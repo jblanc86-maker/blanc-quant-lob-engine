@@ -1,0 +1,4 @@
+/Users/jmb/code/lucy-library/itch-lob-proto/build/CMakeFiles/gen_synth.dir
+/Users/jmb/code/lucy-library/itch-lob-proto/build/CMakeFiles/replay.dir
+/Users/jmb/code/lucy-library/itch-lob-proto/build/CMakeFiles/edit_cache.dir
+/Users/jmb/code/lucy-library/itch-lob-proto/build/CMakeFiles/rebuild_cache.dir
