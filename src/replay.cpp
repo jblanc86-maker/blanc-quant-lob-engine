@@ -1,34 +1,47 @@
-#include <iostream>
+// SPDX-License-Identifier: BSL-1.1
 #include <fstream>
+#include <iostream>
 #include <vector>
-#include <chrono>
-#include <string>
+#include <cstring>
 #include <cstdint>
-int main(int argc, char** argv){
+#include "breaker.hpp"
+#include "detectors.hpp"
+#include "telemetry.hpp"
+using namespace lob;
+
+static uint64_t fnv1a(const std::vector<uint8_t>& v){
+  uint64_t h=1469598103934665603ull; for(uint8_t b: v){ h^=b; h*=1099511628211ull; } return h;
+}
+static std::string hex64(uint64_t v){ char s[17]; std::snprintf(s,sizeof(s),"%016llx",(unsigned long long)v); return s; }
+static bool read_all(const std::string& p,std::vector<uint8_t>& out){
+  std::ifstream f(p,std::ios::binary); if(!f) return false; f.seekg(0,std::ios::end);
+  auto n=f.tellg(); f.seekg(0,std::ios::beg); out.resize((size_t)n);
+  return f.read(reinterpret_cast<char*>(out.data()), n).good();
+}
+
+int main(int argc,char** argv){
   std::string input="data/golden/itch_1m.bin";
-  double skew_ppm=0.0; double gap_rate=0.0; double corrupt_rate=0.0; int burst_ms=0;
+  double g=0,c=0,sk=0,bu=0;
   for(int i=1;i<argc;i++){
-    std::string a=argv[i];
-    if((a=="--input"||a=="-i") && i+1<argc) input=argv[++i];
-    else if(a=="--skew-ppm" && i+1<argc) skew_ppm=std::stod(argv[++i]);
-    else if(a=="--gap-rate" && i+1<argc) gap_rate=std::stod(argv[++i]);
-    else if(a=="--corrupt-rate" && i+1<argc) corrupt_rate=std::stod(argv[++i]);
-    else if(a=="--burst-ms" && i+1<argc) burst_ms=std::stoi(argv[++i]);
+    if(!std::strcmp(argv[i],"--input") && i+1<argc) input=argv[++i];
+    else if(!std::strcmp(argv[i],"--gap-ppm") && i+1<argc) g=std::stod(argv[++i]);
+    else if(!std::strcmp(argv[i],"--corrupt-ppm") && i+1<argc) c=std::stod(argv[++i]);
+    else if(!std::strcmp(argv[i],"--skew-ppm") && i+1<argc) sk=std::stod(argv[++i]);
+    else if(!std::strcmp(argv[i],"--burst-ms") && i+1<argc) bu=std::stod(argv[++i]);
   }
-  auto t0=std::chrono::steady_clock::now();
-  std::ifstream f(input, std::ios::binary);
-  if(!f){ std::cerr<<"no input: "<<input<<"\n"; return 2; }
-  std::vector<char> buf(1<<20);
-  uint64_t rolling=1469598103934665603ULL; // FNV offset
-  while(f){
-    f.read(buf.data(), buf.size());
-    std::streamsize n=f.gcount();
-    for(std::streamsize i=0;i<n;i++) rolling = (rolling ^ (uint8_t)buf[i])*1099511628211ULL;
-  }
-  auto t1=std::chrono::steady_clock::now();
-  double ms=std::chrono::duration<double,std::milli>(t1-t0).count();
-  std::cout<<"digest=0x"<<std::hex<<rolling<<std::dec<<" elapsed_ms="<<ms
-           <<" gap_rate="<<gap_rate<<" corrupt_rate="<<corrupt_rate
-           <<" burst_ms="<<burst_ms<<" skew_ppm="<<skew_ppm<<"\n";
+  std::vector<uint8_t> buf;
+  if(!read_all(input,buf)){ std::cerr<<"Blanc LOB Engine: could not read "<<input<<"\n"; return 2; }
+
+  uint64_t d=fnv1a(buf);
+  Detectors det; det.on_message(buf.size()); det.inject_ppm(g,c,sk,bu);
+  Breaker br(BreakerThresholds{}); auto st=br.step(det.readings());
+
+  ensure_dir("artifacts");
+  TelemetrySnapshot t; t.input_path=input; t.golden_digest_hex="<sha256-file>"; t.actual_digest_hex=hex64(d);
+  t.readings=det.readings(); t.breaker=st; t.publish_allowed=br.publish_allowed();
+  write_jsonl("artifacts/bench.jsonl",t); write_prom("artifacts/metrics.prom",t);
+
+  std::cout<<"digest_fnv=0x"<<t.actual_digest_hex<<" breaker="<<Breaker::to_string(st)
+           <<" publish="<<(t.publish_allowed?"YES":"GATED")<<"\n";
   return 0;
 }

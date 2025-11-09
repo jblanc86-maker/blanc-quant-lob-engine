@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-here="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$here"
+cd "$(git rev-parse --show-toplevel)"
 actual="$(shasum -a 256 data/golden/itch_1m.bin | awk '{print $1}')"
 want="$(cat data/golden/itch_1m.digest)"
+mkdir -p artifacts
 if [[ "$actual" != "$want" ]]; then
-  echo "DIGEST DRIFT ❌ actual=$actual want=$want"
+  echo "DIGEST DRIFT ❌ actual=$actual want=$want" | tee artifacts/verify.txt
   exit 2
 fi
-echo "Determinism PASS ✔︎ ($actual)"
+echo "Determinism PASS ✔︎ ($actual)" | tee artifacts/verify.txt
