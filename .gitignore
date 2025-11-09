@@ -1,0 +1,9 @@
+# build artifacts
+build/
+build-asan/
+cmake-build-*/
+artifacts/
+data/
+*.bin
+*.trace
+.DS_Store
