@@ -1,0 +1,20 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  mac-build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+      - name: Conformance verify
+        run: scripts/verify_golden.sh
+      - name: Bench
+        run: scripts/bench.sh 9
+      - name: Upload bench + bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-and-bundle
+          path: |
+            artifacts/bench.jsonl
+            artifacts/blanc-lob-engine-rc.tar.gz
