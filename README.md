@@ -137,3 +137,5 @@ See `LICENSE`. Third-party dependencies remain under their respective licenses. 
 - Build fails with missing Ninja: install Ninja (`brew install ninja`, `apt-get install ninja-build`).
 - Oversized input rejected: lower input size or raise `REPLAY_MAX_BYTES`.
 - Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
+
+[![Commercial licenses available](https://img.shields.io/badge/Commercial-licenses%20available-informational.svg)](#commercial-use)
