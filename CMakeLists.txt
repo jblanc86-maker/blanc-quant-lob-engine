@@ -3,7 +3,6 @@ project(blanc_lob_engine VERSION 0.9 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(replay
-  src/detectors.cpp
   src/replay.cpp
   src/breaker.cpp
   src/telemetry.cpp
