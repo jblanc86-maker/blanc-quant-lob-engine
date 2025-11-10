@@ -1,4 +1,4 @@
-nl -ba .github/workflows/ci.yml | sed -n '1,80p'  # just to confirm before overwriting
+
 
 # Overwrite with a conflict-free version:
 cat > .github/workflows/ci.yml <<'YAML'
