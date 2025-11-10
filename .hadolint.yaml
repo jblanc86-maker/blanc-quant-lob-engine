@@ -1,0 +1,3 @@
+# hadolint configuration
+ignored: []
+failure-threshold: error

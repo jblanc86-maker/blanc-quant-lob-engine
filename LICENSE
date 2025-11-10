@@ -1,5 +1,16 @@
-Business Source License 1.1 (BSL 1.1)
+Business Source License 1.1
+
+Parameters
 Licensor: Jean Blanc
-Change Date: 2027-12-01
+Licensed Work: Blanc Quant Systems — L2 Replay Engine (BQS L2)
+Additional Use Grant: Research and non-commercial evaluation permitted. Production use in live trading or
+  other revenue-generating systems requires a commercial license from the Licensor. Benchmarking and
+  publication of results are permitted, provided they include commit hash, hardware, and methodology disclosures.
+Change Date: 24 months after the first public release tag of this repository
 Change License: Apache-2.0
-Use Limitation: Use in live trading or production trading systems requires a commercial license from the Licensor.
+
+License Text
+The Licensed Work is provided under the Business Source License 1.1.
+On the Change Date, the License will convert to the Change License.
+A copy of the full Business Source License 1.1 terms is incorporated herein.
+THE LICENSED WORK IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND.

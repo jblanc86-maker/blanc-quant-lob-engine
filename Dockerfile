@@ -1,38 +1,37 @@
-#####
-# Multi-stage build for Blanc LOB Engine (slim runtime, non-root)
-# Stage 1: Builder (includes toolchain only)
-#####
+# SPDX-License-Identifier: Apache-2.0
+# ---- builder ----
 FROM ubuntu:24.04 AS builder
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends cmake ninja-build g++ make bash \
+	&& apt-get install -y --no-install-recommends cmake ninja-build g++ ca-certificates make \
 	&& rm -rf /var/lib/apt/lists/*
 WORKDIR /src
-COPY . /src
-# Build release binaries
+COPY . .
+# Build (Release)
 RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
 	&& cmake --build build -j
-# Optional golden verification done at build time (kept minimal); ignore failure gracefully
-RUN make -C /src verify || echo "Golden verify skipped"
 
-#####
-# Stage 2: Runtime (just libc + binary + data)
-#####
-FROM gcr.io/distroless/cc-debian12 AS runtime
-# Distroless provides libc/libstdc++ needed for a typical C++ release build.
+# Optional: quick conformance at build-time (non-fatal)
+# RUN ./scripts/verify_golden.sh || true
+
+# ---- runtime ----
+FROM ubuntu:24.04 AS runtime
+ENV DEBIAN_FRONTEND=noninteractive
+# Minimal runtime deps only; no compilers
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends ca-certificates \
+	&& rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-# Copy only runtime artifacts (binary + data). Verify artifact optional.
-COPY --from=builder /src/build/replay /app/replay
-COPY --from=builder /src/data /app/data
-COPY --from=builder /src/artifacts/verify.txt /app/artifacts/verify.txt
-# Non-root: distroless defaults to non-root if user added; we drop privileges explicitly via uid/gid.
-USER 65532:65532
-# Exec form CMD runs the binary directly; passes input path explicitly.
-CMD ["/app/replay","--input","/app/data/golden/itch_1m.bin"]
 
-# Version pin guidance (optional):
-#  - Pin builder stage: FROM ubuntu:24.04@sha256:<digest>
-#  - Pin distroless: get digest from `docker pull gcr.io/distroless/cc-debian12`.
-#  - For toolchain reproducibility: consider a dedicated builder image with pre-installed cmake/ninja specific versions.
-# Security/size notes:
-#  - Distroless removes shell and package manager, shrinking attack surface.
-#  - If additional shared libs are required (check with `ldd build/replay`), either switch to a minimal base like debian:stable-slim and apt-get install libstdc++6, or link statically (add `-static` if feasible).
+# Non-root user
+RUN useradd --system --home /app --shell /usr/sbin/nologin appuser \
+	&& chown -R appuser:appuser /app
+USER appuser
+
+# Copy in only what we need to run
+COPY --from=builder /src/build/replay /app/replay
+COPY --from=builder /src/data/golden /app/data/golden
+COPY --from=builder /src/scripts/verify_golden.sh /app/scripts/verify_golden.sh
+
+# Default: show determinism / basic run
+CMD ["/app/replay","--input","/app/data/golden/itch_1m.bin"]

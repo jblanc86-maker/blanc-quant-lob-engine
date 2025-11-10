@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSL-1.1
+// SPDX-License-Identifier: Apache-2.0
 #include "breaker.hpp"
 #include "detectors.hpp"
 #include "telemetry.hpp"
