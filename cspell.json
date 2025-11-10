@@ -1,0 +1,44 @@
+{
+  "version": "0.2",
+  "language": "en-US",
+  "words": [
+    "fnv1a",
+    "jsonl",
+    "prom",
+    "ppm",
+    "ppms",
+    "telemetry",
+    "cmake",
+    "ninja",
+    "itch",
+    "synth",
+    "gen_synth",
+    "golden",
+    "artifacts",
+    "bench",
+    "digest",
+    "digests",
+    "replay",
+    "lob",
+    "LOB",
+    "Blanc",
+    "nonroot",
+    "distroless"
+  ],
+  "ignorePaths": [
+    "build/**",
+    "**/build/**",
+    "artifacts/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/.direnv/**",
+    "**/.git/**",
+    "**/*.bin",
+    "**/*.jsonl",
+    "**/*.prom"
+  ],
+  "flagWords": [
+    "the",
+    "the"
+  ]
+}

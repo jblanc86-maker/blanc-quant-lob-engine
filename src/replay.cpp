@@ -3,6 +3,7 @@
 #include "detectors.hpp"
 #include "telemetry.hpp"
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -22,6 +23,18 @@ static std::string hex64(uint64_t v) {
   std::snprintf(s, sizeof(s), "%016llx", (unsigned long long)v);
   return s;
 }
+static size_t get_max_bytes() {
+  const char *env = std::getenv("REPLAY_MAX_BYTES");
+  const size_t def = 128ull * 1024ull * 1024ull; // 128 MiB default
+  if (!env || !*env)
+    return def;
+  char *end = nullptr;
+  unsigned long long v = std::strtoull(env, &end, 10);
+  if (end == env || v == 0)
+    return def;
+  return static_cast<size_t>(v);
+}
+
 static bool read_all(const std::string &p, std::vector<uint8_t> &out) {
   std::ifstream f(p, std::ios::binary);
   if (!f)
@@ -30,10 +43,11 @@ static bool read_all(const std::string &p, std::vector<uint8_t> &out) {
   auto n = f.tellg();
   f.seekg(0, std::ios::beg);
 
-  // Security: Limit file size to 1GB to prevent memory exhaustion
-  constexpr std::streamsize max_size = 1024 * 1024 * 1024;
+  const std::streamsize max_size =
+      static_cast<std::streamsize>(get_max_bytes());
   if (n < 0 || n > max_size) {
-    std::cerr << "File size invalid or too large (max 1GB)\n";
+    std::cerr << "File size invalid or too large (max " << max_size
+              << " bytes)\n";
     return false;
   }
 
