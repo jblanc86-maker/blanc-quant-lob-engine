@@ -122,7 +122,15 @@ artifacts/      # generated outputs (gitignored)
 
 ## License
 
-See `LICENSE`.
+See `LICENSE`. Third-party dependencies remain under their respective licenses. If you contribute code, you agree it will be released under this repository's license unless explicitly noted otherwise in the PR description.
+
+### Attribution & Credits
+
+- Core engine & replay implementation © 2025 Blanc contributors.
+- Build and CI workflow patterns adapted from open best practices (GitHub Actions hardening, pre-commit hygiene).
+- Security scanning integrates detect-secrets (Yelp) and optional CodeQL.
+- Docker base image: `ubuntu:24.04` (Canonical).
+- Any trademarks or names remain property of their respective owners.
 
 ## Troubleshooting
 
