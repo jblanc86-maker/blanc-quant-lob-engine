@@ -10,4 +10,3 @@ C++20 L2 replay + order book; Ninja/CMake; reproducible benches.
 !![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
 ![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)
-[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
