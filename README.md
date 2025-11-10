@@ -122,7 +122,22 @@ artifacts/      # generated outputs (gitignored)
 
 ## License
 
-See `LICENSE`. Third-party dependencies remain under their respective licenses. If you contribute code, you agree it will be released under this repository's license unless explicitly noted otherwise in the PR description.
+### License Model (BUSL → Apache-2.0)
+
+This project is released under the Business Source License 1.1 (BUSL‑1.1) with a planned automatic conversion to Apache‑2.0 on the Change Date (24 months after the first public release tag). Until that date:
+
+- Non‑production research, evaluation, benchmarking, education, and internal prototyping are allowed without a commercial license (Additional Use Grant).
+- Production use (live trading, order routing, broker/exchange integration, market making, customer‑facing or revenue‑critical systems) requires a commercial license.
+
+On the Change Date, the full codebase converts to Apache‑2.0 permanently.
+
+See `LICENSE` for authoritative terms and `COMMERCIAL_LICENSE.md` for a concise summary.
+
+### Commercial Use
+
+If you need production access before the Change Date, request a commercial license via a private contact channel (Security tab → Report a vulnerability, or a minimal issue requesting secure contact). Do not include sensitive operational details.
+
+[![Commercial licenses available](https://img.shields.io/badge/Commercial-licenses%20available-informational.svg)](#commercial-use)
 
 ### Attribution & Credits
 

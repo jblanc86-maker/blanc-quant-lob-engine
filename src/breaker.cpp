@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: BUSL-1.1
 #include "breaker.hpp"
 #include <algorithm>
 namespace lob {

@@ -56,3 +56,17 @@ add_executable(replay
 target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(replay PRIVATE -O3 -march=native)
 target_link_libraries(replay PRIVATE Boost::program_options)
+
+# -----------------
+# Testing (CTest)
+# -----------------
+include(CTest)
+if (BUILD_TESTING)
+  enable_testing()
+  add_executable(test_breaker
+    tests/test_breaker.cpp
+    src/breaker.cpp
+  )
+  target_include_directories(test_breaker PRIVATE ${CMAKE_SOURCE_DIR}/include)
+  add_test(NAME breaker_basic COMMAND test_breaker)
+endif()

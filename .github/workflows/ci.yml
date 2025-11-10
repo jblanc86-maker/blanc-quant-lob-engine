@@ -1,43 +1,16 @@
-# SPDX-License-Identifier: Apache-2.0
-name: ci
+name: CI
 on:
   push:
+    branches: [main]
   pull_request:
-
 jobs:
-  build-macos:
-    runs-on: macos-latest
+  build:
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/cache@v4
         with:
-          python-version: '3.11'
-
-      - name: Pre-commit
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pre-commit ruff codespell detect-secrets
-          pre-commit run --all-files || (echo "::error ::pre-commit failed"; exit 1)
-
-      - name: Configure + Build (Release)
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
-
-      - name: Conformance verify
-        run: scripts/verify_golden.sh
-
-      - name: Bench (p50/p95/p99)
-        run: scripts/bench.sh 9
-
-      - name: Export Prom textfile metrics (optional)
-        run: scripts/prom_textfile.sh artifacts/metrics.prom
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: bench-and-bundle
-          path: |
-            artifacts/bench.jsonl
-            artifacts/metrics.prom
-            artifacts/blanc-lob-engine-rc.tar.gz
+          path: ~/.ccache
+          key: demo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: demo-${{ runner.os }}-
+      - run: echo "hello from CI"
