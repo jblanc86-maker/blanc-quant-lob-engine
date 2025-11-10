@@ -1,16 +1,100 @@
+# SPDX-License-Identifier: Apache-2.0
 name: CI
+
 on:
   push:
-    branches: [main]
   pull_request:
+
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  build-ubuntu:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+
+      - name: Install dependencies (Ubuntu)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          path: ~/.ccache
-          key: demo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: demo-${{ runner.os }}-
-      - run: echo "hello from CI"
+          python-version: '3.11'
+
+      - name: Pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pre-commit ruff codespell detect-secrets
+          pre-commit run --all-files || (echo "::error ::pre-commit failed"; exit 1)
+
+      - name: Configure + Build (Release)
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+
+      - name: Conformance verify (if present)
+        run: |
+          if [ -x scripts/verify_golden.sh ]; then scripts/verify_golden.sh; fi
+
+      - name: Bench (p50/p95/p99) (if present)
+        run: |
+          if [ -x scripts/bench.sh ]; then scripts/bench.sh 9; fi
+
+      - name: Export Prom textfile metrics (optional)
+        run: |
+          if [ -x scripts/prom_textfile.sh ]; then scripts/prom_textfile.sh artifacts/metrics.prom; fi
+
+      - name: Upload artifacts (if present)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-and-bundle
+          path: |
+            artifacts/bench.jsonl
+            artifacts/metrics.prom
+            artifacts/blanc-lob-engine-rc.tar.gz
+          if-no-files-found: ignore
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure Ninja/CMake (macOS)
+        run: |
+          brew update >/dev/null
+          brew list --versions ninja  >/dev/null || brew install ninja
+          brew list --versions cmake  >/dev/null || brew install cmake
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pre-commit ruff codespell detect-secrets
+          pre-commit run --all-files || (echo "::error ::pre-commit failed"; exit 1)
+
+      - name: Configure + Build (Release)
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+
+      - name: Conformance verify (if present)
+        run: |
+          if [ -x scripts/verify_golden.sh ]; then scripts/verify_golden.sh; fi
+
+      - name: Bench (p50/p95/p99) (if present)
+        run: |
+          if [ -x scripts/bench.sh ]; then scripts/bench.sh 9; fi
+
+      - name: Export Prom textfile metrics (optional)
+        run: |
+          if [ -x scripts/prom_textfile.sh ]; then scripts/prom_textfile.sh artifacts/metrics.prom; fi
+
+      - name: Upload artifacts (if present)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-and-bundle-macos
+          path: |
+            artifacts/bench.jsonl
+            artifacts/metrics.prom
+            artifacts/blanc-lob-engine-rc.tar.gz
+          if-no-files-found: ignore

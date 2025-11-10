@@ -69,4 +69,19 @@ if (BUILD_TESTING)
   )
   target_include_directories(test_breaker PRIVATE ${CMAKE_SOURCE_DIR}/include)
   add_test(NAME breaker_basic COMMAND test_breaker)
+  add_executable(test_telemetry
+    tests/test_telemetry.cpp
+    src/telemetry.cpp
+    src/breaker.cpp
+  )
+  target_include_directories(test_telemetry PRIVATE ${CMAKE_SOURCE_DIR}/include)
+  add_test(NAME telemetry_io COMMAND test_telemetry)
+endif()
+
+# --- ccache (optional but recommended) ---
+find_program(CCACHE_PROGRAM ccache)
+if (CCACHE_PROGRAM)
+  message(STATUS "ccache found: ${CCACHE_PROGRAM}")
+  set(CMAKE_C_COMPILER_LAUNCHER   ${CCACHE_PROGRAM})
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
 endif()

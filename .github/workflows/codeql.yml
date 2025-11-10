@@ -13,12 +13,18 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - name: Checkout
+        # actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - name: Initialize CodeQL
+        # github/codeql-action/init@v3
+        uses: github/codeql-action/init@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a
         with:
           languages: cpp
-      - uses: github/codeql-action/autobuild@v3
-      - uses: github/codeql-action/analyze@v3
+      - name: Autobuild
+        # github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a
+      - name: Analyze
+        # github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a
