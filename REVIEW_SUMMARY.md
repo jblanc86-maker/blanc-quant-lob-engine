@@ -19,7 +19,7 @@
 - **Error messages**: Clear feedback for invalid numeric arguments
 
 ### 4. **Code Quality** ✅
-- **Variable naming**: Fixed `bu` → `burst_ms` for consistency
+- Variable naming: renamed bu to burst_ms for consistency
 - **Error handling**: Proper exception catching with user-friendly messages
 - **Documentation**: Help message provides complete usage guide
 

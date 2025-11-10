@@ -21,3 +21,5 @@
 # Misc
 .DS_Store
 .Trash/
+
+/artifacts/
