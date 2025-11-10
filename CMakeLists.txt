@@ -19,3 +19,4 @@ target_link_libraries(replay PRIVATE Boost::program_options)
 # Enable optimization + warnings
 target_compile_options(gen_synth PRIVATE -O3 -Wall -Wextra)
 target_compile_options(replay    PRIVATE -O3 -Wall -Wextra)
+include_directories(${CMAKE_SOURCE_DIR}/include)

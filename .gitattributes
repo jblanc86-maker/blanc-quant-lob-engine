@@ -1,0 +1,3 @@
+scripts/** linguist-vendored
+docs/** linguist-documentation
+.github/** linguist-vendored
