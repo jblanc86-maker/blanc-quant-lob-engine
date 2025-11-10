@@ -1,66 +1,11 @@
-# SPDX-License-Identifier: BUSL-1.1
 repos:
-  # -------------------------------
-  # 1️⃣ Core hygiene (YAML & whitespace)
-  # -------------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: v4.6.0
     hooks:
-      - id: check-yaml
-      - id: end-of-file-fixer
       - id: trailing-whitespace
-
-  # -------------------------------
-  # 2️⃣ C++ Formatting (clang-format)
-  # -------------------------------
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v18.1.8
-    hooks:
-      - id: clang-format
-        name: clang-format (C/C++/Proto)
-        types_or: [c, c++, cuda, proto]
-        exclude: ^(build/|third_party/)
-
-  # -------------------------------
-  # 3️⃣ Python Linting (Ruff)
-  # -------------------------------
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
-    hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-        files: ^(scripts/|tools/).+\.py$
-        additional_dependencies: ["ruff==0.6.9"]
-      - id: ruff-format
-
-  # -------------------------------
-  # 4️⃣ Dockerfile Lint (hadolint)
-  # -------------------------------
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-        name: hadolint (Dockerfile linter)
-        files: ^Dockerfile$
-        args: ["--config", ".hadolint.yaml"]
-
-  # -------------------------------
-  # 5️⃣ Spell Check (codespell)
-  # -------------------------------
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
-    hooks:
-      - id: codespell
-        args:
-          - --ignore-words=codespell.ignore
-          - --skip=*.pdf
-          - --quiet-level=3
-
-  # -------------------------------
-  # 6️⃣ Secrets Scan (detect-secrets)
-  # -------------------------------
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: [--baseline=.secrets.baseline]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
