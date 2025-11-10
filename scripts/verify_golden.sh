@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 actual="$(shasum -a 256 data/golden/itch_1m.bin | awk '{print $1}')"

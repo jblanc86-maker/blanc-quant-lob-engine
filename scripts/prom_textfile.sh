@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 out="${1:-artifacts/metrics.prom}"
 read p50 p95 p99 < <(scripts/bench.sh 9 | awk '/p50_ms=/{gsub("p50_ms=","");gsub("p95_ms=","");gsub("p99_ms=",""); print $1,$2,$3}')
