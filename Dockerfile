@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: Apache-2.0
 # ---- builder ----
 FROM ubuntu:24.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive

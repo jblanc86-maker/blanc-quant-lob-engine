@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 runs="${1:-9}"
 outfile="artifacts/bench.jsonl"
