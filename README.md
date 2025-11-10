@@ -1,18 +1,16 @@
 #
-### Commercial use
-This code is source-available under **Business Source License 1.1 (BUSL-1.1)**.
+## License model
+This project uses **BUSL-1.1 (Business Source License)**.
 
-- Research and non-commercial evaluation are permitted immediately.
+- Research and non-commercial evaluation are permitted.
 - **Production use in live trading or other revenue-generating systems requires a commercial license.**
-- Change Date: 24 months after the first public release tag of this repository.
-- Change License: Apache-2.0 on the Change Date.
+- On the Change Date, the project converts to a permissive license (Apache-2.0).
+	- Change Date: 24 months after the first public release tag of this repository
 
 Benchmarking and publication of results are permitted; please include commit hash, hardware, and methodology details. See `LICENSE` for authoritative terms.
 
 ## Commercial use
-This code is source-available under **BUSL-1.1 (Business Source License)** for research and non-commercial use.
-**Live trading or other revenue-generating production use requires a commercial license.**
-See `COMMERCIAL-LICENSE.md` or contact **licensing@yourdomain.com**.
+For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
 
 ## Why buy BQS L2
 - **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
