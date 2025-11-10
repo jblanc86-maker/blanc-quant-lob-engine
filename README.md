@@ -2,7 +2,9 @@
 C++20 L2 replay + order book; Ninja/CMake; reproducible benches.
 
 
-[![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue)]()
-[![Build](https://img.shields.io/github/actions/workflow/status/jblanc86-maker/quant-lob-engine/ci.yml?label=CI)]()
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-informational)]()
-[![Bench](https://img.shields.io/badge/bench-reproducible-brightgreen)]()
+
+![Build](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
+![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
+![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)
