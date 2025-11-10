@@ -26,3 +26,6 @@
 .github/workflow_backups/
 .github/workflow_backups/
 .github/workflow_backups/
+
+# ignore workflow backups
+.github/workflows/.backup_*
