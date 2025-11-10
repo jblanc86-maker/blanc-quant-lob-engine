@@ -1,9 +1,19 @@
-# build artifacts
-build/
-build-asan/
-cmake-build-*/
-artifacts/
-data/
-*.bin
-*.trace
+# CMake/build
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/*.ninja
+/.ninja_*
+/compile_commands.json
+
+# Binaries & artifacts
+/**/*.o
+/**/*.a
+/**/*.so
+/**/*.dylib
+/**/*.bin
+/**/*.dSYM/
+
+# Misc
 .DS_Store
