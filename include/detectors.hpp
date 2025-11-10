@@ -15,9 +15,9 @@ public:
   }
   void on_skew_ppm(double ppm) { skew_ppm_ = ppm; }
   void inject_ppm(double gap, double corr, double skew, double burst) {
-    s_gap_ = gap;
-    s_corr_ = corr;
-    s_skew_ = skew;
+    s_gap_   = gap;
+    s_corr_  = corr;
+    s_skew_  = skew;
     s_burst_ = burst;
   }
   DetectorReadings readings() const {
@@ -25,9 +25,8 @@ public:
       return total_ ? (double(part) * 1'000'000.0 / double(total_)) : 0.0;
     };
     double rg = ppm(gaps_), rc = ppm(corrupt_), rb = burst_ms_, rs = skew_ppm_;
-    return DetectorReadings{
-        a_ * rg + (1 - a_) * s_gap_, a_ * rc + (1 - a_) * s_corr_,
-        a_ * rs + (1 - a_) * s_skew_, a_ * rb + (1 - a_) * s_burst_};
+    return DetectorReadings{a_ * rg + (1 - a_) * s_gap_, a_ * rc + (1 - a_) * s_corr_,
+                            a_ * rs + (1 - a_) * s_skew_, a_ * rb + (1 - a_) * s_burst_};
   }
 
 private:

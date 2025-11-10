@@ -4,13 +4,7 @@
 #include <string>
 
 namespace lob {
-enum class BreakerState : uint8_t {
-  Fuse = 0,
-  Local = 1,
-  Feeder = 2,
-  Main = 3,
-  Kill = 4
-};
+enum class BreakerState : uint8_t { Fuse = 0, Local = 1, Feeder = 2, Main = 3, Kill = 4 };
 
 struct DetectorReadings {
   double gap_rate{0.0};
@@ -28,11 +22,11 @@ struct BreakerThresholds {
 
 class Breaker {
 public:
-  explicit Breaker(const BreakerThresholds &t);
+  explicit Breaker(const BreakerThresholds& t);
   BreakerState state() const;
   bool publish_allowed() const;
   void clear_latch();
-  BreakerState step(const DetectorReadings &r);
+  BreakerState step(const DetectorReadings& r);
   static std::string to_string(BreakerState s);
 
 private:

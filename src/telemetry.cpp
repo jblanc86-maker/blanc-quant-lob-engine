@@ -7,13 +7,13 @@
 #include <sstream>
 namespace fs = std::filesystem;
 namespace lob {
-bool ensure_dir(const std::string &p) {
+bool ensure_dir(const std::string& p) {
   std::error_code ec;
   if (fs::exists(p, ec))
     return true;
   return fs::create_directories(p, ec);
 }
-static void esc(std::ostream &o, const std::string &s) {
+static void esc(std::ostream& o, const std::string& s) {
   for (char c : s) {
     if (c == '"' || c == '\\')
       o << '\\' << c;
@@ -23,7 +23,7 @@ static void esc(std::ostream &o, const std::string &s) {
       o << c;
   }
 }
-bool write_jsonl(const std::string &path, const TelemetrySnapshot &t) {
+bool write_jsonl(const std::string& path, const TelemetrySnapshot& t) {
   std::ofstream f(path, std::ios::app);
   if (!f)
     return false;
@@ -34,8 +34,7 @@ bool write_jsonl(const std::string &path, const TelemetrySnapshot &t) {
     << "\"golden\":\"" << t.golden_digest_hex << "\","
     << "\"actual\":\"" << t.actual_digest_hex << "\","
     << "\"determinism\":" << (t.determinism_pass ? "true" : "false") << ","
-    << "\"p50_ms\":" << t.p50_ms << ",\"p95_ms\":" << t.p95_ms
-    << ",\"p99_ms\":" << t.p99_ms << ","
+    << "\"p50_ms\":" << t.p50_ms << ",\"p95_ms\":" << t.p95_ms << ",\"p99_ms\":" << t.p99_ms << ","
     << "\"gap_ppm\":" << t.readings.gap_rate << ","
     << "\"corrupt_ppm\":" << t.readings.corrupt_rate << ","
     << "\"skew_ppm\":" << t.readings.skew_ppm << ","
@@ -44,7 +43,7 @@ bool write_jsonl(const std::string &path, const TelemetrySnapshot &t) {
     << "\"publish\":" << (t.publish_allowed ? "true" : "false") << "}\n";
   return true;
 }
-bool write_prom(const std::string &path, const TelemetrySnapshot &t) {
+bool write_prom(const std::string& path, const TelemetrySnapshot& t) {
   std::ofstream f(path);
   if (!f)
     return false;

@@ -11,8 +11,8 @@ struct TelemetrySnapshot {
   BreakerState breaker{};
   bool publish_allowed{true};
 };
-bool ensure_dir(const std::string &path);
-bool write_jsonl(const std::string &path, const TelemetrySnapshot &t);
-bool write_prom(const std::string &path, const TelemetrySnapshot &t);
+bool ensure_dir(const std::string& path);
+bool write_jsonl(const std::string& path, const TelemetrySnapshot& t);
+bool write_prom(const std::string& path, const TelemetrySnapshot& t);
 std::string now_iso8601();
 } // namespace lob

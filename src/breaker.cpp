@@ -2,7 +2,7 @@
 #include "breaker.hpp"
 #include <algorithm>
 namespace lob {
-Breaker::Breaker(const BreakerThresholds &t) : thr_(t) {}
+Breaker::Breaker(const BreakerThresholds& t) : thr_(t) {}
 BreakerState Breaker::state() const { return st_; }
 bool Breaker::publish_allowed() const {
   return st_ == BreakerState::Fuse || st_ == BreakerState::Local;
@@ -13,10 +13,9 @@ void Breaker::clear_latch() {
     st_ = BreakerState::Fuse;
 }
 
-static BreakerState worst(const DetectorReadings &r,
-                          const BreakerThresholds &t) {
+static BreakerState worst(const DetectorReadings& r, const BreakerThresholds& t) {
   BreakerState w = BreakerState::Fuse;
-  auto bump = [&](BreakerState s) {
+  auto bump      = [&](BreakerState s) {
     if (int(s) > int(w))
       w = s;
   };
@@ -50,15 +49,14 @@ static BreakerState worst(const DetectorReadings &r,
   return w;
 }
 
-BreakerState Breaker::step(const DetectorReadings &r) {
+BreakerState Breaker::step(const DetectorReadings& r) {
   BreakerState d = worst(r, thr_);
   if (latched_) {
     st_ = std::max(st_, d);
     return st_;
   }
   st_ = d;
-  if (st_ == BreakerState::Feeder || st_ == BreakerState::Main ||
-      st_ == BreakerState::Kill)
+  if (st_ == BreakerState::Feeder || st_ == BreakerState::Main || st_ == BreakerState::Kill)
     latched_ = true;
   return st_;
 }

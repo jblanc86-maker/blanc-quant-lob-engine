@@ -10,7 +10,7 @@
 #define MAX_REPLAY_BYTES (256ULL * 1024 * 1024)
 #endif
 
-inline std::vector<char> read_all_bounded(const std::string &path) {
+inline std::vector<char> read_all_bounded(const std::string& path) {
   namespace fs = std::filesystem;
   if (!fs::exists(path))
     throw std::runtime_error("file not found: " + path);
