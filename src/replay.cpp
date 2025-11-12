@@ -2,28 +2,33 @@
 #include "breaker.hpp"
 #include "detectors.hpp"
 #include "telemetry.hpp"
+#include <boost/program_options.hpp>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <vector>
 using namespace lob;
+namespace po = boost::program_options;
 
-static uint64_t fnv1a(const std::vector<uint8_t> &v) {
+static uint64_t fnv1a(const std::vector<uint8_t> &v)
+{
   uint64_t h = 1469598103934665603ull;
-  for (uint8_t b : v) {
+  for (uint8_t b : v)
+  {
     h ^= b;
     h *= 1099511628211ull;
   }
   return h;
 }
-static std::string hex64(uint64_t v) {
+static std::string hex64(uint64_t v)
+{
   char s[17];
   std::snprintf(s, sizeof(s), "%016llx", (unsigned long long)v);
   return s;
 }
-static size_t get_max_bytes() {
+static size_t get_max_bytes()
+{
   const char *env = std::getenv("REPLAY_MAX_BYTES");
   const size_t def = 128ull * 1024ull * 1024ull; // 128 MiB default
   if (!env || !*env)
@@ -35,7 +40,8 @@ static size_t get_max_bytes() {
   return static_cast<size_t>(v);
 }
 
-static bool read_all(const std::string &p, std::vector<uint8_t> &out) {
+static bool read_all(const std::string &p, std::vector<uint8_t> &out)
+{
   std::ifstream f(p, std::ios::binary);
   if (!f)
     return false;
@@ -45,7 +51,8 @@ static bool read_all(const std::string &p, std::vector<uint8_t> &out) {
 
   const std::streamsize max_size =
       static_cast<std::streamsize>(get_max_bytes());
-  if (n < 0 || n > max_size) {
+  if (n < 0 || n > max_size)
+  {
     std::cerr << "File size invalid or too large (max " << max_size
               << " bytes)\n";
     return false;
@@ -55,68 +62,51 @@ static bool read_all(const std::string &p, std::vector<uint8_t> &out) {
   return f.read(reinterpret_cast<char *>(out.data()), n).good();
 }
 
-static void print_help(const char *prog) {
-  std::cout << "Blanc LOB Engine - Market Data Replay and Analysis\n\n"
-            << "Usage: " << prog << " [OPTIONS]\n\n"
-            << "Options:\n"
-            << "  --input PATH        Input binary file path (default: "
-               "data/golden/itch_1m.bin)\n"
-            << "  --gap-ppm VALUE     Gap rate in parts per million (default: "
-               "0)\n"
-            << "  --corrupt-ppm VALUE Corrupt rate in parts per million "
-               "(default: 0)\n"
-            << "  --skew-ppm VALUE    Skew rate in parts per million (default: "
-               "0)\n"
-            << "  --burst-ms VALUE    Burst duration in milliseconds (default: "
-               "0)\n"
-            << "  --help, -h          Show this help message\n\n"
-            << "Exit Codes:\n"
-            << "  0 - Success\n"
-            << "  1 - Invalid argument\n"
-            << "  2 - File read error\n";
-}
+int main(int argc, char **argv)
+{
+  po::options_description desc("Blanc LOB Engine - Market Data Replay and Analysis");
+  desc.add_options()("help,h", "Show this help message")("input", po::value<std::string>()->default_value("data/golden/itch_1m.bin"),
+                                                         "Input binary file path")("gap-ppm", po::value<double>()->default_value(0.0),
+                                                                                   "Gap rate in parts per million")("corrupt-ppm", po::value<double>()->default_value(0.0),
+                                                                                                                    "Corrupt rate in parts per million")("skew-ppm", po::value<double>()->default_value(0.0),
+                                                                                                                                                         "Skew rate in parts per million")("burst-ms", po::value<double>()->default_value(0.0),
+                                                                                                                                                                                           "Burst duration in milliseconds");
 
-int main(int argc, char **argv) {
-  std::string input = "data/golden/itch_1m.bin";
-  double g = 0, c = 0, sk = 0, burst_ms = 0;
-  for (int i = 1; i < argc; i++) {
-    if (!std::strcmp(argv[i], "--help") || !std::strcmp(argv[i], "-h")) {
-      print_help(argv[0]);
-      return 0;
-    } else if (!std::strcmp(argv[i], "--input") && i + 1 < argc)
-      input = argv[++i];
-    else if (!std::strcmp(argv[i], "--gap-ppm") && i + 1 < argc) {
-      try {
-        g = std::stod(argv[++i]);
-      } catch (const std::exception &e) {
-        std::cerr << "Invalid --gap-ppm value: " << argv[i] << "\n";
-        return 1;
-      }
-    } else if (!std::strcmp(argv[i], "--corrupt-ppm") && i + 1 < argc) {
-      try {
-        c = std::stod(argv[++i]);
-      } catch (const std::exception &e) {
-        std::cerr << "Invalid --corrupt-ppm value: " << argv[i] << "\n";
-        return 1;
-      }
-    } else if (!std::strcmp(argv[i], "--skew-ppm") && i + 1 < argc) {
-      try {
-        sk = std::stod(argv[++i]);
-      } catch (const std::exception &e) {
-        std::cerr << "Invalid --skew-ppm value: " << argv[i] << "\n";
-        return 1;
-      }
-    } else if (!std::strcmp(argv[i], "--burst-ms") && i + 1 < argc) {
-      try {
-        burst_ms = std::stod(argv[++i]);
-      } catch (const std::exception &e) {
-        std::cerr << "Invalid --burst-ms value: " << argv[i] << "\n";
-        return 1;
-      }
-    }
+  po::variables_map vm;
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
   }
+  catch (const po::error &e)
+  {
+    std::cerr << "Error: " << e.what() << "\n\n";
+    std::cerr << desc << "\n";
+    std::cerr << "Exit Codes:\n"
+              << "  0 - Success\n"
+              << "  1 - Invalid argument\n"
+              << "  2 - File read error\n";
+    return 1;
+  }
+
+  if (vm.count("help"))
+  {
+    std::cout << desc << "\n";
+    std::cout << "Exit Codes:\n"
+              << "  0 - Success\n"
+              << "  1 - Invalid argument\n"
+              << "  2 - File read error\n";
+    return 0;
+  }
+
+  std::string input = vm["input"].as<std::string>();
+  double g = vm["gap-ppm"].as<double>();
+  double c = vm["corrupt-ppm"].as<double>();
+  double sk = vm["skew-ppm"].as<double>();
+  double burst_ms = vm["burst-ms"].as<double>();
   std::vector<uint8_t> buf;
-  if (!read_all(input, buf)) {
+  if (!read_all(input, buf))
+  {
     std::cerr << "Blanc LOB Engine: could not read " << input << "\n";
     return 2;
   }
