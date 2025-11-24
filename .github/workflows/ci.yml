@@ -3,6 +3,8 @@ name: ci
 on:
   push:
   pull_request:
+- name: Configure CMake
+  run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
 jobs:
   build-macos:
