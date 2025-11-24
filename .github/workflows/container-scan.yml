@@ -1,0 +1,40 @@
+name: Container Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    - cron: '12 4 * * 3'
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build image (no push)
+        run: |
+          docker build -t quant-lob-engine:ci .
+      - name: Run Trivy scan (fs)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+      - name: Run Trivy scan (image)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'quant-lob-engine:ci'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-image.sarif'
+          severity: 'CRITICAL,HIGH'
+      - name: Upload SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image-sarif
+          path: trivy-image.sarif
