@@ -1,6 +1,21 @@
 # Blanc LOB Engine (v0.9-RC)
+<<<<<<< HEAD
 
 C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
+=======
+
+[![CI](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml)
+
+## License model
+
+This project uses **BUSL-1.1 (Business Source License)**.
+
+- Research and non-commercial evaluation are permitted.
+- **Production use in live trading or other revenue-generating systems requires a commercial license.**
+- On the Change Date, the project converts to a permissive license (Apache-2.0).
+  - Change Date: 24 months after the first public release tag of this repository
+>>>>>>> 238af94 (ci: add CI + Determinism badges with determinism workflow)
 
 ![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
@@ -10,6 +25,7 @@ C++20 market data replay + lightweight order-book signal path. Built with CMake/
 ![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
 ![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)
 
+<<<<<<< HEAD
 ## Features
 
 - C++20, single binary (`replay`)
@@ -139,3 +155,23 @@ See `LICENSE`. Third-party dependencies remain under their respective licenses. 
 - Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
 
 [![Commercial licenses available](https://img.shields.io/badge/Commercial-licenses%20available-informational.svg)](#commercial-use)
+=======
+## Commercial use
+
+For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
+
+## Why buy BQS L2
+
+- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
+- **Tight tails:** we optimize **p99 stability**, not just throughput.
+- **Time-to-green:** one-command benches + sample adapters.
+- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
+- **Adaptable core:** SoA book + branch-light parser.
+- **Anonymous option:** attribution can be waived in the commercial license.
+
+## Why invest / sponsor
+
+- **Own the roadmap:** fund adapters/features you need.
+- **Proof transparency:** reproducible claims with artifacts.
+- **Talent magnet:** open, measured performance work attracts systems engineers.
+>>>>>>> 238af94 (ci: add CI + Determinism badges with determinism workflow)

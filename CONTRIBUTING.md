@@ -2,19 +2,6 @@
 
 We keep patches boring, testable, and reversible. This guide explains the workflow, tooling, and quality bar we expect.
 
-## No-Surprises Patch Checklist
-
-1. **Assumptions** — State toolchain & versions (Boost, CMake, OS).
-2. **Small scope** — One logical change per PR.
-3. **Self-contained diff** — Explicit paths; no hidden global edits.
-4. **Lint passes** — `pre-commit run -a` is green.
-5. **Tests** — Add/adjust at least one smoke or unit test (`ctest` covers it).
-6. **CI** — Confirm matrix CI (Ubuntu/macOS) passes.
-7. **Rollback** — Note how to revert (file list or commit SHA).
-8. **Security** — No secrets; SPDX header matches LICENSE.
-9. **Docs** — Update README/CLI help for user-visible behavior.
-10. **Versioning** — Mention behavior changes in PR notes/release.
-
 ## Quick Start
 
 ```bash
@@ -60,7 +47,8 @@ scripts/prom_textfile.sh   # export Prometheus metrics
 
 ## Pre-commit Hooks
 
-We rely on pre-commit for hygiene (whitespace, YAML/JSON/TOML, clang-format, codespell, detect-secrets, hadolint).
+We rely on pre-commit for hygiene (whitespace, YAML/JSON/TOML, clang-format,
+codespell, detect-secrets, hadolint).
 
 ```sh
 pip install pre-commit
