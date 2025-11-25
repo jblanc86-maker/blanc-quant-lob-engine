@@ -2,19 +2,6 @@
 
 We keep patches boring, testable, and reversible. This guide explains the workflow, tooling, and quality bar we expect.
 
-## No-Surprises Patch Checklist
-
-1. **Assumptions** — State toolchain & versions (Boost, CMake, OS).
-2. **Small scope** — One logical change per PR.
-3. **Self-contained diff** — Explicit paths; no hidden global edits.
-4. **Lint passes** — `pre-commit run -a` is green.
-5. **Tests** — Add/adjust at least one smoke or unit test (`ctest` covers it).
-6. **CI** — Confirm matrix CI (Ubuntu/macOS) passes.
-7. **Rollback** — Note how to revert (file list or commit SHA).
-8. **Security** — No secrets; SPDX header matches LICENSE.
-9. **Docs** — Update README/CLI help for user-visible behavior.
-10. **Versioning** — Mention behavior changes in PR notes/release.
-
 ## Quick Start
 
 ```bash
@@ -60,7 +47,8 @@ scripts/prom_textfile.sh   # export Prometheus metrics
 
 ## Pre-commit Hooks
 
-We rely on pre-commit for hygiene (whitespace, YAML/JSON/TOML, clang-format, codespell, detect-secrets, hadolint).
+We rely on pre-commit for hygiene (whitespace, YAML/JSON/TOML, clang-format,
+codespell, detect-secrets, hadolint).
 
 ```sh
 pip install pre-commit
@@ -102,3 +90,70 @@ Signed-off-by: Your Name <your.email@example.com>
 ```
 
 Thanks again for helping improve Blanc LOB Engine!
+
+---
+
+## For Newcomers
+
+Welcome! Here are some tips to help you get started contributing:
+
+### How to Submit Issues
+
+* Report bugs or request features via [GitHub Issues](https://github.com/jblanc86-maker/quant-lob-engine/issues).
+
+* Please include steps to reproduce, expected behavior, and relevant logs or screenshots.
+
+### Code Review Process
+
+* All pull requests are reviewed by maintainers or experienced contributors.
+
+* You may be asked to revise code for clarity, style, or test coverage.
+* Reviews are typically completed within a few days.
+
+### Branching Model
+
+* Create feature branches from `main` using `git switch -c feat/<slug>`.
+
+* Use descriptive branch names (e.g., `fix/latency-bug`, `docs/update-readme`).
+
+### Writing & Locating Tests
+
+* Add or update tests in the `tests/` directory for C++ and Python code.
+
+* Aim for clear, focused tests that cover new or changed behavior.
+* Use `ctest` for C++ and `pytest` for Python scripts if applicable.
+
+### CI Details
+
+* All pull requests trigger CI checks (lint, build, test, determinism).
+
+* If CI fails, review logs and fix issues locally before pushing updates.
+* You can run most checks locally using the scripts in `scripts/`.
+
+### Documentation Standards
+
+* Update relevant documentation (README, code comments, docstrings) when changing features or APIs.
+
+* Well-documented code is easier for everyone to use and maintain.
+
+### Contact & Community
+
+* For questions, open a GitHub Discussion or email the maintainer listed in `SECURITY.md`.
+
+* We welcome all constructive feedback and ideas!
+
+### Code of Conduct
+
+* Please review our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) and treat all contributors with respect.
+
+### Python Style Guide
+
+* For Python scripts, follow [PEP8](https://peps.python.org/pep-0008/) and use `ruff` for linting/formatting.
+
+* Run `pre-commit run -a` before committing changes.
+
+### Release Process
+
+* Releases are managed by maintainers, but contributors can help by updating changelogs and testing release candidates.
+
+* See `RELEASE.md` (if present) for details.

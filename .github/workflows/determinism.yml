@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Determinism Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up C++
+        uses: lukka/run-cmake@v10
+        with:
+          cmakeListsOrSettingsJson: 'CMakeLists.txt'
+          buildDirectory: 'build'
+          cmakeBuildType: 'Release'
+
+      - name: Run determinism bench
+        run: |
+          ./build/bin/replay --input data/golden/itch_1m.bin > determinism.log
+          grep "digest_fnv=" determinism.log
+          grep "elapsed_ms=" determinism.log
