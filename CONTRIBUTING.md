@@ -1,72 +1,104 @@
 # Contributing to Blanc LOB Engine
 
-Thanks for your interest in contributing! This guide outlines our development workflow, coding standards, and how to propose improvements safely.
+We keep patches boring, testable, and reversible. This guide explains the workflow, tooling, and quality bar we expect.
 
-## TL;DR
+## No-Surprises Patch Checklist
 
-* Fork or create a feature branch from `main`.
-* Install tooling and run pre-commit locally: `pip install pre-commit && pre-commit install && pre-commit run -a`.
-* Build & run smoke tests: `cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j && scripts/verify_golden.sh`.
-* Open a PR with a concise title and a clear description of the change and its rationale.
+1. **Assumptions** — State toolchain & versions (Boost, CMake, OS).
+2. **Small scope** — One logical change per PR.
+3. **Self-contained diff** — Explicit paths; no hidden global edits.
+4. **Lint passes** — `pre-commit run -a` is green.
+5. **Tests** — Add/adjust at least one smoke or unit test (`ctest` covers it).
+6. **CI** — Confirm matrix CI (Ubuntu/macOS) passes.
+7. **Rollback** — Note how to revert (file list or commit SHA).
+8. **Security** — No secrets; SPDX header matches LICENSE.
+9. **Docs** — Update README/CLI help for user-visible behavior.
+10. **Versioning** — Mention behavior changes in PR notes/release.
+
+## Quick Start
+
+```bash
+git switch -c feat/<slug>
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+ctest --output-on-failure --test-dir build || true
+pre-commit run -a
+```
 
 ## Development Environment
 
-* CMake, Ninja, and a C++20 compiler (Clang/GCC).
+* CMake ≥ 3.20, Ninja, and a C++20 compiler (Clang/GCC).
+* Boost (currently program_options) and standard build tools.
 * Python 3.11+ for scripts and pre-commit hooks.
 * Optional: Docker (see `Dockerfile`) for hermetic builds.
 
-## Pre-commit Hooks
-
-We use pre-commit to keep the codebase consistent and secure:
-
-* whitespace & EOF normalization
-* YAML/JSON/TOML validation
-* (optionally) clang-format, codespell, detect-secrets
-
-Run locally before committing:
-
-```sh
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
-```
-
 ## Build & Test
+
+Release build + smoke tests:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-scripts/verify_golden.sh
+ctest --output-on-failure --test-dir build
 ```
 
-For Debug builds with sanitizers:
+Debug with sanitizers:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_SANITIZERS=ON
 cmake --build build -j
+ctest --output-on-failure --test-dir build
 ```
 
-## Commit Messages
+Scripts for quick checks:
 
-* Use conventional style where possible, e.g. `feat:`, `fix:`, `docs:`, `ci:`, `chore:`.
-* Keep the first line under ~72 chars; wrap additional detail in the body.
+```sh
+scripts/verify_golden.sh   # golden data conformance
+scripts/bench.sh           # latency sample run
+scripts/prom_textfile.sh   # export Prometheus metrics
+```
 
-## Pull Requests
+## Pre-commit Hooks
 
-* Keep PRs focused and small when possible.
-* Include motivation, approach, and testing notes.
-* Link related issues.
-* CI must pass before review/merge.
+We rely on pre-commit for hygiene (whitespace, YAML/JSON/TOML, clang-format, codespell, detect-secrets, hadolint).
 
-## Security
+```sh
+pip install pre-commit
+pre-commit install
+pre-commit run -a
+```
 
-* Never commit secrets. A detect-secrets workflow runs in CI.
-* Report vulnerabilities privately via the Security Policy.
+## Coding Standards
 
-## License
+* C++20, clang-format enforced.
+* Keep functions short and deterministic.
+* Include `SPDX-License-Identifier: Apache-2.0` at the top of all new source/scripts.
 
-* By contributing, you agree your contributions are licensed under this repository’s license.
+## Commit Messages & PRs
 
----
+* Use conventional prefixes (`feat:`, `fix:`, `docs:`, `ci:`, `chore:`).
+* 72-character subject line, details in body.
+* PRs must describe motivation + testing notes, link issues, and stay focused.
+
+## Tests & CI Expectations
+
+* Every PR should add/adjust at least one test (unit or smoke) when behavior changes.
+* `ctest` must be green; CI (Ubuntu/macOS) must pass before merge.
+
+## Security & Secrets
+
+* Never commit credentials. Detect-secrets baseline runs in CI.
+* Report vulnerabilities privately—see `SECURITY.md`.
+
+## License & DCO
+
+* By contributing, you license your code under Apache-2.0.
+* Include a DCO sign-off in each commit (`git commit -s`).
+
+Example sign-off:
+
+```text
+Signed-off-by: Your Name <your.email@example.com>
+```
 
 Thanks again for helping improve Blanc LOB Engine!
