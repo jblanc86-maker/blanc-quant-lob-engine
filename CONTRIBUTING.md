@@ -90,3 +90,70 @@ Signed-off-by: Your Name <your.email@example.com>
 ```
 
 Thanks again for helping improve Blanc LOB Engine!
+
+---
+
+## For Newcomers
+
+Welcome! Here are some tips to help you get started contributing:
+
+### How to Submit Issues
+
+* Report bugs or request features via [GitHub Issues](https://github.com/jblanc86-maker/quant-lob-engine/issues).
+
+* Please include steps to reproduce, expected behavior, and relevant logs or screenshots.
+
+### Code Review Process
+
+* All pull requests are reviewed by maintainers or experienced contributors.
+
+* You may be asked to revise code for clarity, style, or test coverage.
+* Reviews are typically completed within a few days.
+
+### Branching Model
+
+* Create feature branches from `main` using `git switch -c feat/<slug>`.
+
+* Use descriptive branch names (e.g., `fix/latency-bug`, `docs/update-readme`).
+
+### Writing & Locating Tests
+
+* Add or update tests in the `tests/` directory for C++ and Python code.
+
+* Aim for clear, focused tests that cover new or changed behavior.
+* Use `ctest` for C++ and `pytest` for Python scripts if applicable.
+
+### CI Details
+
+* All pull requests trigger CI checks (lint, build, test, determinism).
+
+* If CI fails, review logs and fix issues locally before pushing updates.
+* You can run most checks locally using the scripts in `scripts/`.
+
+### Documentation Standards
+
+* Update relevant documentation (README, code comments, docstrings) when changing features or APIs.
+
+* Well-documented code is easier for everyone to use and maintain.
+
+### Contact & Community
+
+* For questions, open a GitHub Discussion or email the maintainer listed in `SECURITY.md`.
+
+* We welcome all constructive feedback and ideas!
+
+### Code of Conduct
+
+* Please review our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) and treat all contributors with respect.
+
+### Python Style Guide
+
+* For Python scripts, follow [PEP8](https://peps.python.org/pep-0008/) and use `ruff` for linting/formatting.
+
+* Run `pre-commit run -a` before committing changes.
+
+### Release Process
+
+* Releases are managed by maintainers, but contributors can help by updating changelogs and testing release candidates.
+
+* See `RELEASE.md` (if present) for details.

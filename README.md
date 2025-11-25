@@ -14,8 +14,12 @@ This project uses **BUSL-1.1 (Business Source License)**.
 - Research and non-commercial evaluation are permitted.
 - **Production use in live trading or other revenue-generating systems requires a commercial license.**
 - On the Change Date, the project converts to a permissive license (Apache-2.0).
+<<<<<<< HEAD
   - Change Date: 24 months after the first public release tag of this repository
 >>>>>>> 238af94 (ci: add CI + Determinism badges with determinism workflow)
+=======
+ 	- Change Date: 24 months after the first public release tag of this repository
+>>>>>>> 7fbba9c (WIP: save work before rebase)
 
 ![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)

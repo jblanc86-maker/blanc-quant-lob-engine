@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <chrono>
 using namespace lob;
 namespace po = boost::program_options;
 
@@ -111,6 +112,8 @@ int main(int argc, char **argv)
     return 2;
   }
 
+  using clock = std::chrono::steady_clock;
+  auto start = clock::now();
   uint64_t d = fnv1a(buf);
   Detectors det;
   det.on_message(buf.size());
@@ -129,8 +132,12 @@ int main(int argc, char **argv)
   write_jsonl("artifacts/bench.jsonl", t);
   write_prom("artifacts/metrics.prom", t);
 
-  std::cout << "digest_fnv=0x" << t.actual_digest_hex
+  auto end = clock::now();
+  double elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
+  std::cout << "digest_fnv=0x" << std::hex << d
             << " breaker=" << Breaker::to_string(st)
-            << " publish=" << (t.publish_allowed ? "YES" : "GATED") << "\n";
+            << " publish=" << (br.publish_allowed() ? "YES" : "NO")
+            << " elapsed_ms=" << std::dec << elapsed_ms
+            << std::endl;
   return 0;
 }
