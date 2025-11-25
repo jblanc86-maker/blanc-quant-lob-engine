@@ -56,3 +56,11 @@ add_executable(replay
 target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(replay PRIVATE -O3 -march=native)
 target_link_libraries(replay PRIVATE Boost::program_options)
+
+enable_testing()
+
+add_test(NAME replay_help COMMAND $<TARGET_FILE:replay> --help)
+set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
+
+add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
+set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
