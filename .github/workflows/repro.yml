@@ -19,12 +19,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev
 
-      - name: Set up build
-        uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4
-        with:
-          cmakeListsOrSettingsJson: 'CMakeLists.txt'
-          buildDirectory: 'build'
-          cmakeBuildType: 'Release'
+      - name: Configure build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cmake --build build -j
 
       - name: Run reproducibility verification
         run: |
