@@ -31,7 +31,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev zip unzip
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq nlohmann-json3-dev zip unzip
 
       - name: Toolchain (macOS)
         if: matrix.os == 'macos-latest'

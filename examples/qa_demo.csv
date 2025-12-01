@@ -1,0 +1,4 @@
+role_id,title,company,location,persona,headcount_spike,mutuals,age_days
+QAX-001,Senior QA Lead,SignalGrid Labs,Austin,Driver,true,2,4
+QAX-002,Automation Engineer,Vortex Analytics,Remote,Conscientious,false,1,9
+QAX-003,Quality Architect,Night Ops Systems,Seattle,Influencer,true,0,18

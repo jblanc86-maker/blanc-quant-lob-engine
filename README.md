@@ -1,4 +1,293 @@
-# Quant LOB Engine
+# SignalGrid — Job Intelligence Platform
+
+[![CI](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml)
+[![Determinism](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml)
+[![CodeQL](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml)
+[![SITREP OK](https://github.com/signalgrid/signalgrid/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/smoke-sitrep.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/signalgrid/signalgrid/pulls)
+
+Military-grade job intelligence powered by the VORTEX ranking engine: collect signals, score opportunities, and orchestrate next actions—automatically.
+
+## SignalGrid Snapshot
+
+- **SignalGrid Core** ingests enriched job signals, normalizes fields, and version-controls canonical records.
+- **VORTEX** scores every opportunity with tunable weights, boosts/decays, and guardrails for stale pipelines.
+- **CommandPost (Ops)** automates campaigns (scan → triage → strike) while staying deterministic and auditable.
+- **SITREP & Artifacts** ship JSONL/CSV dashboards, playbooks, and action queues for exec review.
+- **Signals (aggregators)** keep taps on feeds (ATS posts, LinkedIn, niche radars) without scraping fragility.
+
+## System Architecture
+
+```
+Signals (aggregators) ─┬─> ETL adapters ─────┐
+                       │                    │
+                       ▼                    ▼
+                  SignalGrid Core ──> vortex/ (ranking)
+                                           │
+                                           ▼
+                                 persistence/telemetry
+                                           │
+                                           ▼
+                         CommandPost (Ops) workflows
+                                           │
+                                           ▼
+                          SITREP & Artifacts exporters
+```
+
+Core changes vs. the legacy Lucy Library:
+
+| Legacy | SignalGrid | Notes |
+| --- | --- | --- |
+| CORE MODULES | SignalGrid Core | canonical.py, change_detection.py live here |
+| scoring.py | vortex/engine.py | weights in `vortex/weights.yaml` |
+| automation layer | CommandPost (Ops) | includes schedulers + CLI |
+| Job Radar | Signals (aggregators) | connectors for external feeds |
+| Output & Reporting | SITREP & Artifacts | JSONL + CSV export set |
+
+## Modules & Rename Map
+
+| Old Path | New Path | Action |
+| --- | --- | --- |
+| `scoring.py` | `vortex/engine.py` | move + refactor imports |
+| *(new)* | `vortex/weights.yaml` | commit default scoring weights |
+| `night_ops_cli.py` | `sg-cli` | publish console entry-point (`sg` command) |
+| `tourctl.py` | `ops/tourctl.py` | keep ops helpers together |
+| `canonical.py` | `signalgrid/core/canonical.py` | namespace under `signalgrid/core/` |
+| `change_detection.py` | `signalgrid/core/change_detection.py` | ditto |
+
+Night Ops command set becomes:
+
+- `sg scan` — pull latest feeds into staging.
+- `sg sitrep` — render dashboards or dry-runs (`sg sitrep --dry-run`).
+- `sg strike missions/manifest.yaml` — execute orchestrated outreach.
+- `sg manifest --profile default` — generate templated manifests.
+- `sg targets --min-score 80` — list short-list candidates by score.
+
+## VORTEX Signal Model
+
+VORTEX blends structured signals into a single opportunity score. Weights ship in `vortex/weights.yaml` (see `docs/vortex_scoring.md` for deeper tuning notes) and default to:
+
+$$overall = 0.35\cdot fit + 0.25\cdot comp + 0.20\cdot timing + 0.15\cdot warm + 0.05\cdot brand$$
+
+Dynamic adjustments:
+
+- **Boosts**: fresh headcount signals, mutual connectors, in-flight referrals.
+- **Decays**: stale postings (>21 days), low engagement loops, recruiter churn.
+- **Guards**: WIP caps per channel, compliance toggles, blackout windows.
+
+Expose the model via `vortex.engine.score(opportunity, context)`; keep deterministic replay fixtures in `tests/vortex/`.
+
+## Persona Profiles (Targeting Lens)
+
+SignalGrid keeps DISC personas but presents them as operator-facing “Persona Profiles” for filtering and playbook routing.
+
+| Persona | Notes |
+| --- | --- |
+| **Driver** | urgency-first, rapid follow-ups, emphasize outcomes |
+| **Influencer** | warm intros, highlight mission + team |
+| **Steady** | nurture cadence, trust-building proof |
+| **Conscientious** | data-backed packets, deep org charts |
+
+Attach persona metadata to opportunities so VORTEX can tilt weights or recommend outreach templates.
+
+## CLI Operations
+
+```sh
+sg scan --sources linkedin,ats
+sg sitrep --format table --dry-run
+sg strike missions/manifest.yaml
+sg manifest --profile default > missions/manifest.yaml
+sg targets --min-score 80 --limit 25
+```
+
+`sg` ships as a console script via `sg-cli`. Use `CommandPost` automation to schedule scans (cron) and SITREPs (Slack/email export). Sample flows live under `examples/`.
+
+## Environment & Config
+
+| Variable | Description |
+| --- | --- |
+| `SG_DATABASE_PATH` | SQLite/Postgres connection for canonical data |
+| `SG_TELEMETRY_LOG` | JSONL log for SITREP emissions |
+| `SG_SLACK_WEBHOOK_URL` | Optional alert destination |
+| `SG_PROFILE` | Active profile (default/night_ops/custom) |
+
+Python 3.10+, Poetry/uv/venv workflows are supported. Keep deterministic lockfiles and reproducible seeds for VORTEX simulations.
+
+## Outputs & Artifacts
+
+SignalGrid exports deterministic artifacts for review:
+
+- `artifacts/sitrep.jsonl` — streaming SITREP snapshots.
+- `artifacts/sitrep.csv` — tabular summary for exec stakeholders.
+- `artifacts/actions.csv` — queued outreach/next steps.
+- `artifacts/metrics.prom` — Prometheus gauges for latency + throughput.
+
+![Sample SITREP sparkline](docs/images/sitrep.png)
+
+## Continuous Delivery
+
+GitHub Actions (under the `signalgrid` org) stay pinned and deterministic:
+
+- `ci.yml` — lint, unit tests, VORTEX model checks.
+- `determinism.yml` — golden data replay for scoring drift.
+- `codeql.yml` — static security scan.
+- `smoke-sitrep.yml` — `sg sitrep --dry-run` to ensure CLI stays green (feeds the SITREP badge).
+
+## Examples
+
+The `examples/` directory includes `qa_demo.csv` (three QA-focused roles) plus usage notes. Run:
+
+```sh
+sg scan --from examples/qa_demo.csv --profile demo
+```
+
+to ingest the sample data before issuing `sg sitrep --dry-run`.
+
+## License & Credits
+
+SignalGrid continues to ship under BUSL-1.1. Research and non-commercial evaluation remain permitted; production use requires a commercial license until the change date.
+
+Credits: **Platform:** SignalGrid • **Engine:** VORTEX.# SignalGrid — Job Intelligence Platform
+
+[![CI](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml)
+[![Determinism](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml)
+[![CodeQL](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/signalgrid/signalgrid/pulls)
+
+Military-grade job intelligence powered by the VORTEX ranking engine: collect signals, score opportunities, and orchestrate next actions—automatically.
+
+## SignalGrid Snapshot
+
+- **SignalGrid Core** ingests enriched job signals, normalizes fields, and version-controls canonical records.
+- **VORTEX** scores every opportunity with tunable weights, boosts/decays, and guardrails for stale pipelines.
+- **CommandPost (Ops)** automates campaigns (scan → triage → strike) while staying deterministic and auditable.
+- **SITREP & Artifacts** ship JSONL/CSV dashboards, playbooks, and action queues for exec review.
+- **Signals (aggregators)** keep taps on feeds (ATS posts, LinkedIn, niche radars) without scraping fragility.
+
+## System Architecture
+
+```
+Signals (aggregators) ─┬─> ETL adapters ─────┐
+                       │                    │
+                       ▼                    ▼
+                  SignalGrid Core ──> vortex/ (ranking)
+                                           │
+                                           ▼
+                                 persistence/telemetry
+                                           │
+                                           ▼
+                         CommandPost (Ops) workflows
+                                           │
+                                           ▼
+                          SITREP & Artifacts exporters
+```
+
+Core changes vs. the legacy Lucy Library:
+
+| Legacy | SignalGrid | Notes |
+| --- | --- | --- |
+| CORE MODULES | SignalGrid Core | canonical.py, change_detection.py live here |
+| scoring.py | vortex/engine.py | weights in `vortex/weights.yaml` |
+| automation layer | CommandPost (Ops) | includes schedulers + CLI |
+| Job Radar | Signals (aggregators) | connectors for external feeds |
+| Output & Reporting | SITREP & Artifacts | JSONL + CSV export set |
+
+## Modules & Rename Map
+
+| Old Path | New Path | Action |
+| --- | --- | --- |
+| `scoring.py` | `vortex/engine.py` | move + refactor imports |
+| *(new)* | `vortex/weights.yaml` | commit default scoring weights |
+| `night_ops_cli.py` | `sg-cli` | publish console entry-point (`sg` command) |
+| `tourctl.py` | `ops/tourctl.py` | keep ops helpers together |
+| `canonical.py` | `signalgrid/core/canonical.py` | namespace under `signalgrid/core/` |
+| `change_detection.py` | `signalgrid/core/change_detection.py` | ditto |
+
+Night Ops command set becomes:
+
+- `sg scan` — pull latest feeds into staging.
+- `sg sitrep` — render dashboards or dry-runs (`sg sitrep --dry-run`).
+- `sg strike missions/manifest.yaml` — execute orchestrated outreach.
+- `sg manifest --profile default` — generate templated manifests.
+- `sg targets --min-score 80` — list short-list candidates by score.
+
+## VORTEX Signal Model
+
+VORTEX blends structured signals into a single opportunity score. Weights ship in `vortex/weights.yaml` and default to:
+
+$$overall = 0.35\cdot fit + 0.25\cdot comp + 0.20\cdot timing + 0.15\cdot warm + 0.05\cdot brand$$
+
+Dynamic adjustments:
+
+- **Boosts**: fresh headcount signals, mutual connectors, in-flight referrals.
+- **Decays**: stale postings (>21 days), low engagement loops, recruiter churn.
+- **Guards**: WIP caps per channel, compliance toggles, blackout windows.
+
+Expose the model via `vortex.engine.score(opportunity, context)`; keep deterministic replay fixtures in `tests/vortex/`.
+
+## Persona Profiles (Targeting Lens)
+
+SignalGrid keeps DISC personas but presents them as operator-facing “Persona Profiles” for filtering and playbook routing.
+
+| Persona | Notes |
+| --- | --- |
+| **Driver** | urgency-first, rapid follow-ups, emphasize outcomes |
+| **Influencer** | warm intros, highlight mission + team |
+| **Steady** | nurture cadence, trust-building proof |
+| **Conscientious** | data-backed packets, deep org charts |
+
+Attach persona metadata to opportunities so VORTEX can tilt weights or recommend outreach templates.
+
+## CLI Operations
+
+```sh
+sg scan --sources linkedin,ats
+sg sitrep --format table --dry-run
+sg strike missions/manifest.yaml
+sg manifest --profile default > missions/manifest.yaml
+sg targets --min-score 80 --limit 25
+```
+
+`sg` ships as a console script via `sg-cli`. Use `CommandPost` automation to schedule scans (cron) and SITREPs (Slack/email export).
+
+## Environment & Config
+
+| Variable | Description |
+| --- | --- |
+| `SG_DATABASE_PATH` | SQLite/Postgres connection for canonical data |
+| `SG_TELEMETRY_LOG` | JSONL log for SITREP emissions |
+| `SG_SLACK_WEBHOOK_URL` | Optional alert destination |
+| `SG_PROFILE` | Active profile (default/night_ops/custom) |
+
+Python 3.10+, Poetry/uv/venv workflows are supported. Keep deterministic lockfiles and reproducible seeds for VORTEX simulations.
+
+## Outputs & Artifacts
+
+SignalGrid exports deterministic artifacts for review:
+
+- `artifacts/sitrep.jsonl` — streaming SITREP snapshots.
+- `artifacts/sitrep.csv` — tabular summary for exec stakeholders.
+- `artifacts/actions.csv` — queued outreach/next steps.
+- `artifacts/metrics.prom` — Prometheus gauges for latency + throughput.
+
+## Continuous Delivery
+
+GitHub Actions (under the `signalgrid` org) stay pinned and deterministic:
+
+- `ci.yml` — lint, unit tests, VORTEX model checks.
+- `determinism.yml` — golden data replay for scoring drift.
+- `codeql.yml` — static security scan.
+- `smoke-sitrep.yml` — `sg sitrep --dry-run` to ensure CLI stays green.
+
+## License & Credits
+
+SignalGrid continues to ship under BUSL-1.1. Research and non-commercial evaluation remain permitted; production use requires a commercial license until the change date.
+
+Credits: **Platform:** SignalGrid • **Engine:** VORTEX.# Quant LOB Engine
 
 [![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
@@ -31,7 +320,7 @@ Production-grade C++20 quantitative limit order book (LOB) engine for high-frequ
 │           │                              │                        │
 │           ▼                              ▼                        │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │         Circuit Breakers (Patent-Pending)             │       │
+│  │         DEG — Dynamic Execution Gates (circuit breakers; patent-pending)             │       │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐│       │
 │  │  │Price Anomaly │  │Volume Spike  │  │ Latency     ││       │
 │  │  │  Detector    │  │   Detector   │  │  Monitor    ││       │
@@ -43,7 +332,7 @@ Production-grade C++20 quantitative limit order book (LOB) engine for high-frequ
 │  │            Telemetry Export System                    │       │
 │  │    - Latency Metrics (sub-microsecond)               │       │
 │  │    - Order Flow Statistics                           │       │
-│  │    - Breaker Activation Logs                         │       │
+│  │    - DEG Activation Logs                         │       │
 │  │    - Book Depth Snapshots                            │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                              │                                    │

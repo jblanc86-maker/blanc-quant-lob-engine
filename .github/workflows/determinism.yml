@@ -21,7 +21,7 @@ jobs:
       - name: Deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev unzip zip
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev unzip zip
       - name: Build (Release)
         run: |
           set -euxo pipefail

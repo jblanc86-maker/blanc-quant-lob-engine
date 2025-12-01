@@ -1,0 +1,19 @@
+name: Question
+description: Ask a question about usage, setup, or design
+title: "[Question]: "
+labels: ["question"]
+
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: Describe your question here
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any relevant context, links, or screenshots
