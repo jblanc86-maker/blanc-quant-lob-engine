@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 project(blanc_lob_engine VERSION 0.9 LANGUAGES CXX)
 
+include(CTest)
+enable_testing()
+
+add_executable(test_book
+  tests/test_book.cpp
+)
+target_link_libraries(test_book PRIVATE replay)
+add_test(NAME book_basic COMMAND test_book)
+
+add_executable(test_empty
+  tests/test_empty.cpp
+)
+target_link_libraries(test_empty PRIVATE replay)
+add_test(NAME empty_input COMMAND test_empty)
+
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
 endif()
