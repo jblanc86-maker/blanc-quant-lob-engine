@@ -1,5 +1,6 @@
 name: Snapshot Nightly
 on:
+  workflow_dispatch: {}
   schedule:
     - cron: '30 6 * * *' # daily at 06:30 UTC
 
@@ -11,7 +12,7 @@ jobs:
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev
+          sudo apt-get install -y cmake ninja-build zip libboost-all-dev libnlohmann-json3-dev
       - name: Build (Release) and tests
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
