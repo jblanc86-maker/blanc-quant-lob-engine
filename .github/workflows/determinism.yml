@@ -4,6 +4,8 @@ name: Determinism
 on:
   push:
   pull_request:
+  schedule:
+    - cron: '0 6 * * *'  # daily at 06:00 UTC
 
 jobs:
   verify-golden:
@@ -26,3 +28,20 @@ jobs:
             ./build/bin/replay --input data/golden/itch_1m.bin | tee run.out
             grep -E "digest_fnv=" run.out
           fi
+      - name: Run bench and collect artifacts
+        shell: bash
+        run: |
+          # Build is already done; run bench to collect artifacts
+          mkdir -p artifacts
+          # Run bench script if present, else run the binary directly
+          if [ -x scripts/bench.sh ]; then
+            scripts/bench.sh 9
+          else
+            ./build/bin/replay --input data/golden/itch_1m.bin | tee artifacts/run.stdout.txt
+          fi
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: determinism-artifacts
+          path: |
+            artifacts/**
