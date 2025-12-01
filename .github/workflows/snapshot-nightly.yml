@@ -8,11 +8,11 @@ jobs:
   snapshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build zip libboost-all-dev libnlohmann-json3-dev
+          sudo apt-get install -y cmake ninja-build zip libboost-all-dev nlohmann-json3-dev
       - name: Build (Release) and tests
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
@@ -27,7 +27,7 @@ jobs:
           ctest --output-on-failure -R book_snapshot || true
           ctest --output-on-failure -R book_snapshot_burst || true
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: snapshot-artifacts-${{ github.run_id }}
           path: tests/out/**
@@ -37,7 +37,7 @@ jobs:
           make release-package
 
       - name: Upload release package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: release-package-${{ github.run_id }}
           path: artifacts/release/**

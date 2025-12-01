@@ -134,7 +134,7 @@ On Ubuntu (apt):
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
+sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev jq
 ```
 
 On macOS (Homebrew):

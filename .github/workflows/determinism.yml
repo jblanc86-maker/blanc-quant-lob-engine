@@ -11,7 +11,7 @@ jobs:
   verify-golden:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - name: Normalize environment
         run: |
           # Ensure deterministic environment
@@ -21,7 +21,7 @@ jobs:
       - name: Deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev unzip zip
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev unzip zip
       - name: Build (Release)
         run: |
           set -euxo pipefail
@@ -56,7 +56,7 @@ jobs:
             ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
           fi
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: determinism-artifacts-${{ github.run_id }}
           path: |

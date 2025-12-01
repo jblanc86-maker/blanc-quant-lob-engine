@@ -17,10 +17,10 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@5ad83d3202da6e473f763d732b591299ae4e380c
         with:
           languages: cpp
           autobuild: false
@@ -28,7 +28,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev g++ zip
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
 
       - name: Build (for CodeQL DB)
         run: |
@@ -36,6 +36,6 @@ jobs:
           cmake --build build -j
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@5ad83d3202da6e473f763d732b591299ae4e380c
         with:
           category: 'security-and-quality'
