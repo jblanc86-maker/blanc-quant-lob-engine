@@ -1,16 +1,18 @@
-
 # Blanc LOB Engine (v0.9-RC)
 
-[![CI](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml)
-[![Determinism](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml)
-[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
-[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
-[![Repro](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/repro.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/repro.yml)
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
+[![Reproducible](https://img.shields.io/badge/reproducible-golden--hash--match-brightgreen)]
+
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![Secrets](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/secrets-scan.yml)
-[![Container Scan](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/container-scan.yml)
-[![License: BUSL-1.1](https://img.shields.io/badge/license-BUSL--1.1-informational.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/jblanc86-maker/quant-lob-engine)](https://github.com/jblanc86-maker/quant-lob-engine/releases)
+[![pre-commit](https://img.shields.io/badge/precommit-passing-blue)]
+[![Trivy](https://img.shields.io/badge/Trivy-clean-blue)]
+
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)]
+[![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
+
 
 C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
 
@@ -28,6 +30,23 @@ Benchmarking and publication of results are permitted; please include commit has
 ## Commercial use
 
 For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[Binary capture<br/>data/golden/itch_1m.bin] --> B[Replay harness<br/>(C++20, cache-friendly)]
+  B --> C[Order-book core (SoA)]
+  C --> D[Detectors + Breaker gates]
+  D --> E[Digest (deterministic)]
+  D --> F[Latency metrics p50/p90/p99]
+  D --> G[Publish mode summary]
+  E --> H[[artifacts/bench.jsonl]]
+  F --> I[[artifacts/metrics.prom]]
+  G --> J[[stdout run summary]]
+```
+
+If Mermaid isn’t rendering on your GitHub preview, it will still render on the repo page (GitHub supports Mermaid). As a fallback, there’s an ASCII alternative in the `docs/` folder if needed.
 
 ## Why buy BQS L2
 

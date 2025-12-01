@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
 
       - name: Set up build
-        uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4
+        uses: lukka/run-cmake@v10
         with:
           cmakeListsOrSettingsJson: 'CMakeLists.txt'
           buildDirectory: 'build'

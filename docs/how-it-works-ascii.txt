@@ -1,0 +1,21 @@
+Binary capture -> replay harness -> orderbook -> detectors/breaker -> digest
+
+Legend:
+  - Binary capture (data/golden/itch_1m.bin)
+  - Replay harness: C++20, cache-friendly
+  - Order-book core: SoA
+  - Detectors + Breaker gates: runtime safeguards
+  - Digest: deterministic end-state hash
+  - Latency metrics: p50/p90/p99
+  - Publish mode: run summary and outputs
+
+Flow:
+  [data/golden/itch_1m.bin] -> [replay harness] -> [order-book core]
+    -> [detectors + breaker gates] -> {digest, latency metrics, publish summary}
+
+Artifacts:
+  - artifacts/bench.jsonl   # bench per-run JSON lines
+  - artifacts/metrics.prom  # prometheus textfile metrics
+  - stdout run summary
+
+If you need a nicer visual than Mermaid, copy this ASCII as a fallback in README or docs.
