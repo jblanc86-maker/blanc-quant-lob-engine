@@ -154,3 +154,5 @@ If you need production access before the Change Date, request a commercial licen
 - Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
 
 [![Commercial licenses available](https://img.shields.io/badge/Commercial-licenses%20available-informational.svg)](#commercial-use)
+
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
