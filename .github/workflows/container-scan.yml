@@ -1,4 +1,6 @@
 name: Container Scan
+permissions:
+  contents: read
 
 on:
   push:
