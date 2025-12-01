@@ -1,616 +1,187 @@
-# SignalGrid — Job Intelligence Platform
-
-[![CI](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml)
-[![Determinism](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml)
-[![CodeQL](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml)
-[![SITREP OK](https://github.com/signalgrid/signalgrid/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/smoke-sitrep.yml)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/signalgrid/signalgrid/pulls)
-
-Military-grade job intelligence powered by the VORTEX ranking engine: collect signals, score opportunities, and orchestrate next actions—automatically.
-
-## SignalGrid Snapshot
-
-- **SignalGrid Core** ingests enriched job signals, normalizes fields, and version-controls canonical records.
-- **VORTEX** scores every opportunity with tunable weights, boosts/decays, and guardrails for stale pipelines.
-- **CommandPost (Ops)** automates campaigns (scan → triage → strike) while staying deterministic and auditable.
-- **SITREP & Artifacts** ship JSONL/CSV dashboards, playbooks, and action queues for exec review.
-- **Signals (aggregators)** keep taps on feeds (ATS posts, LinkedIn, niche radars) without scraping fragility.
-
-## System Architecture
-
-```
-Signals (aggregators) ─┬─> ETL adapters ─────┐
-                       │                    │
-                       ▼                    ▼
-                  SignalGrid Core ──> vortex/ (ranking)
-                                           │
-                                           ▼
-                                 persistence/telemetry
-                                           │
-                                           ▼
-                         CommandPost (Ops) workflows
-                                           │
-                                           ▼
-                          SITREP & Artifacts exporters
-```
-
-Core changes vs. the legacy Lucy Library:
-
-| Legacy | SignalGrid | Notes |
-| --- | --- | --- |
-| CORE MODULES | SignalGrid Core | canonical.py, change_detection.py live here |
-| scoring.py | vortex/engine.py | weights in `vortex/weights.yaml` |
-| automation layer | CommandPost (Ops) | includes schedulers + CLI |
-| Job Radar | Signals (aggregators) | connectors for external feeds |
-| Output & Reporting | SITREP & Artifacts | JSONL + CSV export set |
-
-## Modules & Rename Map
-
-| Old Path | New Path | Action |
-| --- | --- | --- |
-| `scoring.py` | `vortex/engine.py` | move + refactor imports |
-| *(new)* | `vortex/weights.yaml` | commit default scoring weights |
-| `night_ops_cli.py` | `sg-cli` | publish console entry-point (`sg` command) |
-| `tourctl.py` | `ops/tourctl.py` | keep ops helpers together |
-| `canonical.py` | `signalgrid/core/canonical.py` | namespace under `signalgrid/core/` |
-| `change_detection.py` | `signalgrid/core/change_detection.py` | ditto |
-
-Night Ops command set becomes:
-
-- `sg scan` — pull latest feeds into staging.
-- `sg sitrep` — render dashboards or dry-runs (`sg sitrep --dry-run`).
-- `sg strike missions/manifest.yaml` — execute orchestrated outreach.
-- `sg manifest --profile default` — generate templated manifests.
-- `sg targets --min-score 80` — list short-list candidates by score.
-
-## VORTEX Signal Model
-
-VORTEX blends structured signals into a single opportunity score. Weights ship in `vortex/weights.yaml` (see `docs/vortex_scoring.md` for deeper tuning notes) and default to:
-
-$$overall = 0.35\cdot fit + 0.25\cdot comp + 0.20\cdot timing + 0.15\cdot warm + 0.05\cdot brand$$
-
-Dynamic adjustments:
-
-- **Boosts**: fresh headcount signals, mutual connectors, in-flight referrals.
-- **Decays**: stale postings (>21 days), low engagement loops, recruiter churn.
-- **Guards**: WIP caps per channel, compliance toggles, blackout windows.
-
-Expose the model via `vortex.engine.score(opportunity, context)`; keep deterministic replay fixtures in `tests/vortex/`.
-
-## Persona Profiles (Targeting Lens)
-
-SignalGrid keeps DISC personas but presents them as operator-facing “Persona Profiles” for filtering and playbook routing.
-
-| Persona | Notes |
-| --- | --- |
-| **Driver** | urgency-first, rapid follow-ups, emphasize outcomes |
-| **Influencer** | warm intros, highlight mission + team |
-| **Steady** | nurture cadence, trust-building proof |
-| **Conscientious** | data-backed packets, deep org charts |
-
-Attach persona metadata to opportunities so VORTEX can tilt weights or recommend outreach templates.
-
-## CLI Operations
-
-```sh
-sg scan --sources linkedin,ats
-sg sitrep --format table --dry-run
-sg strike missions/manifest.yaml
-sg manifest --profile default > missions/manifest.yaml
-sg targets --min-score 80 --limit 25
-```
-
-`sg` ships as a console script via `sg-cli`. Use `CommandPost` automation to schedule scans (cron) and SITREPs (Slack/email export). Sample flows live under `examples/`.
-
-## Environment & Config
-
-| Variable | Description |
-| --- | --- |
-| `SG_DATABASE_PATH` | SQLite/Postgres connection for canonical data |
-| `SG_TELEMETRY_LOG` | JSONL log for SITREP emissions |
-| `SG_SLACK_WEBHOOK_URL` | Optional alert destination |
-| `SG_PROFILE` | Active profile (default/night_ops/custom) |
-
-Python 3.10+, Poetry/uv/venv workflows are supported. Keep deterministic lockfiles and reproducible seeds for VORTEX simulations.
-
-## Outputs & Artifacts
-
-SignalGrid exports deterministic artifacts for review:
-
-- `artifacts/sitrep.jsonl` — streaming SITREP snapshots.
-- `artifacts/sitrep.csv` — tabular summary for exec stakeholders.
-- `artifacts/actions.csv` — queued outreach/next steps.
-- `artifacts/metrics.prom` — Prometheus gauges for latency + throughput.
-
-![Sample SITREP sparkline](docs/images/sitrep.png)
-
-## Continuous Delivery
-
-GitHub Actions (under the `signalgrid` org) stay pinned and deterministic:
-
-- `ci.yml` — lint, unit tests, VORTEX model checks.
-- `determinism.yml` — golden data replay for scoring drift.
-- `codeql.yml` — static security scan.
-- `smoke-sitrep.yml` — `sg sitrep --dry-run` to ensure CLI stays green (feeds the SITREP badge).
-
-## Examples
-
-The `examples/` directory includes `qa_demo.csv` (three QA-focused roles) plus usage notes. Run:
-
-```sh
-sg scan --from examples/qa_demo.csv --profile demo
-```
-
-to ingest the sample data before issuing `sg sitrep --dry-run`.
-
-## License & Credits
-
-SignalGrid continues to ship under BUSL-1.1. Research and non-commercial evaluation remain permitted; production use requires a commercial license until the change date.
-
-Credits: **Platform:** SignalGrid • **Engine:** VORTEX.# SignalGrid — Job Intelligence Platform
-
-[![CI](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/ci.yml)
-[![Determinism](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/determinism.yml)
-[![CodeQL](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml/badge.svg)](https://github.com/signalgrid/signalgrid/actions/workflows/codeql.yml)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/signalgrid/signalgrid/pulls)
-
-Military-grade job intelligence powered by the VORTEX ranking engine: collect signals, score opportunities, and orchestrate next actions—automatically.
-
-## SignalGrid Snapshot
-
-- **SignalGrid Core** ingests enriched job signals, normalizes fields, and version-controls canonical records.
-- **VORTEX** scores every opportunity with tunable weights, boosts/decays, and guardrails for stale pipelines.
-- **CommandPost (Ops)** automates campaigns (scan → triage → strike) while staying deterministic and auditable.
-- **SITREP & Artifacts** ship JSONL/CSV dashboards, playbooks, and action queues for exec review.
-- **Signals (aggregators)** keep taps on feeds (ATS posts, LinkedIn, niche radars) without scraping fragility.
-
-## System Architecture
-
-```
-Signals (aggregators) ─┬─> ETL adapters ─────┐
-                       │                    │
-                       ▼                    ▼
-                  SignalGrid Core ──> vortex/ (ranking)
-                                           │
-                                           ▼
-                                 persistence/telemetry
-                                           │
-                                           ▼
-                         CommandPost (Ops) workflows
-                                           │
-                                           ▼
-                          SITREP & Artifacts exporters
-```
-
-Core changes vs. the legacy Lucy Library:
-
-| Legacy | SignalGrid | Notes |
-| --- | --- | --- |
-| CORE MODULES | SignalGrid Core | canonical.py, change_detection.py live here |
-| scoring.py | vortex/engine.py | weights in `vortex/weights.yaml` |
-| automation layer | CommandPost (Ops) | includes schedulers + CLI |
-| Job Radar | Signals (aggregators) | connectors for external feeds |
-| Output & Reporting | SITREP & Artifacts | JSONL + CSV export set |
-
-## Modules & Rename Map
-
-| Old Path | New Path | Action |
-| --- | --- | --- |
-| `scoring.py` | `vortex/engine.py` | move + refactor imports |
-| *(new)* | `vortex/weights.yaml` | commit default scoring weights |
-| `night_ops_cli.py` | `sg-cli` | publish console entry-point (`sg` command) |
-| `tourctl.py` | `ops/tourctl.py` | keep ops helpers together |
-| `canonical.py` | `signalgrid/core/canonical.py` | namespace under `signalgrid/core/` |
-| `change_detection.py` | `signalgrid/core/change_detection.py` | ditto |
-
-Night Ops command set becomes:
-
-- `sg scan` — pull latest feeds into staging.
-- `sg sitrep` — render dashboards or dry-runs (`sg sitrep --dry-run`).
-- `sg strike missions/manifest.yaml` — execute orchestrated outreach.
-- `sg manifest --profile default` — generate templated manifests.
-- `sg targets --min-score 80` — list short-list candidates by score.
-
-## VORTEX Signal Model
-
-VORTEX blends structured signals into a single opportunity score. Weights ship in `vortex/weights.yaml` and default to:
-
-$$overall = 0.35\cdot fit + 0.25\cdot comp + 0.20\cdot timing + 0.15\cdot warm + 0.05\cdot brand$$
-
-Dynamic adjustments:
-
-- **Boosts**: fresh headcount signals, mutual connectors, in-flight referrals.
-- **Decays**: stale postings (>21 days), low engagement loops, recruiter churn.
-- **Guards**: WIP caps per channel, compliance toggles, blackout windows.
-
-Expose the model via `vortex.engine.score(opportunity, context)`; keep deterministic replay fixtures in `tests/vortex/`.
-
-## Persona Profiles (Targeting Lens)
-
-SignalGrid keeps DISC personas but presents them as operator-facing “Persona Profiles” for filtering and playbook routing.
-
-| Persona | Notes |
-| --- | --- |
-| **Driver** | urgency-first, rapid follow-ups, emphasize outcomes |
-| **Influencer** | warm intros, highlight mission + team |
-| **Steady** | nurture cadence, trust-building proof |
-| **Conscientious** | data-backed packets, deep org charts |
-
-Attach persona metadata to opportunities so VORTEX can tilt weights or recommend outreach templates.
-
-## CLI Operations
-
-```sh
-sg scan --sources linkedin,ats
-sg sitrep --format table --dry-run
-sg strike missions/manifest.yaml
-sg manifest --profile default > missions/manifest.yaml
-sg targets --min-score 80 --limit 25
-```
-
-`sg` ships as a console script via `sg-cli`. Use `CommandPost` automation to schedule scans (cron) and SITREPs (Slack/email export).
-
-## Environment & Config
-
-| Variable | Description |
-| --- | --- |
-| `SG_DATABASE_PATH` | SQLite/Postgres connection for canonical data |
-| `SG_TELEMETRY_LOG` | JSONL log for SITREP emissions |
-| `SG_SLACK_WEBHOOK_URL` | Optional alert destination |
-| `SG_PROFILE` | Active profile (default/night_ops/custom) |
-
-Python 3.10+, Poetry/uv/venv workflows are supported. Keep deterministic lockfiles and reproducible seeds for VORTEX simulations.
-
-## Outputs & Artifacts
-
-SignalGrid exports deterministic artifacts for review:
-
-- `artifacts/sitrep.jsonl` — streaming SITREP snapshots.
-- `artifacts/sitrep.csv` — tabular summary for exec stakeholders.
-- `artifacts/actions.csv` — queued outreach/next steps.
-- `artifacts/metrics.prom` — Prometheus gauges for latency + throughput.
-
-## Continuous Delivery
-
-GitHub Actions (under the `signalgrid` org) stay pinned and deterministic:
-
-- `ci.yml` — lint, unit tests, VORTEX model checks.
-- `determinism.yml` — golden data replay for scoring drift.
-- `codeql.yml` — static security scan.
-- `smoke-sitrep.yml` — `sg sitrep --dry-run` to ensure CLI stays green.
-
-## License & Credits
-
-SignalGrid continues to ship under BUSL-1.1. Research and non-commercial evaluation remain permitted; production use requires a commercial license until the change date.
-
-Credits: **Platform:** SignalGrid • **Engine:** VORTEX.# Quant LOB Engine
+<!-- markdownlint-disable MD013 -->
+# Quant LOB Engine
 
 [![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![C++](https://img.shields.io/badge/C++-20-blue.svg)](https://isocpp.org/)
-[![CMake](https://img.shields.io/badge/CMake-3.20+-blue.svg)](https://cmake.org/)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE.txt)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 
-Production-grade C++20 quantitative limit order book (LOB) engine for high-frequency trading applications.
+Deterministic C++20 limit order book (LOB) replay engine for quantitative and
+low-latency research. The project centers on repeatable benches,
+patent-pending Dynamic Execution Gates (DEG), and tail SLO enforcement through
+`scripts/verify_bench.py`.
 
-## 📦 System Architecture
+## System architecture
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│              QUANT LOB ENGINE (Production HFT System)              │
-├────────────────────────────────────────────────────────────────────┤
-│                                                                    │
-│  ┌──────────────────┐         ┌──────────────────┐              │
-│  │   ITCH 5.0       │────────▶│   Order Book     │              │
-│  │   Binary Parser  │  Orders │   (SoA Layout)   │              │
-│  │  (NASDAQ Feed)   │         │   L2/L3 Data     │              │
-│  └──────────────────┘         └─────────┬────────┘              │
-│           │                              │                        │
-│           │                              ▼                        │
-│           │                   ┌──────────────────┐               │
-│           │                   │   Price Levels   │               │
-│           │                   │  (Best Bid/Ask)  │               │
-│           │                   └─────────┬────────┘               │
-│           │                              │                        │
-│           ▼                              ▼                        │
-│  ┌──────────────────────────────────────────────────────┐       │
-│  │         DEG — Dynamic Execution Gates (circuit breakers; patent-pending)             │       │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐│       │
-│  │  │Price Anomaly │  │Volume Spike  │  │ Latency     ││       │
-│  │  │  Detector    │  │   Detector   │  │  Monitor    ││       │
-│  │  └──────────────┘  └──────────────┘  └─────────────┘│       │
-│  └───────────────────────────┬──────────────────────────┘       │
-│                              │                                    │
-│                              ▼                                    │
-│  ┌──────────────────────────────────────────────────────┐       │
-│  │            Telemetry Export System                    │       │
-│  │    - Latency Metrics (sub-microsecond)               │       │
-│  │    - Order Flow Statistics                           │       │
-│  │    - DEG Activation Logs                         │       │
-│  │    - Book Depth Snapshots                            │       │
-│  └──────────────────────────────────────────────────────┘       │
-│                              │                                    │
-│                              ▼                                    │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────┐   │
-│  │   gen_synth      │  │  Golden Tests    │  │  Replay    │   │
-│  │ (Synthetic Data) │  │ (Determinism)    │  │  Engine    │   │
-│  └──────────────────┘  └──────────────────┘  └────────────┘   │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│   QUANT LOB ENGINE — Deterministic Replay & Benchmark Harness                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Inputs                              Core                           Outputs    │
+│ ┌─────────────────┐        ┌──────────────────────────────┐      ┌───────────┐│
+│ │ trace_loader    │───▲───▶│ Deterministic Replay         │───┬─▶│ Stdout    ││
+│ │ (ITCH bin; CSV/ │   │    │ Scheduler (ST; MT optional)  │   │  │ summary   ││
+│ │ PCAP→bin bridge)│   │    └──────────────┬───────────────┘   │  └───────────┘│
+│ └─────────────────┘   │                   │                   │              │
+│ ┌─────────────────┐   │                   │                   │  ┌───────────┐│
+│ │ gen_synth       │───┘   Fault Injection / Gates (DEG‑compatible;         ││
+│ │ (synthetic)     │           breaker‑style, optional)           └─▶│ Artifacts ││
+│ └─────────────────┘                                     ▲            │ bench.jsonl│
+│                                                         │            │ metrics.prom│
+│                                         ┌──────────────────────────────┐└───────────┘│
+│                                         │ Golden-state Checker         │◀──────┘
+│                                         │ (byte-for-byte digest_fnv)   │
+│                                         └──────────────────────────────┘
+│                                                 │
+│                                                 ▼
+│ ┌──────────────────────────────┐     ┌──────────────────────────────┐
+│ │ Benchmark Harness            │     │ Structured Observability     │
+│ │ • msgs/s throughput          │     │ • JSONL event logs           │
+│ │ • p50/p95/p99 latency        │     │ • Prometheus textfile        │
+│ │ • config matrix sweeps       │     │ • CI artifacts (goldens)     │
+│ └──────────────────────────────┘     └──────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key Features:**
-- 🚀 Structure-of-Arrays (SoA) for cache-line optimization
-- ⚡ Sub-microsecond order processing latency
-- 🔒 Deterministic builds (binary-exact reproducibility)
-- 🛡️ Patent-pending circuit breaker algorithms
-- 📡 ITCH 5.0 protocol compliance (NASDAQ)
+Gate policy details live in `docs/gates.md`; CI wiring is under
+`.github/workflows/verify-bench.yml`.
 
-**Tech Stack:** C++20, CMake 3.20+, Ninja, Boost, nlohmann-json
-**Build:** Ninja build system with determinism validation
-**Testing:** Golden file replay, snapshot diffing, telemetry verification
+## Highlights
 
-[![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)](https://cmake.org)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
-
-C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
-
-Blanc LOB Engine is a functionally deterministic C++20 Level-2 order-book replay and benchmarking framework built with CMake/Ninja for repeatable, auditable low-latency research. It emphasizes reproducible golden state validation, tight tail latency (p50 / p95 / p99), and stable throughput across runs, with first-class observability via structured artifacts (JSONL and Prometheus-compatible metrics). The system includes patent-pending breaker-style gates. Trading use subject to license terms.
-
-## License model
-
-This project uses **BUSL-1.1 (Business Source License)**.
-
-- Research and non-commercial evaluation are permitted.
-- **Production use in live trading or other revenue-generating systems requires a commercial license.**
-- On the Change Date, the project converts to a permissive license (Apache-2.0).
-  - Change Date: 24 months after the first public release tag of this repository
-
-Benchmarking and publication of results are permitted; please include commit hash, hardware, and methodology details. See `LICENSE` for authoritative terms.
-
-## Commercial use
-
-For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
-
-## How it works
-
-```
-
-> See also: [Dynamic Execution Gates (DEG) & Release Gates](docs/gates.md)
-mermaid
-flowchart LR
-  A[Binary capture<br/>data/golden/itch_1m.bin] --> B["Replay harness<br/>C++20, cache-friendly"]
-  B --> C["Order-book core SoA"]
-  C --> D[Detectors + Breaker gates]
-  D --> E["Digest deterministic"]
-  D --> F[Latency metrics p50/p95/p99]
-  D --> G[Publish mode summary]
-  E --> H[[artifacts/bench.jsonl]]
-  F --> I[[artifacts/metrics.prom]]
-  G --> J[[stdout run summary]]
-```
-
-If Mermaid isn’t rendering on your GitHub preview, it will still render on the repo page (GitHub supports Mermaid). As a fallback, there’s an ASCII alternative in the `docs/` folder if needed.
-
-## Why buy BQS L2
-
-- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
-- **Tail metrics:** p50/p95/p99 latency + throughput.
-- **Time-to-green:** one-command benches + sample adapters.
-- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
-- **Adaptable core:** SoA book + branch-light parser.
-- **Anonymous option:** attribution can be waived in the commercial license.
-
-## Why invest / sponsor
-
-- **Own the roadmap:** fund adapters/features you need.
-- **Proof transparency:** reproducible claims with artifacts.
-- **Talent magnet:** open, measured performance work attracts systems engineers.
+- Golden digest + tail budgets keep regressions caught early.
+- Observability-first artifacts: `bench.jsonl` + `metrics.prom`.
+- Conformance + bench scripts plus Prometheus exporter helpers.
+- CI ready: determinism, bench, and CodeQL workflows pinned to SHAs.
 
 ## Build
 
-Prereqs: CMake ≥ 3.20, Ninja, a C++20 compiler (Clang/GCC).
+Prereqs: CMake ≥ 3.20, Ninja, modern C++20 compiler, Boost, and
+`nlohmann-json`.
 
 ```sh
-# Configure (Release) and build
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-
-# Binaries land in build/bin
 ls build/bin/replay
 ```
 
-Notes
+Notes:
 
-- Compile commands are exported to `build/compile_commands.json` for IDEs.
-- Linux Release builds get hardening flags (stack protector, FORTIFY, PIE link) when supported.
-- Optional sanitizers for Debug builds:
-
-```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_SANITIZERS=ON
-cmake --build build -j
-```
+- `build/compile_commands.json` aids IDEs.
+- Release builds add stack protector, FORTIFY, PIE when supported.
+- Enable sanitizers via `-DENABLE_SANITIZERS=ON` on Debug builds.
 
 ## Run
 
 ```sh
-# Show usage
-build/bin/replay --help
-
-# Default run (uses data/golden/itch_1m.bin)
+# Default run
 build/bin/replay
 
-# Custom input and parameters
+# Custom input and limits
 build/bin/replay --input path/to/input.bin \
   --gap-ppm 0 --corrupt-ppm 0 --skew-ppm 0 --burst-ms 0
 ```
 
-Outputs
-
-- `artifacts/bench.jsonl`
-- `artifacts/metrics.prom`
+Artifacts land in `artifacts/bench.jsonl` and `artifacts/metrics.prom`.
+Deterministic fixtures live under `data/golden/`; regenerate with `gen_synth`
+as needed.
 
 ## Scripts
 
 ```sh
-# Conformance (uses scripts/verify_golden.sh)
-scripts/verify_golden.sh
-
-# Benchmark (9 iterations by default)
-scripts/bench.sh 9
-
-# Export Prometheus textfile metrics
-scripts/prom_textfile.sh artifacts/metrics.prom
+scripts/verify_golden.sh     # digest determinism check
+scripts/bench.sh 9           # multi-run benchmark harness
+scripts/prom_textfile.sh ... # emit metrics.prom schema
+scripts/verify_bench.py      # release gate enforcement
 ```
 
-### Golden-state validation
+## Golden-state validation
 
-The project includes a golden-state check based on a functionally deterministic digest produced by the replay run. The expected FNV digest is kept in `data/golden/itch_1m.fnv`; the `scripts/verify_golden.sh` script and the `golden_state` CTest validate this value. To regenerate golden files from a synthetic trace, use `make golden`.
+- Golden digest resides at `data/golden/itch_1m.fnv`.
+- `ctest -R golden_state` plus `scripts/verify_golden.sh` ensure
+  reproducibility.
+- Use `cmake --build build -t golden_sample` (or `make golden`) to refresh
+  fixtures after new traces are accepted.
 
-Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
+## Developer setup
 
-The build now emits the deterministic `data/golden/itch_1m.bin` fixture automatically via the `gen_synth` helper, so CI and local runs never have to download blobs. If you ever need to regenerate it manually, run `cmake --build build -t golden_sample` (after configuring) or `make golden`.
-
-## Developer setup (local)
-
-If you plan to build and run tests locally, install the OS packages required for the build and the `nlohmann_json` package which is used by the `book_snapshot` tests.
-
-On Ubuntu (apt):
+Ubuntu:
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
+sudo apt-get install -y cmake ninja-build libboost-all-dev \
+  libnlohmann-json3-dev jq
 ```
 
-On macOS (Homebrew):
+macOS:
 
 ```sh
 brew update
 brew install cmake ninja jq nlohmann-json
 ```
 
-Then configure and build as normal, and run the book_snapshot test (this runs `./bin/replay` and compares `bench.jsonl` to the golden JSON):
-
-```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build build -j
-cd build
-ctest --output-on-failure -R book_snapshot
-```
-
-If you prefer running the test binary directly:
-
-```sh
-cd build
-./bin/test_book_snapshot
-```
-
-The test expects to run from the `build` directory so that `./bin/replay` is found; if you run from another directory, adjust the working directory or run `build/bin/replay` directly.
+Enable tests with `-DBUILD_TESTING=ON` and run `ctest --output-on-failure -R
+book_snapshot` from `build/`. Tests expect `./bin/replay` within the working
+directory.
 
 ## Release packaging
 
-This repository includes a small helper script to produce a rights-marked release bundle containing the binary, artifacts, a checksum manifest, and a minimal rights manifest.
-
-Files produced:
-- `artifacts/release/*.zip` — the release archive
-- `artifacts/release/manifest.json` — listing files, sizes and SHA256
-- `artifacts/release/rights_manifest.json` — minimal rights metadata
-
-Run locally:
+`./scripts/release_package.sh` creates rights-marked zips plus manifests.
 
 ```sh
-# Build first (Release recommended)
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-
-# Create release package (uses current git short SHA in the name)
-./scripts/release_package.sh --build-dir build --art-dir artifacts --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
+./scripts/release_package.sh --build-dir build --art-dir artifacts \
+  --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
 ```
 
-Optional signing:
+Add `--sign` for optional detached GPG signatures. The `snapshot-nightly`
+workflow runs this and uploads the bundle automatically.
+
+## Tooling helpers
+
+- `scripts/pin_actions_by_shas.sh` keeps workflow `uses:` entries pinned.
+- `.github/workflows/verify-bench.yml` exposes a manual/cron gate run.
+- `docs/technology_transition.md` + `docs/deliverable_marking_checklist.md`
+  cover gov delivery and rights-marking guidance.
+
+## CPU pinning (Linux)
 
 ```sh
-# If you have gpg available and want a detached signature
-./scripts/release_package.sh --sign --git-sha "$(git rev-parse --short HEAD)"
-```
-
-CI: The `snapshot-nightly` workflow builds artifacts and now runs `make release-package`, after which the release bundle is uploaded as a workflow artifact.
-
-## Tools — pin GitHub Actions
-
-There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
-
-Usage:
-
-```sh
-# Preview (dry-run): lists proposed changes without editing files
-./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposals.json
-
-# Apply to files (makes in-place changes):
-./scripts/pin_actions_by_shas.sh
-```
-
-There's a preview workflow `.github/workflows/pin-actions-preview.yml` to run the script and create a draft PR with pinned changes (run via 'Actions' -> 'Pin Actions Preview').
-
-## Technology transition & government deliveries
-
-See `docs/technology_transition.md` for a concise pipeline and rights summary if you plan to pursue government funding or transition into a Program of Record. For CI-assisted rights-marking and artifact packaging, see `docs/deliverable_marking_checklist.md`.
-
-## CPU pinning (Linux-only)
-
-You can optionally pin the replay process to a CPU core to reduce scheduling noise and improve determinism during benchmarks. This is a best-effort, Linux-only feature.
-
-Usage examples:
-
-```sh
-# Pin to CPU 3 via the CLI
 build/bin/replay --input data/golden/itch_1m.bin --cpu-pin 3
-
-# Or use the Makefile convenience wrapper; pass an integer core id into `CPU_PIN`:
+# or
 CPU_PIN=3 make bench
 ```
 
-Notes:
+Pinning reduces tail variance on some hosts; measure on your hardware.
 
-
-CPU pinning effects (initial observations):
-In limited local testing (5× runs per configuration), CPU pinning slightly reduced mean p50 latency and, in some cases, significantly reduced tail latency variability (p95 standard deviation). Absolute p95 values varied modestly by core selection. These results suggest CPU pinning can improve repeatability of tail measurements under certain conditions. Additional runs across longer durations and multiple hardware instances are required for statistical confidence.
-
-### Preview PR bench metrics
-
-Preview PRs created by the `pin-actions-preview.yml` workflow include a bench step that captures `bench.jsonl` and `metrics.prom` for the preview branch. The workflow posts a summary comment on the PR with p50/p95/p99 metrics and a link to the artifacts; this makes reviewing performance/regressions easier when pinning actions.
-
-## Security & Safety
-
-## Repository Layout
+## Repository layout
 
 ```text
 include/        # headers
-src/            # sources (replay, breaker, telemetry)
-scripts/        # helper scripts (verify/bench/prom exporter)
+src/            # replay engine, detectors, telemetry
+scripts/        # bench, verify, release, pin helpers
 artifacts/      # generated outputs (gitignored)
 ```
 
+## Security & safety
+
+`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
+and CodeQL. Signing helpers live under `scripts/` if you need to stamp
+artifacts.
+
+## Contributing
+
+See `CONTRIBUTING.md` for workflow expectations. Pull requests should pin new
+dependencies, ship matching tests, and update docs for externally visible
+changes.
+
 ## License
 
-See `LICENSE`. Third-party dependencies remain under their respective licenses. If you contribute code, you agree it will be released under this repository's license unless explicitly noted otherwise in the PR description.
+Distributed under the Business Source License 1.1 (`LICENSE.txt`). Research and
+non-commercial evaluation are permitted; production use requires a commercial
+license until the change date defined in `COMMERCIAL_LICENSE.md`.
 
-### Attribution & Credits
-
-- Core engine & replay implementation © 2025 Blanc contributors.
-- Build and CI workflow patterns adapted from open best practices (GitHub Actions hardening, pre-commit hygiene).
-- Security scanning integrates detect-secrets (Yelp) and optional CodeQL.
-- Docker base image: `ubuntu:24.04` (Canonical).
-- Any trademarks or names remain property of their respective owners.
-
-## Troubleshooting
-
-- Build fails with missing Ninja: install Ninja (`brew install ninja`, `apt-get install ninja-build`).
-- Oversized input rejected: lower input size or raise `REPLAY_MAX_BYTES`.
-- Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
+<!-- markdownlint-enable MD013 -->
