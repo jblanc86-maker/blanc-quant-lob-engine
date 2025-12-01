@@ -74,3 +74,7 @@ release-package: build
 	@mkdir -p $(ART_DIR)/release
 	@./scripts/release_package.sh --build-dir $(BUILD) --art-dir $(ART_DIR) --out-dir $(ART_DIR)/release --git-sha $(shell git rev-parse --short HEAD)
 	@echo "Release package created under $(ART_DIR)/release"
+
+.PHONY: packaging-test
+packaging-test:
+	@bash tests/test_release_package.sh
