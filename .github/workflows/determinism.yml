@@ -11,36 +11,52 @@ jobs:
   verify-golden:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@v4
+      - name: Normalize environment
+        run: |
+          # Ensure deterministic environment
+          echo "TZ=UTC" >> $GITHUB_ENV
+          echo "LANG=C.UTF-8" >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
       - name: Deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev
+          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev unzip zip
       - name: Build (Release)
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
-      - name: Verify golden digest
+        run: |
+          set -euxo pipefail
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build -j
+
+      - name: Verify deterministic replay (2 runs)
         shell: bash
         run: |
-          if [ -x scripts/verify_golden.sh ]; then
-            scripts/verify_golden.sh
-          else
-            # Fallback: run once and check digest line is present
-            ./build/bin/replay --input data/golden/itch_1m.bin | tee run.out
-            grep -E "digest_fnv=" run.out
+          set -euxo pipefail
+          ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
+          # Run replay twice and capture digest lines
+          ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run1.txt"
+          sleep 1
+          ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run2.txt"
+          d1=$(grep -m1 -oE 'digest_fnv=[0-9a-fx]+' "$ART_DIR/run1.txt" || true)
+          d2=$(grep -m1 -oE 'digest_fnv=[0-9a-fx]+' "$ART_DIR/run2.txt" || true)
+          echo "digest1=$d1"; echo "digest2=$d2"
+          if [ "$d1" != "$d2" ]; then
+            echo "Determinism failure: digests differ" >&2
+            echo "--- run1 ---"; cat "$ART_DIR/run1.txt"; echo "--- run2 ---"; cat "$ART_DIR/run2.txt"
+            exit 1
           fi
       - name: Run bench and collect artifacts
         shell: bash
         run: |
-          # Build is already done; run bench to collect artifacts
+          set -euxo pipefail
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
-          # Run bench script if present, else run the binary directly
           if [ -x scripts/bench.sh ]; then
             ART_DIR="$ART_DIR" scripts/bench.sh 9
           else
             ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
           fi
       - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4
         with:
           name: determinism-artifacts-${{ github.run_id }}
           path: |
