@@ -66,3 +66,11 @@ release: build verify
 	@cp -r build/replay build/gen_synth data/golden scripts/verify_golden.sh artifacts/release/
 	@tar -C artifacts -czf artifacts/blanc-lob-engine-rc.tar.gz release
 	@echo "Release bundle at artifacts/blanc-lob-engine-rc.tar.gz"
+
+# Create a reproducible release package (zip + manifest + rights_manifest)
+.PHONY: release-package
+release-package: build
+	@echo "Creating release package..."
+	@mkdir -p $(ART_DIR)/release
+	@./scripts/release_package.sh --build-dir $(BUILD) --art-dir $(ART_DIR) --out-dir $(ART_DIR)/release --git-sha $(shell git rev-parse --short HEAD)
+	@echo "Release package created under $(ART_DIR)/release"

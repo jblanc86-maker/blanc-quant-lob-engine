@@ -161,6 +161,35 @@ cd build
 
 The test expects to run from the `build` directory so that `./bin/replay` is found; if you run from another directory, adjust the working directory or run `build/bin/replay` directly.
 
+## Release packaging
+
+This repository includes a small helper script to produce a rights-marked release bundle containing the binary, artifacts, a checksum manifest, and a minimal rights manifest.
+
+Files produced:
+- `artifacts/release/*.zip` — the release archive
+- `artifacts/release/manifest.json` — listing files, sizes and SHA256
+- `artifacts/release/rights_manifest.json` — minimal rights metadata
+
+Run locally:
+
+```sh
+# Build first (Release recommended)
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+
+# Create release package (uses current git short SHA in the name)
+./scripts/release_package.sh --build-dir build --art-dir artifacts --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
+```
+
+Optional signing:
+
+```sh
+# If you have gpg available and want a detached signature
+./scripts/release_package.sh --sign --git-sha "$(git rev-parse --short HEAD)"
+```
+
+CI: The `snapshot-nightly` workflow builds artifacts and now runs `make release-package`, after which the release bundle is uploaded as a workflow artifact.
+
 ## Tools — pin GitHub Actions
 
 There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
