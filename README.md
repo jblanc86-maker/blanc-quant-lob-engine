@@ -177,6 +177,10 @@ Usage:
 
 There's a preview workflow `.github/workflows/pin-actions-preview.yml` to run the script and create a draft PR with pinned changes (run via 'Actions' -> 'Pin Actions Preview').
 
+## Technology transition & government deliveries
+
+See `docs/technology_transition.md` for a concise pipeline and rights summary if you plan to pursue government funding or transition into a Program of Record. For CI-assisted rights-marking and artifact packaging, see `docs/deliverable_marking_checklist.md`.
+
 ## CPU pinning (Linux-only)
 
 You can optionally pin the replay process to a CPU core to reduce scheduling noise and improve determinism during benchmarks. This is a best-effort, Linux-only feature.
