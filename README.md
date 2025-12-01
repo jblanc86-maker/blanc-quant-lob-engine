@@ -12,9 +12,9 @@
 [![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)]
 
-
-
 C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
+
+Blanc LOB Engine is a functionally deterministic C++20 Level-2 order-book replay and benchmarking framework built with CMake/Ninja for repeatable, auditable low-latency research. It emphasizes reproducible golden state validation, tight tail latency (p50 / p95 / p99), and stable throughput across runs, with first-class observability via structured artifacts (JSONL and Prometheus-compatible metrics). The system includes patent-pending breaker-style gates. Trading use subject to license terms.
 
 ## License model
 
@@ -119,12 +119,16 @@ scripts/bench.sh 9
 scripts/prom_textfile.sh artifacts/metrics.prom
 ```
 
+### Golden-state validation
+
+The project includes a golden-state check based on a functionally deterministic digest produced by the replay run. The expected FNV digest is kept in `data/golden/itch_1m.fnv`; the `scripts/verify_golden.sh` script and the `golden_state` CTest validate this value. To regenerate golden files from a synthetic trace, use `make golden`.
 
 ## Tools — pin GitHub Actions
 
 There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
 
 Usage:
+
 ```sh
 # Preview (dry-run): lists proposed changes without editing files
 ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposals.json
@@ -151,10 +155,13 @@ CPU_PIN=3 make bench
 
 Notes:
 
-- CPU pinning is only implemented on Linux via pthread_setaffinity_np. On other platforms this is a no-op.
-- Pinning the main process is usually sufficient; future work can add thread-level pinning for worker threads if required.
 
+CPU pinning effects (initial observations):
+In limited local testing (5× runs per configuration), CPU pinning slightly reduced mean p50 latency and, in some cases, significantly reduced tail latency variability (p95 standard deviation). Absolute p95 values varied modestly by core selection. These results suggest CPU pinning can improve repeatability of tail measurements under certain conditions. Additional runs across longer durations and multiple hardware instances are required for statistical confidence.
 
+### Preview PR bench metrics
+
+Preview PRs created by the `pin-actions-preview.yml` workflow include a bench step that captures `bench.jsonl` and `metrics.prom` for the preview branch. The workflow posts a summary comment on the PR with p50/p95/p99 metrics and a link to the artifacts; this makes reviewing performance/regressions easier when pinning actions.
 
 ## Security & Safety
 
