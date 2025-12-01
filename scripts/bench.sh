@@ -52,4 +52,7 @@ p99="${sorted[$idx99]}"
 
 echo "p50_ms=$p50 p95_ms=$p95 p99_ms=$p99"
 
+# Append a summary JSON line with quantiles so CI/parsers have easy access
+echo "{\"summary\":true,\"runs\":$n,\"p50_ms\":$p50,\"p95_ms\":$p95,\"p99_ms\":$p99}" >> "$outfile"
+
 echo "bench runs complete (runs=$runs)"
