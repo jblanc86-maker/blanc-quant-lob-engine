@@ -6,7 +6,8 @@
 
 using namespace lob;
 
-int main() {
+int main()
+{
   TelemetrySnapshot t;
   t.input_path = "data/golden/itch_1m.bin";
   t.golden_digest_hex = "deadbeef";
@@ -27,34 +28,40 @@ int main() {
   // Ensure the directory exists (best effort) - C++ function not used here
   system((std::string("mkdir -p ") + out_dir).c_str());
 
-  if (!write_jsonl(json_file, t)) {
+  if (!write_jsonl(json_file, t))
+  {
     std::cerr << "write_jsonl failed" << std::endl;
     return 1;
   }
-  if (!write_prom(prom_file, t)) {
+  if (!write_prom(prom_file, t))
+  {
     std::cerr << "write_prom failed" << std::endl;
     return 2;
   }
 
   // Validate the files contain expected content
   std::ifstream fjson(json_file);
-  if (!fjson) {
+  if (!fjson)
+  {
     std::cerr << "json file missing" << std::endl;
     return 3;
   }
   std::string contents((std::istreambuf_iterator<char>(fjson)), std::istreambuf_iterator<char>());
-  if (contents.find("\"actual\":\"cafef00d\"") == std::string::npos) {
+  if (contents.find("\"actual\":\"cafef00d\"") == std::string::npos)
+  {
     std::cerr << "actual digest not found in json" << std::endl;
     return 4;
   }
 
   std::ifstream fprom(prom_file);
-  if (!fprom) {
+  if (!fprom)
+  {
     std::cerr << "prom file missing" << std::endl;
     return 5;
   }
   std::string prom_contents((std::istreambuf_iterator<char>(fprom)), std::istreambuf_iterator<char>());
-  if (prom_contents.find("lob_cpu_pin 0") == std::string::npos) {
+  if (prom_contents.find("lob_cpu_pin 0") == std::string::npos)
+  {
     std::cerr << "lob_cpu_pin not found in prom file" << std::endl;
     return 6;
   }

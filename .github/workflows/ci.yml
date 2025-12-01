@@ -31,7 +31,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev jq
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev
 
       - name: Toolchain (macOS)
         if: matrix.os == 'macos-latest'
@@ -40,6 +40,7 @@ jobs:
           brew list --versions ninja  >/dev/null || brew install ninja
           brew list --versions cmake  >/dev/null || brew install cmake
           brew list --versions jq >/dev/null || brew install jq
+          brew list --versions nlohmann-json >/dev/null || brew install nlohmann-json
 
       - name: Pre-commit (lint)
         run: |

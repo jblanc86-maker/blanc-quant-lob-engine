@@ -125,6 +125,42 @@ The project includes a golden-state check based on a functionally deterministic 
 
 Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
 
+## Developer setup (local)
+
+If you plan to build and run tests locally, install the OS packages required for the build and the `nlohmann_json` package which is used by the `book_snapshot` tests.
+
+On Ubuntu (apt):
+
+```sh
+sudo apt-get update
+sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
+```
+
+On macOS (Homebrew):
+
+```sh
+brew update
+brew install cmake ninja jq nlohmann-json
+```
+
+Then configure and build as normal, and run the book_snapshot test (this runs `./bin/replay` and compares `bench.jsonl` to the golden JSON):
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build build -j
+cd build
+ctest --output-on-failure -R book_snapshot
+```
+
+If you prefer running the test binary directly:
+
+```sh
+cd build
+./bin/test_book_snapshot
+```
+
+The test expects to run from the `build` directory so that `./bin/replay` is found; if you run from another directory, adjust the working directory or run `build/bin/replay` directly.
+
 ## Tools — pin GitHub Actions
 
 There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.

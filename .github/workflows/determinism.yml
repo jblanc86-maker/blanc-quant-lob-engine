@@ -15,7 +15,7 @@ jobs:
       - name: Deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev
+          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev
       - name: Build (Release)
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
       - name: Verify golden digest
