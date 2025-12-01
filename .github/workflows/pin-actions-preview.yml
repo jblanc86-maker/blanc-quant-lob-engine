@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Run pin script (dry-run)
         run: |
@@ -15,7 +15,7 @@ jobs:
           ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposed.json || true
 
       - name: Upload proposals
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: pin-proposals
           path: pin_proposed.json
@@ -50,7 +50,7 @@ jobs:
       - name: Create draft PR
         if: steps.eval.outputs.found == 'true'
         id: create_pr
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "chore(ci): pin GitHub Actions by commit SHA (preview)"
@@ -61,7 +61,7 @@ jobs:
 
       - name: Checkout preview branch
         if: steps.eval.outputs.found == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ steps.create_preview_pr.outputs.pr_branch }}
 
@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload bench artifacts
         if: steps.eval.outputs.found == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: preview-bench-${{ github.run_id }}
           path: |
@@ -84,7 +84,7 @@ jobs:
 
       - name: Parse bench summary and add PR comment
         if: steps.eval.outputs.found == 'true'
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

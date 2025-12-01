@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <system_error>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -23,8 +25,13 @@ int main(int argc, char **argv)
   }
 
   // Ensure the directory exists
-  std::string mkdir = "mkdir -p " + ART_DIR;
-  system(mkdir.c_str());
+  std::error_code ec;
+  std::filesystem::create_directories(ART_DIR, ec);
+  if (ec)
+  {
+    std::cerr << "failed to create output directory: " << ec.message() << std::endl;
+    return 1;
+  }
 
   // Run replay and write to ART_DIR
   std::string cmd = "ART_DIR=" + ART_DIR + " " + BIN + " --input " + INPUT + " 2>&1";

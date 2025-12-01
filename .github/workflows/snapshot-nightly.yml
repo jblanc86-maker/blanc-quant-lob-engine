@@ -8,7 +8,7 @@ jobs:
   snapshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Install deps
         run: |
           sudo apt-get update
@@ -27,7 +27,7 @@ jobs:
           ctest --output-on-failure -R book_snapshot || true
           ctest --output-on-failure -R book_snapshot_burst || true
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: snapshot-artifacts-${{ github.run_id }}
           path: tests/out/**
@@ -37,7 +37,7 @@ jobs:
           make release-package
 
       - name: Upload release package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: release-package-${{ github.run_id }}
           path: artifacts/release/**
