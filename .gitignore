@@ -9,6 +9,7 @@
 
 # Repo artifacts
 /artifacts/
+tests/out/
 
 # Python virtual environment
 .venv/

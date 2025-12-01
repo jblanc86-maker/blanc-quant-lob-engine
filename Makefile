@@ -54,8 +54,8 @@ clean:
 .PHONY: build run bench clean
 
 # Extras from pre-existing Makefile
-golden:
-	./build/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+golden: build
+	./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
 	shasum -a 256 data/golden/itch_1m.bin | awk '{print $$1}' > data/golden/itch_1m.digest
 
 verify:

@@ -1,0 +1,47 @@
+name: verify-bench
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Gate profile (strict | standard | lenient)
+        required: false
+        default: standard
+      runner_id:
+        description: Optional explicit runner identifier
+        required: false
+        default: gh-ubuntu-latest
+
+jobs:
+  verify:
+    name: Verify deterministic bench
+    runs-on: ubuntu-latest
+    env:
+      PROFILE: ${{ github.event.inputs.profile || 'standard' }}
+      RUNNER_ID: ${{ github.event.inputs.runner_id || 'gh-ubuntu-latest' }}
+      P99_MULTIPLIER: "1.10"
+      MAD_MULTIPLIER: "3.0"
+      EPSILON_MS: "0.05"
+      P99_BUDGET_MS: "0.75"
+      REQUIRE_DIGEST: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run verify_bench.py
+        env:
+          RUNNER_NAME: ${{ env.RUNNER_ID }}
+          BENCH_FILE: artifacts/bench.jsonl
+          METRICS_FILE: artifacts/metrics.prom
+          BASELINE_FILE: artifacts/baselines/sample_runner.json
+        run: |
+          python scripts/verify_bench.py \
+            --bench-file "$BENCH_FILE" \
+            --metrics-file "$METRICS_FILE" \
+            --baseline-file "$BASELINE_FILE" \
+            --profile "$PROFILE" \
+            --runner-id "$RUNNER_NAME"

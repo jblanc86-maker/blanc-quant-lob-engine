@@ -1,0 +1,19 @@
+name: Smoke SITREP
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sitrep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Smoke sg sitrep --dry-run
+        run: |
+          chmod +x scripts/sg
+          ./scripts/sg sitrep --dry-run

@@ -1,0 +1,270 @@
+#!/usr/bin/env python3
+"""Tail-latency and determinism guardrail checker.
+
+The script is intentionally tiny so it can run inside CI workflows or locally
+before cutting a release. It reads:
+
+* `bench.jsonl` (first line of NDJSON summarising the latest run)
+* `metrics.prom` (for schema validation)
+* `artifacts/baselines/*.json` (per-runner golden stats)
+
+It then enforces profile-specific gates (strict/standard/lenient) with optional
+overrides via environment variables.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Optional, Sequence
+
+PROFILE_PRESETS = {
+    "strict": {
+        "mad_multiplier": 2.0,
+        "p99_multiplier": 1.05,
+        "epsilon_ms": 0.03,
+        "require_digest": True,
+        "description": "Nightly/CI goldens",
+    },
+    "standard": {
+        "mad_multiplier": 3.0,
+        "p99_multiplier": 1.10,
+        "epsilon_ms": 0.05,
+        "require_digest": False,
+        "description": "PR gate",
+    },
+    "lenient": {
+        "mad_multiplier": 4.0,
+        "p99_multiplier": 1.20,
+        "epsilon_ms": 0.07,
+        "require_digest": False,
+        "description": "Exploratory",
+    },
+}
+
+REQUIRED_METRICS = {
+    "lob_p50_ms",
+    "lob_p95_ms",
+    "lob_p99_ms",
+    "lob_publish_allowed",
+}
+
+
+@dataclass
+class BenchResult:
+    p99_ms: float
+    digest: Optional[str]
+    determinism: Optional[bool]
+
+
+def _read_first_json_line(path: Path) -> Dict[str, Any]:
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        try:
+            return json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"✖ bench file {path} contains invalid JSON: {exc}")
+    raise SystemExit(f"✖ bench file {path} is empty")
+
+
+def parse_bench(path: Path) -> BenchResult:
+    payload = _read_first_json_line(path)
+
+    def _require_float(key: str) -> float:
+        value = payload.get(key)
+        if value is None:
+            raise SystemExit(f"✖ bench payload missing '{key}'")
+        try:
+            return float(value)
+        except (TypeError, ValueError) as exc:
+            raise SystemExit(f"✖ bench '{key}' not a float: {exc}")
+
+    digest = payload.get("digest_fnv") or payload.get("actual")
+    return BenchResult(
+        p99_ms=_require_float("p99_ms"),
+        digest=digest,
+        determinism=payload.get("determinism"),
+    )
+
+
+def parse_prom_metrics(path: Path) -> Dict[str, float]:
+    metrics: Dict[str, float] = {}
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2:
+            continue
+        key, value = parts
+        try:
+            metrics[key] = float(value)
+        except ValueError as exc:
+            raise SystemExit(f"✖ metric '{key}' expected numeric value, got '{value}': {exc}")
+    missing = REQUIRED_METRICS - metrics.keys()
+    if missing:
+        raise SystemExit(f"✖ metrics file {path} missing keys: {', '.join(sorted(missing))}")
+    return metrics
+
+
+def load_baseline(path: Path, runner_id: str) -> Dict[str, Any]:
+    if not path.exists():
+        raise SystemExit(f"✖ baseline file {path} not found. Run golden calibration first.")
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"✖ baseline file {path} is not valid JSON: {exc}")
+    stats = data.get("runners", {}).get(runner_id) or data.get("defaults")
+    if stats is None:
+        raise SystemExit(f"✖ no baseline entry for runner '{runner_id}' and no defaults fallback")
+    for key in ("median_p99_ms", "mad_p99_ms"):
+        if key not in stats:
+            raise SystemExit(f"✖ baseline entry missing '{key}'")
+    return stats
+
+
+def compute_allowed(
+    baseline: Dict[str, Any],
+    mad_multiplier: float,
+    p99_multiplier: float,
+    epsilon_ms: float,
+    budget_cap_ms: Optional[float],
+) -> float:
+    candidates = []
+    median = baseline.get("median_p99_ms")
+    mad = baseline.get("mad_p99_ms")
+    last = baseline.get("last_p99_ms") or baseline.get("p99_ms") or median
+    if median is not None and mad is not None:
+        candidates.append(float(median) + mad_multiplier * float(mad) + epsilon_ms)
+    if last is not None:
+        candidates.append(float(last) * p99_multiplier + epsilon_ms)
+    if budget_cap_ms is not None:
+        candidates.append(budget_cap_ms)
+    if not candidates:
+        raise SystemExit("✖ unable to compute allowance; baseline missing usable stats")
+    return min(candidates)
+
+
+def resolve_runner_id(explicit: Optional[str]) -> str:
+    if explicit:
+        return explicit
+    name = os.getenv("RUNNER_NAME")
+    arch = os.getenv("RUNNER_ARCH")
+    os_name = os.getenv("RUNNER_OS")
+    pieces = [piece for piece in (name, os_name, arch) if piece]
+    return "-".join(pieces) or "manual-runner"
+
+
+def env_float(key: str) -> Optional[float]:
+    raw = os.getenv(key)
+    if raw in (None, "", "None"):
+        return None
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise SystemExit(f"✖ environment {key} must be float-compatible: {exc}")
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Tail-latency & digest guardrail checker")
+    parser.add_argument("--bench-file", default="artifacts/bench.jsonl", help="NDJSON benchmark summary")
+    parser.add_argument("--metrics-file", default="artifacts/metrics.prom", help="Prometheus textfile output")
+    parser.add_argument(
+        "--baseline-file",
+        default="artifacts/baselines/sample_runner.json",
+        help="Per-runner baseline JSON",
+    )
+    parser.add_argument("--profile", choices=PROFILE_PRESETS.keys(), default=os.getenv("PROFILE", "standard"))
+    parser.add_argument("--runner-id", default=None, help="Override runner identifier")
+    parser.add_argument("--p99-multiplier", type=float, default=None, help="Override p99 multiplier")
+    parser.add_argument("--mad-multiplier", type=float, default=None, help="Override MAD multiplier")
+    parser.add_argument("--epsilon-ms", type=float, default=None, help="Override epsilon slack")
+    parser.add_argument("--p99-budget-ms", type=float, default=None, help="Absolute cap (optional)")
+    parser.add_argument("--require-digest", action="store_true", help="Force digest equality regardless of profile")
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    parser = build_arg_parser()
+    args = parser.parse_args(argv)
+
+    profile_cfg = dict(PROFILE_PRESETS[args.profile])
+
+    def resolve_float(cli_value: Optional[float], env_key: str, fallback: float) -> float:
+        if cli_value is not None:
+            return float(cli_value)
+        env_value = env_float(env_key)
+        if env_value is not None:
+            return env_value
+        return float(fallback)
+
+    profile_cfg["p99_multiplier"] = resolve_float(
+        args.p99_multiplier, "P99_MULTIPLIER", profile_cfg["p99_multiplier"]
+    )
+    profile_cfg["mad_multiplier"] = resolve_float(
+        args.mad_multiplier, "MAD_MULTIPLIER", profile_cfg["mad_multiplier"]
+    )
+    profile_cfg["epsilon_ms"] = resolve_float(args.epsilon_ms, "EPSILON_MS", profile_cfg["epsilon_ms"])
+
+    budget_cap = args.p99_budget_ms
+    if budget_cap is None:
+        budget_cap = env_float("P99_BUDGET_MS")
+
+    runner_id = resolve_runner_id(args.runner_id)
+    bench = parse_bench(Path(args.bench_file))
+    _ = parse_prom_metrics(Path(args.metrics_file))  # schema enforcement side effect
+    baseline = load_baseline(Path(args.baseline_file), runner_id)
+
+    allowed_ms = compute_allowed(
+        baseline,
+        mad_multiplier=profile_cfg["mad_multiplier"],
+        p99_multiplier=profile_cfg["p99_multiplier"],
+        epsilon_ms=profile_cfg["epsilon_ms"],
+        budget_cap_ms=budget_cap,
+    )
+
+    decision_lines = [
+        f"runner: {runner_id}",
+        f"profile: {args.profile} ({profile_cfg['description']})",
+        f"measured_p99_ms: {bench.p99_ms:.4f}",
+        f"allowed_p99_ms: {allowed_ms:.4f}",
+        f"median_p99_ms: {baseline['median_p99_ms']}",
+        f"mad_p99_ms: {baseline['mad_p99_ms']}",
+        f"p99_multiplier: {profile_cfg['p99_multiplier']}",
+        f"mad_multiplier: {profile_cfg['mad_multiplier']}",
+        f"epsilon_ms: {profile_cfg['epsilon_ms']}",
+    ]
+
+    force_digest = os.getenv("REQUIRE_DIGEST")
+    require_digest = profile_cfg["require_digest"] or args.require_digest or (force_digest == "1")
+    digest_ok = True
+    expected_digest = baseline.get("digest_fnv")
+    if expected_digest:
+        decision_lines.append(f"digest_ref: {expected_digest}")
+    if require_digest and expected_digest:
+        digest_ok = bench.digest == expected_digest
+        decision_lines.append(f"digest_measured: {bench.digest}")
+    else:
+        decision_lines.append(f"digest_measured: {bench.digest} (informational)")
+
+    status = "PASS"
+    if bench.p99_ms > allowed_ms + 1e-9:
+        status = "FAIL"
+    if require_digest and expected_digest and not digest_ok:
+        status = "FAIL"
+
+    print("verdict:", status)
+    for line in decision_lines:
+        print(line)
+
+    return 0 if status == "PASS" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -28,6 +28,10 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
+ add/security-workflows
+
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
+ main
 
 
       - name: Perform CodeQL Analysis

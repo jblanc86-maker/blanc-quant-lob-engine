@@ -31,7 +31,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev zip unzip
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq nlohmann-json3-dev zip unzip
 
       - name: Toolchain (macOS)
         if: matrix.os == 'macos-latest'
@@ -55,8 +55,12 @@ jobs:
 
       - name: Configure + Build (Release)
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
           cmake --build build -j
+
+      - name: Run tests
+        run: |
+          ctest --test-dir build --output-on-failure
 
       - name: Run Bench (optional)
         run: |

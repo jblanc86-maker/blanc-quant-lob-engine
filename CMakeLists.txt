@@ -57,6 +57,26 @@ target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(replay PRIVATE -O3 -march=native)
 target_link_libraries(replay PRIVATE Boost::program_options)
 
+add_executable(gen_synth
+  tools/gen_synth.cpp
+)
+target_compile_options(gen_synth PRIVATE -O3 -march=native)
+
+set(GOLDEN_DIR ${CMAKE_SOURCE_DIR}/data/golden)
+set(GOLDEN_BIN ${GOLDEN_DIR}/itch_1m.bin)
+
+add_custom_command(
+  OUTPUT ${GOLDEN_BIN}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${GOLDEN_DIR}
+  COMMAND $<TARGET_FILE:gen_synth> --count 1000000 --out ${GOLDEN_BIN}
+  DEPENDS gen_synth
+  COMMENT "Generating deterministic ITCH sample at ${GOLDEN_BIN}"
+)
+
+add_custom_target(golden_sample ALL
+  DEPENDS ${GOLDEN_BIN}
+)
+
 # -----------------
 # Testing (CTest)
 # -----------------

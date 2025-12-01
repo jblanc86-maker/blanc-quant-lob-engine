@@ -1,265 +1,236 @@
-# Blanc LOB Engine (v0.9-RC)
+<!-- markdownlint-disable MD013 -->
+# Quant LOB Engine
 
-<!-- CI & quality badges -->
-[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
-[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
-[![Reproducible](https://img.shields.io/badge/reproducible-golden--hash--match-brightgreen)]
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![pre-commit](https://img.shields.io/badge/pre-commit-passing-blue)]
-[![Trivy](https://img.shields.io/badge/Trivy-clean-blue)]
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE.txt)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 
-<!-- Technology badges -->
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)]
-[![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+Deterministic C++20 limit order book (LOB) replay engine for quantitative and
+low-latency research.
 
-C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
+Quant LOB Engine is a **replay + benchmarking harness** for HFT-style order
+books, built for:
 
-Blanc LOB Engine is a functionally deterministic C++20 Level-2 order-book replay and benchmarking framework built with CMake/Ninja for repeatable, auditable low-latency research. It emphasizes reproducible golden state validation, tight tail latency (p50 / p95 / p99), and stable throughput across runs, with first-class observability via structured artifacts (JSONL and Prometheus-compatible metrics). The system includes patent-pending breaker-style gates. Trading use subject to license terms.
+- **Deterministic replay:** byte-for-byte golden-state checks over ITCH binaries
+  and synthetic bursts.
+- **Patent-pending Dynamic Execution Gates (DEG):** breaker-style gate policies
+  that wrap the datapath with explicit safety and tail-latency controls.
+- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets
+  as **release gates**, not suggestions.
+- **Structured observability:** every run emits JSONL + Prometheus-compatible
+  textfiles for diffing, dashboards, and CI.
 
-## License model
+If you care about *“can we replay this exactly, under load, and prove it didn’t
+get slower or weirder at the tails?”* this engine is the answer.
 
-This project uses **BUSL-1.1 (Business Source License)**.
+## System architecture
 
-- Research and non-commercial evaluation are permitted.
-- **Production use in live trading or other revenue-generating systems requires a commercial license.**
-- On the Change Date, the project converts to a permissive license (Apache-2.0).
-  - Change Date: 24 months after the first public release tag of this repository
-
-Benchmarking and publication of results are permitted; please include commit hash, hardware, and methodology details. See `LICENSE` for authoritative terms.
-
-## Commercial use
-
-For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
-
-## How it works
-
-```mermaid
-flowchart LR
-  A[Binary capture<br/>data/golden/itch_1m.bin] --> B[Replay harness<br/>(C++20, cache-friendly)]
-  B --> C[Order-book core (SoA)]
-  C --> D[Detectors + Breaker gates]
-  D --> E[Digest (deterministic)]
-  D --> F[Latency metrics p50/p95/p99]
-  D --> G[Publish mode summary]
-  E --> H[[artifacts/bench.jsonl]]
-  F --> I[[artifacts/metrics.prom]]
-  G --> J[[stdout run summary]]
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│   QUANT LOB ENGINE — Deterministic Replay & Benchmark Harness                │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Inputs                              Core                           Outputs    │
+│ ┌─────────────────┐        ┌──────────────────────────────┐      ┌───────────┐│
+│ │ trace_loader    │───▲───▶│ Deterministic Replay         │───┬─▶│ Stdout    ││
+│ │ (ITCH bin; CSV/ │   │    │ Scheduler (ST; MT optional)  │   │  │ summary   ││
+│ │ PCAP→bin bridge)│   │    └──────────────┬───────────────┘   │  └───────────┘│
+│ └─────────────────┘   │                   │                   │              │
+│ ┌─────────────────┐   │                   │                   │  ┌───────────┐│
+│ │ gen_synth       │───┘   Fault Injection / Gates (DEG‑compatible;         ││
+│ │ (synthetic)     │           breaker‑style, optional)           └─▶│ Artifacts ││
+│ └─────────────────┘                                     ▲            │ bench.jsonl│
+│                                                         │            │ metrics.prom│
+│                                         ┌──────────────────────────────┐└───────────┘│
+│                                         │ Golden-state Checker         │◀──────┘
+│                                         │ (byte-for-byte digest_fnv)   │
+│                                         └──────────────────────────────┘
+│                                                 │
+│                                                 ▼
+│ ┌──────────────────────────────┐     ┌──────────────────────────────┐
+│ │ Benchmark Harness            │     │ Structured Observability     │
+│ │ • msgs/s throughput          │     │ • JSONL event logs           │
+│ │ • p50/p95/p99 latency        │     │ • Prometheus textfile        │
+│ │ • config matrix sweeps       │     │ • CI artifacts (goldens)     │
+│ └──────────────────────────────┘     └──────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-If Mermaid isn’t rendering on your GitHub preview, it will still render on the repo page (GitHub supports Mermaid). As a fallback, there’s an ASCII alternative in the `docs/` folder if needed.
+### Flow summary
 
-## Why buy BQS L2
+- ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
+  that enforces DEG-compatible gate policies before emitting telemetry.
+- Golden digest checks ensure byte-for-byte stability, while the bench harness
+  sweeps configs to publish `bench.jsonl`, Prometheus textfiles, and CI-ready
+  artifacts.
+- Structured observability (JSONL + textfile) makes it easy to diff runs,
+  enforce SLOs, and root-cause tail spikes.
+- Dynamic Execution Gates (DEG) model tail behavior as first-class policy,
+  making “breaker-style” protections and SLO checks part of the engine instead
+  of bolted-on monitoring.
 
-- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
-- **Tail metrics:** p50/p95/p99 latency + throughput.
-- **Time-to-green:** one-command benches + sample adapters.
-- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
-- **Adaptable core:** SoA book + branch-light parser.
-- **Anonymous option:** attribution can be waived in the commercial license.
+### Classic HFT datapath
 
-## Why invest / sponsor
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│                    QUANT LOB ENGINE (HFT SYSTEM)                   │
+├────────────────────────────────────────────────────────────────────┤
+│  ITCH 5.0 parser  ──▶  L2/L3 order book (SoA) ──▶  Price levels    │
+│            │                             │                        │
+│            ▼                             ▼                        │
+│      Dynamic Execution Gates (DEG) ──▶ Telemetry exporter          │
+│            │                             │                        │
+│            ▼                             ▼                        │
+│     gen_synth fixtures          Golden determinism tests          │
+└────────────────────────────────────────────────────────────────────┘
+```
 
-- **Own the roadmap:** fund adapters/features you need.
-- **Proof transparency:** reproducible claims with artifacts.
-- **Talent magnet:** open, measured performance work attracts systems engineers.
+Gate policy details live in `docs/gates.md`; CI wiring is under
+`.github/workflows/verify-bench.yml`.
+
+## Highlights
+
+- Golden digest + explicit tail budgets so regressions fail CI early.
+- Observability-first artifacts: `bench.jsonl` + `metrics.prom` for diffing,
+  dashboards, and automated SLO checks.
+- Conformance + bench scripts are wired for cron / CI, not just local runs.
+- CI-ready: determinism, bench, and CodeQL workflows pinned to SHAs.
+- Designed to slot into HFT / research pipelines as a replay + guardrail
+  module rather than a one-off benchmark toy.
 
 ## Build
 
-Prereqs: CMake ≥ 3.20, Ninja, a C++20 compiler (Clang/GCC).
+Prereqs: CMake ≥ 3.20, Ninja, modern C++20 compiler, Boost, and
+`nlohmann-json`.
 
 ```sh
-# Configure (Release) and build
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-
-# Binaries land in build/bin
 ls build/bin/replay
 ```
 
-Notes
+Notes:
 
-- Compile commands are exported to `build/compile_commands.json` for IDEs.
-- Linux Release builds get hardening flags (stack protector, FORTIFY, PIE link) when supported.
-- Optional sanitizers for Debug builds:
-
-```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_SANITIZERS=ON
-cmake --build build -j
-```
+- `build/compile_commands.json` aids IDEs.
+- Release builds add stack protector, FORTIFY, PIE when supported.
+- Enable sanitizers via `-DENABLE_SANITIZERS=ON` on Debug builds.
 
 ## Run
 
 ```sh
-# Show usage
-build/bin/replay --help
-
-# Default run (uses data/golden/itch_1m.bin)
+# Default run
 build/bin/replay
 
-# Custom input and parameters
+# Custom input and limits
 build/bin/replay --input path/to/input.bin \
   --gap-ppm 0 --corrupt-ppm 0 --skew-ppm 0 --burst-ms 0
 ```
 
-Outputs
-
-- `artifacts/bench.jsonl`
-- `artifacts/metrics.prom`
+Artifacts land in `artifacts/bench.jsonl` and `artifacts/metrics.prom`.
+Deterministic fixtures live under `data/golden/`; regenerate with `gen_synth`
+as needed.
 
 ## Scripts
 
 ```sh
-# Conformance (uses scripts/verify_golden.sh)
-scripts/verify_golden.sh
-
-# Benchmark (9 iterations by default)
-scripts/bench.sh 9
-
-# Export Prometheus textfile metrics
-scripts/prom_textfile.sh artifacts/metrics.prom
+scripts/verify_golden.sh     # digest determinism check
+scripts/bench.sh 9           # multi-run benchmark harness
+scripts/prom_textfile.sh ... # emit metrics.prom schema
+scripts/verify_bench.py      # release gate enforcement
 ```
 
-### Golden-state validation
+## Golden-state validation
 
-The project includes a golden-state check based on a functionally deterministic digest produced by the replay run. The expected FNV digest is kept in `data/golden/itch_1m.fnv`; the `scripts/verify_golden.sh` script and the `golden_state` CTest validate this value. To regenerate golden files from a synthetic trace, use `make golden`.
+- Golden digest resides at `data/golden/itch_1m.fnv`.
+- `ctest -R golden_state` plus `scripts/verify_golden.sh` ensure
+  reproducibility.
+- Use `cmake --build build -t golden_sample` (or `make golden`) to refresh
+  fixtures after new traces are accepted.
 
-Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
+## Developer setup
 
-## Developer setup (local)
-
-If you plan to build and run tests locally, install the OS packages required for the build and the `nlohmann_json` package which is used by the `book_snapshot` tests.
-
-On Ubuntu (apt):
+Ubuntu:
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
+sudo apt-get install -y cmake ninja-build libboost-all-dev \
+  libnlohmann-json3-dev jq
 ```
 
-On macOS (Homebrew):
+macOS:
 
 ```sh
 brew update
 brew install cmake ninja jq nlohmann-json
 ```
 
-Then configure and build as normal, and run the book_snapshot test (this runs `./bin/replay` and compares `bench.jsonl` to the golden JSON):
-
-```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build build -j
-cd build
-ctest --output-on-failure -R book_snapshot
-```
-
-If you prefer running the test binary directly:
-
-```sh
-cd build
-./bin/test_book_snapshot
-```
-
-The test expects to run from the `build` directory so that `./bin/replay` is found; if you run from another directory, adjust the working directory or run `build/bin/replay` directly.
+Enable tests with `-DBUILD_TESTING=ON` and run `ctest --output-on-failure -R
+book_snapshot` from `build/`. Tests expect `./bin/replay` within the working
+directory.
 
 ## Release packaging
 
-This repository includes a small helper script to produce a rights-marked release bundle containing the binary, artifacts, a checksum manifest, and a minimal rights manifest.
-
-Files produced:
-- `artifacts/release/*.zip` — the release archive
-- `artifacts/release/manifest.json` — listing files, sizes and SHA256
-- `artifacts/release/rights_manifest.json` — minimal rights metadata
-
-Run locally:
+`./scripts/release_package.sh` creates rights-marked zips plus manifests.
 
 ```sh
-# Build first (Release recommended)
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-
-# Create release package (uses current git short SHA in the name)
-./scripts/release_package.sh --build-dir build --art-dir artifacts --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
+./scripts/release_package.sh --build-dir build --art-dir artifacts \
+  --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
 ```
 
-Optional signing:
+Add `--sign` for optional detached GPG signatures. The `snapshot-nightly`
+workflow runs this and uploads the bundle automatically.
+
+## Tooling helpers
+
+- `scripts/pin_actions_by_shas.sh` keeps workflow `uses:` entries pinned.
+- `.github/workflows/verify-bench.yml` exposes a manual/cron gate run.
+- `docs/technology_transition.md` + `docs/deliverable_marking_checklist.md`
+  cover gov delivery and rights-marking guidance.
+
+## CPU pinning (Linux)
 
 ```sh
-# If you have gpg available and want a detached signature
-./scripts/release_package.sh --sign --git-sha "$(git rev-parse --short HEAD)"
-```
-
-CI: The `snapshot-nightly` workflow builds artifacts and now runs `make release-package`, after which the release bundle is uploaded as a workflow artifact.
-
-## Tools — pin GitHub Actions
-
-There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
-
-Usage:
-
-```sh
-# Preview (dry-run): lists proposed changes without editing files
-./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposals.json
-
-# Apply to files (makes in-place changes):
-./scripts/pin_actions_by_shas.sh
-```
-
-There's a preview workflow `.github/workflows/pin-actions-preview.yml` to run the script and create a draft PR with pinned changes (run via 'Actions' -> 'Pin Actions Preview').
-
-## Technology transition & government deliveries
-
-See `docs/technology_transition.md` for a concise pipeline and rights summary if you plan to pursue government funding or transition into a Program of Record. For CI-assisted rights-marking and artifact packaging, see `docs/deliverable_marking_checklist.md`.
-
-## CPU pinning (Linux-only)
-
-You can optionally pin the replay process to a CPU core to reduce scheduling noise and improve determinism during benchmarks. This is a best-effort, Linux-only feature.
-
-Usage examples:
-
-```sh
-# Pin to CPU 3 via the CLI
 build/bin/replay --input data/golden/itch_1m.bin --cpu-pin 3
-
-# Or use the Makefile convenience wrapper; pass an integer core id into `CPU_PIN`:
+# or
 CPU_PIN=3 make bench
 ```
 
-Notes:
+Pinning reduces tail variance on some hosts; measure on your hardware.
 
-
-CPU pinning effects (initial observations):
-In limited local testing (5× runs per configuration), CPU pinning slightly reduced mean p50 latency and, in some cases, significantly reduced tail latency variability (p95 standard deviation). Absolute p95 values varied modestly by core selection. These results suggest CPU pinning can improve repeatability of tail measurements under certain conditions. Additional runs across longer durations and multiple hardware instances are required for statistical confidence.
-
-### Preview PR bench metrics
-
-Preview PRs created by the `pin-actions-preview.yml` workflow include a bench step that captures `bench.jsonl` and `metrics.prom` for the preview branch. The workflow posts a summary comment on the PR with p50/p95/p99 metrics and a link to the artifacts; this makes reviewing performance/regressions easier when pinning actions.
-
-## Security & Safety
-
-## Repository Layout
+## Repository layout
 
 ```text
 include/        # headers
-src/            # sources (replay, breaker, telemetry)
-scripts/        # helper scripts (verify/bench/prom exporter)
+src/            # replay engine, detectors, telemetry
+scripts/        # bench, verify, release, pin helpers
 artifacts/      # generated outputs (gitignored)
 ```
 
+## Security & safety
+
+`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
+and CodeQL. Signing helpers live under `scripts/` if you need to stamp
+artifacts. Quant LOB Engine is opinionated toward safety-by-default: determinism,
+repeatable benches, and explicit tail SLOs are non-negotiable controls rather
+than after-the-fact monitoring.
+
+## Contributing
+
+See `CONTRIBUTING.md` for workflow expectations. Pull requests should pin new
+dependencies, ship matching tests, and update docs for externally visible
+changes.
+
 ## License
 
-See `LICENSE`. Third-party dependencies remain under their respective licenses. If you contribute code, you agree it will be released under this repository's license unless explicitly noted otherwise in the PR description.
+Distributed under the Business Source License 1.1 (`LICENSE.txt`). Research and
+non-commercial evaluation are permitted; production use requires a commercial
+Research users can clone and run the engine today; commercial or production
+deployment requires a license until the change date in
+`COMMERCIAL_LICENSE.md`.
 
-### Attribution & Credits
-
-- Core engine & replay implementation © 2025 Blanc contributors.
-- Build and CI workflow patterns adapted from open best practices (GitHub Actions hardening, pre-commit hygiene).
-- Security scanning integrates detect-secrets (Yelp) and optional CodeQL.
-- Docker base image: `ubuntu:24.04` (Canonical).
-- Any trademarks or names remain property of their respective owners.
-
-## Troubleshooting
-
-- Build fails with missing Ninja: install Ninja (`brew install ninja`, `apt-get install ninja-build`).
-- Oversized input rejected: lower input size or raise `REPLAY_MAX_BYTES`.
-- Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
+<!-- markdownlint-enable MD013 -->
