@@ -6,15 +6,19 @@ set -euo pipefail
 
 runs="${1:-9}"
 ART_DIR="${ART_DIR:-artifacts}"
+CPU_PIN_ARG=""
+if [[ -n "${CPU_PIN:-}" ]]; then
+  CPU_PIN_ARG="--cpu-pin ${CPU_PIN}"
+fi
 outfile="$ART_DIR/bench.jsonl"
 
-mkdir -p artifacts
-: > "$outfile"
+mkdir -p "$ART_DIR"
+> "$outfile"
 
 times=()
 
 for i in $(seq 1 "$runs"); do
-  line="$(./build/bin/replay --input data/golden/itch_1m.bin)"
+  line="$(./build/bin/replay --input data/golden/itch_1m.bin $CPU_PIN_ARG)"
 
   # Extract elapsed_ms from the output line: elapsed_ms=123.45
   ms="$(sed -n 's/.*elapsed_ms=\([0-9.]*\).*/\1/p' <<<"$line")"
