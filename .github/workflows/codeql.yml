@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@5ad83d3202da6e473f763d732b591299ae4e380c
         with:
           languages: cpp
 
@@ -35,6 +35,6 @@ jobs:
           cmake --build build --config Release -j
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@5ad83d3202da6e473f763d732b591299ae4e380c
         with:
           category: '/language:cpp'

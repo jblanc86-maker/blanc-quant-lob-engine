@@ -20,13 +20,17 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
   cp "$file" "$tmpfile"
   updated=0
   while IFS= read -r line; do
-    if [[ $line =~ uses:[[:space:]]*([^@[:space:]]+/[^@[:space:]]+)@([^[:space:]#]+) ]]; then
-      repo=${BASH_REMATCH[1]}
+    if [[ $line =~ uses:[[:space:]]*([^@[:space:]]+)@([^[:space:]#]+) ]]; then
+      full_repo=${BASH_REMATCH[1]}
+      # repo is always owner/repo; sometimes the action uses an extra path (e.g. 'owner/repo/path')
+      # Extract owner/repo only
+      owner_repo=$(echo "$full_repo" | awk -F'/' '{print $1"/"$2}')
+      repo=$owner_repo
       ref=${BASH_REMATCH[2]}
       if [[ $ref =~ ^[0-9a-f]{40}$ ]]; then
         continue
       fi
-      repo_url="https://github.com/${repo}.git"
+  repo_url="https://github.com/${repo}.git"
       echo "Resolving $repo@$ref"
       sha=""
       if sha_line=$(git ls-remote --exit-code "$repo_url" "refs/tags/$ref^{}" 2>/dev/null || true); then
