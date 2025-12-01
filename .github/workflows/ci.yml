@@ -67,7 +67,6 @@ jobs:
         run: |
           # Create release package (script will write into artifacts/release)
           scripts/release_package.sh || echo "release packaging failed or produced no artifacts"
-
       - name: Parse bench summary
         if: always()
         run: |
