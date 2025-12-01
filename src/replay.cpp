@@ -9,6 +9,12 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#ifdef __linux__
+#include <pthread.h>
+#include <sched.h>
+#include <cerrno>
+#include <cstring>
+#endif
 using namespace lob;
 namespace po = boost::program_options;
 
@@ -72,6 +78,7 @@ int main(int argc, char **argv)
                                                                                                                     "Corrupt rate in parts per million")("skew-ppm", po::value<double>()->default_value(0.0),
                                                                                                                                                          "Skew rate in parts per million")("burst-ms", po::value<double>()->default_value(0.0),
                                                                                                                                                                                            "Burst duration in milliseconds");
+  desc.add_options()("cpu-pin", po::value<int>()->default_value(-1), "Pin main thread to CPU core (Linux-only)");
 
   po::variables_map vm;
   try
@@ -105,6 +112,7 @@ int main(int argc, char **argv)
   double c = vm["corrupt-ppm"].as<double>();
   double sk = vm["skew-ppm"].as<double>();
   double burst_ms = vm["burst-ms"].as<double>();
+  int cpu_pin = vm["cpu-pin"].as<int>();
   std::vector<uint8_t> buf;
   if (!read_all(input, buf))
   {
@@ -114,6 +122,22 @@ int main(int argc, char **argv)
 
   using clock = std::chrono::steady_clock;
   auto start = clock::now();
+  // Set CPU affinity as requested (best-effort; Linux-only)
+  if (cpu_pin >= 0)
+  {
+#ifdef __linux__
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(cpu_pin, &cpuset);
+    int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+    if (rc != 0)
+    {
+      std::cerr << "Warning: pthread_setaffinity_np failed: " << std::strerror(errno) << "\n";
+    }
+#else
+    (void)cpu_pin; // no-op on non-Linux platforms
+#endif
+  }
   uint64_t d = fnv1a(buf);
   Detectors det;
   det.on_message(buf.size());

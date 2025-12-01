@@ -14,6 +14,8 @@ JOBS         ?= $(shell sysctl -n hw.ncpu 2>/dev/null || nproc)
 DATA         ?= data/golden/itch_1m.bin
 GAP_PPM      ?= 0
 BURST_MS     ?= 0
+CPU_PIN      ?=
+CPU_PIN_ARG  := $(if $(CPU_PIN),--cpu-pin $(CPU_PIN),)
 BIN          := $(BUILD)/bin/replay
 ART_DIR      := artifacts
 TARBALL      := $(ART_DIR)/blanc-lob-engine-rc.tar.gz
@@ -28,12 +30,12 @@ build: configure
 	@cmake --build $(BUILD) -j $(JOBS)
 
 run: build
-	@$(BIN) --input $(DATA) --gap-ppm $(GAP_PPM) --burst-ms $(BURST_MS)
+	@$(BIN) --input $(DATA) --gap-ppm $(GAP_PPM) --burst-ms $(BURST_MS) $(CPU_PIN_ARG)
 
 bench: build
 	@mkdir -p $(ART_DIR)
 	# 1) Run with current knobs (deterministic input ⇒ deterministic digest)
-	@$(BIN) --input $(DATA) --gap-ppm $(GAP_PPM) --burst-ms $(BURST_MS) | tee $(ART_DIR)/run.stdout.txt
+	@ART_DIR=$(ART_DIR) $(BIN) --input $(DATA) --gap-ppm $(GAP_PPM) --burst-ms $(BURST_MS) $(CPU_PIN_ARG) | tee $(ART_DIR)/run.stdout.txt
 	# 2) Optional repo scripts (no-ops if missing)
 	@if [ -x scripts/bench.sh ]; then scripts/bench.sh 9 || true; fi
 	@if [ -x scripts/prom_textfile.sh ]; then scripts/prom_textfile.sh $(ART_DIR)/metrics.prom || true; fi
