@@ -1,0 +1,59 @@
+name: Pin Actions Preview
+on:
+  workflow_dispatch:
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run pin script (dry-run)
+        run: |
+          chmod +x scripts/pin_actions_by_shas.sh
+          ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposed.json || true
+
+      - name: Upload proposals
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-proposals
+          path: pin_proposed.json
+
+      - name: Evaluate proposals
+        id: eval
+        run: |
+          if [ -f pin_proposed.json ] && [ $(jq 'length' pin_proposed.json) -gt 0 ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create preview PR
+        id: create_preview_pr
+        if: steps.eval.outputs.found == 'true'
+        run: |
+          BRANCH="preview/pin-actions-$(date -u +%Y%m%d%H%M%S)"
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+          git checkout -b "$BRANCH"
+          ./scripts/pin_actions_by_shas.sh --commit || true
+          git add .github/workflows || true
+          if [[ -n $(git status --porcelain) ]]; then
+            git commit -m "chore(ci): preview pin GitHub Actions by commit SHA (automated)" || true
+            git push origin HEAD:refs/heads/$BRANCH
+            echo "pr_branch=$BRANCH" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Create draft PR
+        if: steps.eval.outputs.found == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "chore(ci): pin GitHub Actions by commit SHA (preview)"
+          body: "This is a preview PR with suggested pins applied. Review and merge if acceptable."
+          base: main
+          head: ${{ steps.create_preview_pr.outputs.pr_branch }}
+          draft: true

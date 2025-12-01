@@ -31,7 +31,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq
 
       - name: Toolchain (macOS)
         if: matrix.os == 'macos-latest'
@@ -39,6 +39,7 @@ jobs:
           brew update >/dev/null
           brew list --versions ninja  >/dev/null || brew install ninja
           brew list --versions cmake  >/dev/null || brew install cmake
+          brew list --versions jq >/dev/null || brew install jq
 
       - name: Pre-commit (lint)
         run: |
@@ -51,13 +52,35 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j
 
+      - name: Run Bench (optional)
+        run: |
+          make bench ART_DIR=artifacts/${{ github.run_id }} || true
+
+      - name: Parse bench summary
+        if: always()
+        run: |
+          set -euo pipefail
+          OUT=artifacts/${{ github.run_id }}/bench.jsonl
+          if [ -f "$OUT" ]; then
+            line=$(tail -n1 "$OUT")
+            p50=$(jq -r '.p50_ms' <<<"$line")
+            p95=$(jq -r '.p95_ms' <<<"$line")
+            p99=$(jq -r '.p99_ms' <<<"$line")
+            echo "bench_p50_ms=$p50" >> $GITHUB_OUTPUT
+            echo "bench_p95_ms=$p95" >> $GITHUB_OUTPUT
+            echo "bench_p99_ms=$p99" >> $GITHUB_OUTPUT
+            echo "$line" > artifacts/${{ github.run_id }}/bench-summary.json
+          else
+            echo "bench summary not found at $OUT"
+          fi
+
       - name: Upload artifacts (if present)
         # actions/upload-artifact@v4
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bench-and-bundle-${{ matrix.os }}
+          name: bench-and-bundle-${{ matrix.os }}-${{ github.run_id }}
           path: |
-            artifacts/bench.jsonl
-            artifacts/metrics.prom
-            artifacts/blanc-lob-engine-rc.tar.gz
+            artifacts/${{ github.run_id }}/bench.jsonl
+            artifacts/${{ github.run_id }}/metrics.prom
+            artifacts/${{ github.run_id }}/blanc-lob-engine-rc.tar.gz
           if-no-files-found: ignore

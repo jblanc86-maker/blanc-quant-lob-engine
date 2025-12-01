@@ -5,7 +5,8 @@ set -euo pipefail
 
 
 runs="${1:-9}"
-outfile="artifacts/bench.jsonl"
+ART_DIR="${ART_DIR:-artifacts}"
+outfile="$ART_DIR/bench.jsonl"
 
 mkdir -p artifacts
 : > "$outfile"
