@@ -10,9 +10,22 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 
 Deterministic C++20 limit order book (LOB) replay engine for quantitative and
-low-latency research. The project centers on repeatable benches,
-patent-pending Dynamic Execution Gates (DEG), and tail SLO enforcement through
-`scripts/verify_bench.py`.
+low-latency research.
+
+Quant LOB Engine is a **replay + benchmarking harness** for HFT-style order
+books, built for:
+
+- **Deterministic replay:** byte-for-byte golden-state checks over ITCH binaries
+  and synthetic bursts.
+- **Patent-pending Dynamic Execution Gates (DEG):** breaker-style gate policies
+  that wrap the datapath with explicit safety and tail-latency controls.
+- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets
+  as **release gates**, not suggestions.
+- **Structured observability:** every run emits JSONL + Prometheus-compatible
+  textfiles for diffing, dashboards, and CI.
+
+If you care about *“can we replay this exactly, under load, and prove it didn’t
+get slower or weirder at the tails?”* this engine is the answer.
 
 ## System architecture
 
@@ -46,15 +59,47 @@ patent-pending Dynamic Execution Gates (DEG), and tail SLO enforcement through
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Flow summary
+
+- ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
+  that enforces DEG-compatible gate policies before emitting telemetry.
+- Golden digest checks ensure byte-for-byte stability, while the bench harness
+  sweeps configs to publish `bench.jsonl`, Prometheus textfiles, and CI-ready
+  artifacts.
+- Structured observability (JSONL + textfile) makes it easy to diff runs,
+  enforce SLOs, and root-cause tail spikes.
+- Dynamic Execution Gates (DEG) model tail behavior as first-class policy,
+  making “breaker-style” protections and SLO checks part of the engine instead
+  of bolted-on monitoring.
+
+### Classic HFT datapath
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│                    QUANT LOB ENGINE (HFT SYSTEM)                   │
+├────────────────────────────────────────────────────────────────────┤
+│  ITCH 5.0 parser  ──▶  L2/L3 order book (SoA) ──▶  Price levels    │
+│            │                             │                        │
+│            ▼                             ▼                        │
+│      Dynamic Execution Gates (DEG) ──▶ Telemetry exporter          │
+│            │                             │                        │
+│            ▼                             ▼                        │
+│     gen_synth fixtures          Golden determinism tests          │
+└────────────────────────────────────────────────────────────────────┘
+```
+
 Gate policy details live in `docs/gates.md`; CI wiring is under
 `.github/workflows/verify-bench.yml`.
 
 ## Highlights
 
-- Golden digest + tail budgets keep regressions caught early.
-- Observability-first artifacts: `bench.jsonl` + `metrics.prom`.
-- Conformance + bench scripts plus Prometheus exporter helpers.
-- CI ready: determinism, bench, and CodeQL workflows pinned to SHAs.
+- Golden digest + explicit tail budgets so regressions fail CI early.
+- Observability-first artifacts: `bench.jsonl` + `metrics.prom` for diffing,
+  dashboards, and automated SLO checks.
+- Conformance + bench scripts are wired for cron / CI, not just local runs.
+- CI-ready: determinism, bench, and CodeQL workflows pinned to SHAs.
+- Designed to slot into HFT / research pipelines as a replay + guardrail
+  module rather than a one-off benchmark toy.
 
 ## Build
 
@@ -170,7 +215,9 @@ artifacts/      # generated outputs (gitignored)
 
 `SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
 and CodeQL. Signing helpers live under `scripts/` if you need to stamp
-artifacts.
+artifacts. Quant LOB Engine is opinionated toward safety-by-default: determinism,
+repeatable benches, and explicit tail SLOs are non-negotiable controls rather
+than after-the-fact monitoring.
 
 ## Contributing
 
@@ -182,6 +229,8 @@ changes.
 
 Distributed under the Business Source License 1.1 (`LICENSE.txt`). Research and
 non-commercial evaluation are permitted; production use requires a commercial
-license until the change date defined in `COMMERCIAL_LICENSE.md`.
+Research users can clone and run the engine today; commercial or production
+deployment requires a license until the change date in
+`COMMERCIAL_LICENSE.md`.
 
 <!-- markdownlint-enable MD013 -->
