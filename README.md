@@ -1,15 +1,72 @@
-# Blanc LOB Engine (v0.9-RC)
+# Quant LOB Engine
 
-<!-- CI & quality badges -->
-[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
-[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
-[![Reproducible](https://img.shields.io/badge/reproducible-golden--hash--match-brightgreen)](https://github.com)
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![pre-commit](https://img.shields.io/badge/pre-commit-passing-blue)](https://github.com/pre-commit/pre-commit)
-[![Trivy](https://img.shields.io/badge/Trivy-clean-blue)](https://aquasecurity.github.io/trivy)
+[![C++](https://img.shields.io/badge/C++-20-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20+-blue.svg)](https://cmake.org/)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE.txt)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 
-<!-- Technology badges -->
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)](https://en.cppreference.com/w/cpp/20)
+Production-grade C++20 quantitative limit order book (LOB) engine for high-frequency trading applications.
+
+## 📦 System Architecture
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│              QUANT LOB ENGINE (Production HFT System)              │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌──────────────────┐         ┌──────────────────┐              │
+│  │   ITCH 5.0       │────────▶│   Order Book     │              │
+│  │   Binary Parser  │  Orders │   (SoA Layout)   │              │
+│  │  (NASDAQ Feed)   │         │   L2/L3 Data     │              │
+│  └──────────────────┘         └─────────┬────────┘              │
+│           │                              │                        │
+│           │                              ▼                        │
+│           │                   ┌──────────────────┐               │
+│           │                   │   Price Levels   │               │
+│           │                   │  (Best Bid/Ask)  │               │
+│           │                   └─────────┬────────┘               │
+│           │                              │                        │
+│           ▼                              ▼                        │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │         Circuit Breakers (Patent-Pending)             │       │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐│       │
+│  │  │Price Anomaly │  │Volume Spike  │  │ Latency     ││       │
+│  │  │  Detector    │  │   Detector   │  │  Monitor    ││       │
+│  │  └──────────────┘  └──────────────┘  └─────────────┘│       │
+│  └───────────────────────────┬──────────────────────────┘       │
+│                              │                                    │
+│                              ▼                                    │
+│  ┌──────────────────────────────────────────────────────┐       │
+│  │            Telemetry Export System                    │       │
+│  │    - Latency Metrics (sub-microsecond)               │       │
+│  │    - Order Flow Statistics                           │       │
+│  │    - Breaker Activation Logs                         │       │
+│  │    - Book Depth Snapshots                            │       │
+│  └──────────────────────────────────────────────────────┘       │
+│                              │                                    │
+│                              ▼                                    │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────┐   │
+│  │   gen_synth      │  │  Golden Tests    │  │  Replay    │   │
+│  │ (Synthetic Data) │  │ (Determinism)    │  │  Engine    │   │
+│  └──────────────────┘  └──────────────────┘  └────────────┘   │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Features:**
+- 🚀 Structure-of-Arrays (SoA) for cache-line optimization
+- ⚡ Sub-microsecond order processing latency
+- 🔒 Deterministic builds (binary-exact reproducibility)
+- 🛡️ Patent-pending circuit breaker algorithms
+- 📡 ITCH 5.0 protocol compliance (NASDAQ)
+
+**Tech Stack:** C++20, CMake 3.20+, Ninja, Boost, nlohmann-json
+**Build:** Ninja build system with determinism validation
+**Testing:** Golden file replay, snapshot diffing, telemetry verification
+
 [![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)](https://cmake.org)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
