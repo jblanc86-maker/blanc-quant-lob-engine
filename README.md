@@ -1,16 +1,17 @@
 # Blanc LOB Engine (v0.9-RC)
 
+<!-- CI & quality badges -->
 [![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
 [![Reproducible](https://img.shields.io/badge/reproducible-golden--hash--match-brightgreen)]
-
 [![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![pre-commit](https://img.shields.io/badge/precommit-passing-blue)]
+[![pre-commit](https://img.shields.io/badge/pre-commit-passing-blue)]
 [![Trivy](https://img.shields.io/badge/Trivy-clean-blue)]
 
+<!-- Technology badges -->
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)]
 [![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)]
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
 
