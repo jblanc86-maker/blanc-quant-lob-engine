@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <iostream>
+#include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include "telemetry.hpp"
 
@@ -26,7 +27,12 @@ int main()
   const std::string prom_file = out_dir + "/metrics.prom";
 
   // Ensure the directory exists (best effort) - C++ function not used here
-  system((std::string("mkdir -p ") + out_dir).c_str());
+  const int mkdir_rc = std::system((std::string("mkdir -p ") + out_dir).c_str());
+  if (mkdir_rc != 0)
+  {
+    std::cerr << "mkdir failed (" << mkdir_rc << ")" << std::endl;
+    return 7;
+  }
 
   if (!write_jsonl(json_file, t))
   {
