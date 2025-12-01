@@ -1,0 +1,13 @@
+# License Notice
+
+This project is licensed under the Business Source License 1.1 (BSL 1.1).
+
+**Licensor:** Jean Blanc
+**Change Date:** 2027-12-01
+**Change License:** Apache-2.0
+
+**Use Limitation:** Use in live trading or production trading systems requires a commercial license from the Licensor.
+
+On or after the Change Date, this Licensed Work will be made available under the Apache-2.0 license.
+
+For full BSL terms, see [https://mariadb.com/bsl11/](https://mariadb.com/bsl11/)

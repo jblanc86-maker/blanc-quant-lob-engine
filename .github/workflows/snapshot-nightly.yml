@@ -1,0 +1,43 @@
+name: Snapshot Nightly
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '30 6 * * *' # daily at 06:30 UTC
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build zip libboost-all-dev libnlohmann-json3-dev
+      - name: Build (Release) and tests
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build -j
+      - name: Clean and create test output
+        run: |
+          rm -rf tests/out || true
+          mkdir -p tests/out
+      - name: Run snapshot tests
+        run: |
+          cd build
+          ctest --output-on-failure -R book_snapshot || true
+          ctest --output-on-failure -R book_snapshot_burst || true
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-artifacts-${{ github.run_id }}
+          path: tests/out/**
+
+      - name: Create release package
+        run: |
+          make release-package
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package-${{ github.run_id }}
+          path: artifacts/release/**

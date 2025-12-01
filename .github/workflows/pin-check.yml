@@ -1,0 +1,35 @@
+name: Pin Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: Ensure action uses are pinned to SHAs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Check workflow actions pins
+        run: |
+          set -euo pipefail
+          fail=0
+          shopt -s nullglob || true
+          for f in .github/workflows/*.{yml,yaml}; do
+            while IFS= read -r line; do
+              if [[ $line =~ uses:[[:space:]]*([^@[:space:]]+/[^@[:space:]]+)@([^[:space:]#]+) ]]; then
+                ref=${BASH_REMATCH[2]}
+                if ! [[ $ref =~ ^[0-9a-f]{40}$ ]]; then
+                  echo "Unpinned ref '$ref' in $f: $line"
+                  fail=1
+                fi
+              fi
+            done < "$f"
+          done
+          if [[ "$fail" -ne 0 ]]; then
+            echo "Found unpinned actions refs. Please pin actions to commit SHAs."
+            exit 1
+          fi

@@ -1,0 +1,112 @@
+name: Pin Actions Preview
+on:
+  workflow_dispatch:
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run pin script (dry-run)
+        run: |
+          chmod +x scripts/pin_actions_by_shas.sh
+          ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposed.json || true
+
+      - name: Upload proposals
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-proposals
+          path: pin_proposed.json
+
+      - name: Evaluate proposals
+        id: eval
+        run: |
+          if [ -f pin_proposed.json ] && [ $(jq 'length' pin_proposed.json) -gt 0 ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create preview PR
+        id: create_preview_pr
+        if: steps.eval.outputs.found == 'true'
+        run: |
+          BRANCH="preview/pin-actions-$(date -u +%Y%m%d%H%M%S)"
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+          git checkout -b "$BRANCH"
+          ./scripts/pin_actions_by_shas.sh --commit || true
+          git add .github/workflows || true
+          if [[ -n $(git status --porcelain) ]]; then
+            git commit -m "chore(ci): preview pin GitHub Actions by commit SHA (automated)" || true
+            git push origin HEAD:refs/heads/$BRANCH
+            echo "pr_branch=$BRANCH" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Create draft PR
+        if: steps.eval.outputs.found == 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "chore(ci): pin GitHub Actions by commit SHA (preview)"
+          body: "This is a preview PR with suggested pins applied. Review and merge if acceptable."
+          base: main
+          head: ${{ steps.create_preview_pr.outputs.pr_branch }}
+          draft: true
+
+      - name: Checkout preview branch
+        if: steps.eval.outputs.found == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.create_preview_pr.outputs.pr_branch }}
+
+      - name: Setup build deps & Run bench for preview
+        if: steps.eval.outputs.found == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+          ART_DIR=artifacts/${{ github.run_id }} make bench || true
+
+      - name: Upload bench artifacts
+        if: steps.eval.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-bench-${{ github.run_id }}
+          path: |
+            artifacts/${{ github.run_id }}/**
+
+      - name: Parse bench summary and add PR comment
+        if: steps.eval.outputs.found == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = `artifacts/${process.env.GITHUB_RUN_ID}/bench.jsonl`;
+            let summary = {p50: null, p95: null, p99: null};
+            if (fs.existsSync(path)) {
+              const lines = fs.readFileSync(path, 'utf8').trim().split('\n');
+              for (let i = lines.length - 1; i >= 0; i--) {
+                try {
+                  const j = JSON.parse(lines[i]);
+                  if (j.summary) {
+                    summary.p50 = j.p50_ms; summary.p95 = j.p95_ms; summary.p99 = j.p99_ms; break;
+                  }
+                } catch (e) {}
+              }
+            }
+            const prNumber = parseInt(core.getInput('pull_request_number') || process.env.PR_NUMBER || (require('@actions/core').getInput('pull_request_number')) || '${{ steps.create_pr.outputs.pull-request-number }}');
+            const body = `Preview pin PR bench results:\n- p50_ms: ${summary.p50}\n- p95_ms: ${summary.p95}\n- p99_ms: ${summary.p99}\nArtifacts: artifacts/${process.env.GITHUB_RUN_ID}/`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ steps.create_pr.outputs.pull-request-number }}'),
+              body
+            });

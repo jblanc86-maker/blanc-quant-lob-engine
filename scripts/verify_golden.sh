@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
-cd "$(git rev-parse --show-toplevel)"
-actual="$(shasum -a 256 data/golden/itch_1m.bin | awk '{print $1}')"
-want="$(cat data/golden/itch_1m.digest)"
-mkdir -p artifacts
-if [[ "$actual" != "$want" ]]; then
-  echo "DIGEST DRIFT ❌ actual=$actual want=$want" | tee artifacts/verify.txt
-  exit 2
+#!/usr/bin/env bash
+set -euo pipefail
+
+BIN="./build/bin/replay"
+INPUT="data/golden/itch_1m.bin"
+
+echo "Running determinism check..."
+
+line="$($BIN --input $INPUT)"
+digest="$(sed -n 's/.*digest_fnv=0x\([0-9a-f]*\).*/\1/p' <<< "$line")" # pragma: allowlist secret
+
+expected_fnv="36b7011851960792"
+if [[ -f "$INPUT.fnv" ]]; then
+  read -r expected_fnv < "$INPUT.fnv"
 fi
-echo "Determinism PASS ✔︎ ($actual)" | tee artifacts/verify.txt
+
+if [[ "$digest" != "$expected_fnv" ]]; then # pragma: allowlist secret
+  echo "Determinism FAILED: digest $digest != expected"
+  exit 1
+fi
+
+echo "Determinism PASS"

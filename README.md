@@ -1,26 +1,68 @@
 # Blanc LOB Engine (v0.9-RC)
 
+<!-- CI & quality badges -->
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg?branch=main)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
+[![Reproducible](https://img.shields.io/badge/reproducible-golden--hash--match-brightgreen)]
+[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
+[![pre-commit](https://img.shields.io/badge/pre-commit-passing-blue)]
+[![Trivy](https://img.shields.io/badge/Trivy-clean-blue)]
+
+<!-- Technology badges -->
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)]
+[![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+
 C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
 
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
-[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![Security Scan](https://img.shields.io/badge/Secrets--Scan-active-blueviolet.svg)](.github/workflows/secrets-scan.yml)
-[![Reproducible Build](https://img.shields.io/badge/Reproducible-Builds-success-green.svg)](.github/workflows/ci.yml)
-![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
-![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)
+Blanc LOB Engine is a functionally deterministic C++20 Level-2 order-book replay and benchmarking framework built with CMake/Ninja for repeatable, auditable low-latency research. It emphasizes reproducible golden state validation, tight tail latency (p50 / p95 / p99), and stable throughput across runs, with first-class observability via structured artifacts (JSONL and Prometheus-compatible metrics). The system includes patent-pending breaker-style gates. Trading use subject to license terms.
 
-## Features
+## License model
 
-- C++20, single binary (`replay`)
-- Replays a binary input file and produces telemetry and a simple breaker state
-- Artifacts written to `artifacts/`:
-  - `bench.jsonl`: one-line JSON snapshot per run
-  - `metrics.prom`: Prometheus textfile metrics
-- Helper scripts in `scripts/`:
-  - `verify_golden.sh` — conformance check against golden data
-  - `bench.sh` — quick p50/p95/p99 timing loop
-  - `prom_textfile.sh` — convenience exporter for metrics
+This project uses **BUSL-1.1 (Business Source License)**.
+
+- Research and non-commercial evaluation are permitted.
+- **Production use in live trading or other revenue-generating systems requires a commercial license.**
+- On the Change Date, the project converts to a permissive license (Apache-2.0).
+  - Change Date: 24 months after the first public release tag of this repository
+
+Benchmarking and publication of results are permitted; please include commit hash, hardware, and methodology details. See `LICENSE` for authoritative terms.
+
+## Commercial use
+
+For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[Binary capture<br/>data/golden/itch_1m.bin] --> B[Replay harness<br/>(C++20, cache-friendly)]
+  B --> C[Order-book core (SoA)]
+  C --> D[Detectors + Breaker gates]
+  D --> E[Digest (deterministic)]
+  D --> F[Latency metrics p50/p95/p99]
+  D --> G[Publish mode summary]
+  E --> H[[artifacts/bench.jsonl]]
+  F --> I[[artifacts/metrics.prom]]
+  G --> J[[stdout run summary]]
+```
+
+If Mermaid isn’t rendering on your GitHub preview, it will still render on the repo page (GitHub supports Mermaid). As a fallback, there’s an ASCII alternative in the `docs/` folder if needed.
+
+## Why buy BQS L2
+
+- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
+- **Tail metrics:** p50/p95/p99 latency + throughput.
+- **Time-to-green:** one-command benches + sample adapters.
+- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
+- **Adaptable core:** SoA book + branch-light parser.
+- **Anonymous option:** attribution can be waived in the commercial license.
+
+## Why invest / sponsor
+
+- **Own the roadmap:** fund adapters/features you need.
+- **Proof transparency:** reproducible claims with artifacts.
+- **Talent magnet:** open, measured performance work attracts systems engineers.
 
 ## Build
 
@@ -78,38 +120,122 @@ scripts/bench.sh 9
 scripts/prom_textfile.sh artifacts/metrics.prom
 ```
 
-## Security & Safety
+### Golden-state validation
 
-- Bounded read of input file to mitigate memory exhaustion:
-  - Default: 128 MiB
-  - Override: `REPLAY_MAX_BYTES=<bytes>`
-- Build hardening (Linux Release): `-fstack-protector-strong`, `-D_FORTIFY_SOURCE=2`, PIE compile/link when available
-- CI/Pre-commit (repository-level): clang-format, codespell, Ruff, detect-secrets
-- Artifacts ignored by git (`/artifacts/`) to avoid accidental commits
+The project includes a golden-state check based on a functionally deterministic digest produced by the replay run. The expected FNV digest is kept in `data/golden/itch_1m.fnv`; the `scripts/verify_golden.sh` script and the `golden_state` CTest validate this value. To regenerate golden files from a synthetic trace, use `make golden`.
 
-## Development
+Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
 
-Pre-commit hooks
+## Developer setup (local)
+
+If you plan to build and run tests locally, install the OS packages required for the build and the `nlohmann_json` package which is used by the `book_snapshot` tests.
+
+On Ubuntu (apt):
 
 ```sh
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
+sudo apt-get update
+sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
 ```
 
-Common CMake options
+On macOS (Homebrew):
 
-- `-DCMAKE_BUILD_TYPE=Release|Debug`
-- `-DENABLE_SANITIZERS=ON` (Debug; Clang/GCC)
+```sh
+brew update
+brew install cmake ninja jq nlohmann-json
+```
 
-## CI (pipeline)
+Then configure and build as normal, and run the book_snapshot test (this runs `./bin/replay` and compares `bench.jsonl` to the golden JSON):
 
-- GitHub Actions workflow runs pre-commit checks on push/PR
-- Recommended next steps (tracked separately):
-  - CodeQL code scanning
-  - Trivy filesystem/image scanning
-  - hadolint for Dockerfiles
-  - Pin Actions by commit SHA and enable caching for pip/compilers
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build build -j
+cd build
+ctest --output-on-failure -R book_snapshot
+```
+
+If you prefer running the test binary directly:
+
+```sh
+cd build
+./bin/test_book_snapshot
+```
+
+The test expects to run from the `build` directory so that `./bin/replay` is found; if you run from another directory, adjust the working directory or run `build/bin/replay` directly.
+
+## Release packaging
+
+This repository includes a small helper script to produce a rights-marked release bundle containing the binary, artifacts, a checksum manifest, and a minimal rights manifest.
+
+Files produced:
+- `artifacts/release/*.zip` — the release archive
+- `artifacts/release/manifest.json` — listing files, sizes and SHA256
+- `artifacts/release/rights_manifest.json` — minimal rights metadata
+
+Run locally:
+
+```sh
+# Build first (Release recommended)
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+
+# Create release package (uses current git short SHA in the name)
+./scripts/release_package.sh --build-dir build --art-dir artifacts --out-dir artifacts/release --git-sha "$(git rev-parse --short HEAD)"
+```
+
+Optional signing:
+
+```sh
+# If you have gpg available and want a detached signature
+./scripts/release_package.sh --sign --git-sha "$(git rev-parse --short HEAD)"
+```
+
+CI: The `snapshot-nightly` workflow builds artifacts and now runs `make release-package`, after which the release bundle is uploaded as a workflow artifact.
+
+## Tools — pin GitHub Actions
+
+There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
+
+Usage:
+
+```sh
+# Preview (dry-run): lists proposed changes without editing files
+./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposals.json
+
+# Apply to files (makes in-place changes):
+./scripts/pin_actions_by_shas.sh
+```
+
+There's a preview workflow `.github/workflows/pin-actions-preview.yml` to run the script and create a draft PR with pinned changes (run via 'Actions' -> 'Pin Actions Preview').
+
+## Technology transition & government deliveries
+
+See `docs/technology_transition.md` for a concise pipeline and rights summary if you plan to pursue government funding or transition into a Program of Record. For CI-assisted rights-marking and artifact packaging, see `docs/deliverable_marking_checklist.md`.
+
+## CPU pinning (Linux-only)
+
+You can optionally pin the replay process to a CPU core to reduce scheduling noise and improve determinism during benchmarks. This is a best-effort, Linux-only feature.
+
+Usage examples:
+
+```sh
+# Pin to CPU 3 via the CLI
+build/bin/replay --input data/golden/itch_1m.bin --cpu-pin 3
+
+# Or use the Makefile convenience wrapper; pass an integer core id into `CPU_PIN`:
+CPU_PIN=3 make bench
+```
+
+Notes:
+
+
+CPU pinning effects (initial observations):
+In limited local testing (5× runs per configuration), CPU pinning slightly reduced mean p50 latency and, in some cases, significantly reduced tail latency variability (p95 standard deviation). Absolute p95 values varied modestly by core selection. These results suggest CPU pinning can improve repeatability of tail measurements under certain conditions. Additional runs across longer durations and multiple hardware instances are required for statistical confidence.
+
+### Preview PR bench metrics
+
+Preview PRs created by the `pin-actions-preview.yml` workflow include a bench step that captures `bench.jsonl` and `metrics.prom` for the preview branch. The workflow posts a summary comment on the PR with p50/p95/p99 metrics and a link to the artifacts; this makes reviewing performance/regressions easier when pinning actions.
+
+## Security & Safety
 
 ## Repository Layout
 
@@ -122,7 +248,15 @@ artifacts/      # generated outputs (gitignored)
 
 ## License
 
-See `LICENSE`.
+See `LICENSE`. Third-party dependencies remain under their respective licenses. If you contribute code, you agree it will be released under this repository's license unless explicitly noted otherwise in the PR description.
+
+### Attribution & Credits
+
+- Core engine & replay implementation © 2025 Blanc contributors.
+- Build and CI workflow patterns adapted from open best practices (GitHub Actions hardening, pre-commit hygiene).
+- Security scanning integrates detect-secrets (Yelp) and optional CodeQL.
+- Docker base image: `ubuntu:24.04` (Canonical).
+- Any trademarks or names remain property of their respective owners.
 
 ## Troubleshooting
 

@@ -46,7 +46,7 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
-
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(replay
   src/replay.cpp
@@ -56,3 +56,58 @@ add_executable(replay
 target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(replay PRIVATE -O3 -march=native)
 target_link_libraries(replay PRIVATE Boost::program_options)
+
+# -----------------
+# Testing (CTest)
+# -----------------
+include(CTest)
+if (BUILD_TESTING)
+  enable_testing()
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_breaker.cpp)
+    add_executable(test_breaker
+      tests/test_breaker.cpp
+      src/breaker.cpp
+    )
+    target_include_directories(test_breaker PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    add_test(NAME breaker_basic COMMAND test_breaker)
+  else()
+    message(STATUS "Skipping test_breaker: tests/test_breaker.cpp not present")
+  endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_telemetry.cpp)
+    add_executable(test_telemetry
+      tests/test_telemetry.cpp
+      src/telemetry.cpp
+      src/breaker.cpp
+    )
+    target_include_directories(test_telemetry PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    add_test(NAME telemetry_io COMMAND test_telemetry)
+  endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_golden.cpp)
+    add_executable(test_golden
+      tests/test_golden.cpp
+    )
+    target_include_directories(test_golden PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    add_test(NAME golden_state COMMAND test_golden)
+  else()
+    message(STATUS "Skipping golden_state test: tests/test_golden.cpp not present")
+  endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_book_snapshot.cpp)
+    add_executable(test_book_snapshot
+      tests/test_book_snapshot.cpp
+    )
+    target_include_directories(test_book_snapshot PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_link_libraries(test_book_snapshot PRIVATE nlohmann_json::nlohmann_json)
+    add_test(NAME book_snapshot COMMAND test_book_snapshot)
+    set_tests_properties(book_snapshot PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  else()
+    message(STATUS "Skipping book_snapshot test: tests/test_book_snapshot.cpp not present")
+  endif()
+
+  add_test(NAME replay_help COMMAND $<TARGET_FILE:replay> --help)
+  set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
+  add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
+  set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()

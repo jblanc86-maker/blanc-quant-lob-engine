@@ -1,0 +1,47 @@
+name: Pin Actions by SHA (Scheduled)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # weekly on Monday at 06:00 UTC
+
+jobs:
+  pin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set up tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq git
+
+      - name: Ensure pin script is executable
+        run: |
+          chmod +x scripts/pin_actions_by_shas.sh
+
+      - name: Run pin script
+        id: pin
+        run: |
+          set -euo pipefail
+          ./scripts/pin_actions_by_shas.sh || true
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+          if [[ -n $(git status --porcelain) ]]; then
+            git add .github/workflows
+            git commit -m "chore(ci): pin GitHub Actions by commit SHA (automated)"
+            git push origin HEAD:refs/heads/pin-actions-by-sha-$(date +%Y%m%d%H%M%S)
+            echo "PR_BRANCH=pinned/$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          else
+            echo "No pin updates" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.pin.outputs.PR_BRANCH != ''
+        uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "chore(ci): pin GitHub Actions by commit SHA"
+          body: "Automated pinning of GitHub Actions to SHA to improve reproducibility."
+          base: main
+          head: ${{ steps.pin.outputs.PR_BRANCH }}

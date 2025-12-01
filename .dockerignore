@@ -1,0 +1,18 @@
+# Exclude local build artifacts and VCS
+build/
+cmake-build-*/
+.git/
+.gitignore
+.github/
+.vscode/
+.DS_Store
+**/*.o
+**/*.obj
+**/*.a
+**/*.lib
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.cmake
+**/CMakeCache.txt
+**/CMakeFiles/

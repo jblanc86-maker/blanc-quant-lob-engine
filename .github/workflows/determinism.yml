@@ -1,0 +1,63 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+name: Determinism
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * *'  # daily at 06:00 UTC
+
+jobs:
+  verify-golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Normalize environment
+        run: |
+          # Ensure deterministic environment
+          echo "TZ=UTC" >> $GITHUB_ENV
+          echo "LANG=C.UTF-8" >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
+      - name: Deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev unzip zip
+      - name: Build (Release)
+        run: |
+          set -euxo pipefail
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build -j
+
+      - name: Verify deterministic replay (2 runs)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
+          # Run replay twice and capture digest lines
+          ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run1.txt"
+          sleep 1
+          ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run2.txt"
+          d1=$(grep -m1 -oE 'digest_fnv=[0-9a-fx]+' "$ART_DIR/run1.txt" || true)
+          d2=$(grep -m1 -oE 'digest_fnv=[0-9a-fx]+' "$ART_DIR/run2.txt" || true)
+          echo "digest1=$d1"; echo "digest2=$d2"
+          if [ "$d1" != "$d2" ]; then
+            echo "Determinism failure: digests differ" >&2
+            echo "--- run1 ---"; cat "$ART_DIR/run1.txt"; echo "--- run2 ---"; cat "$ART_DIR/run2.txt"
+            exit 1
+          fi
+      - name: Run bench and collect artifacts
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
+          if [ -x scripts/bench.sh ]; then
+            ART_DIR="$ART_DIR" scripts/bench.sh 9
+          else
+            ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
+          fi
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: determinism-artifacts-${{ github.run_id }}
+          path: |
+            artifacts/${{ github.run_id }}/**
