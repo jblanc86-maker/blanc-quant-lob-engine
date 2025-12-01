@@ -9,7 +9,7 @@ on:
 
 jobs:
   analyze:
-    name: CodeQL Analyze (C++)
+
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -23,19 +23,18 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
-          autobuild: false
+
 
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
+ add/security-workflows
 
-      - name: Build (for CodeQL DB)
-        run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
-          cmake --build build -j
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
+ main
+
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: 'security-and-quality'
+
