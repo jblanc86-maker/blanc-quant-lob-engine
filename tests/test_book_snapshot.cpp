@@ -5,7 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <regex>
+#include <cmath>
+#include <nlohmann/json.hpp>
 
 int main(int argc, char **argv)
 {
@@ -58,28 +59,21 @@ int main(int argc, char **argv)
     return 4;
   }
 
-  // Parse JSON summary with regex for required fields
-  std::string actual;
+  // Parse JSON summary for bench.jsonl
+  nlohmann::json j;
+  try
   {
-    std::smatch m;
-    std::regex r_actual("\"actual\"\\s*:\\s*\"([0-9a-fA-F]+)\"");
-    if (std::regex_search(last_line, m, r_actual))
-      actual = m[1];
+    j = nlohmann::json::parse(last_line);
   }
-  bool publish = false;
+  catch (const std::exception &e)
   {
-    std::smatch m;
-    std::regex r_publish("\"publish\"\\s*:\\s*(true|false)");
-    if (std::regex_search(last_line, m, r_publish))
-      publish = (m[1] == "true");
+    std::cerr << "JSON parse error for bench.jsonl last line: " << e.what() << std::endl;
+    return 5;
   }
-  std::string breaker;
-  {
-    std::smatch m;
-    std::regex r_breaker("\"breaker\"\\s*:\\s*\"([a-zA-Z0-9_]+)\"");
-    if (std::regex_search(last_line, m, r_breaker))
-      breaker = m[1];
-  }
+
+  std::string actual = j.value("actual", std::string());
+  bool publish = j.value("publish", false);
+  std::string breaker = j.value("breaker", std::string());
 
   // Load golden
   std::ifstream g(GOLDEN);
@@ -88,71 +82,26 @@ int main(int argc, char **argv)
     std::cerr << "cannot open golden file: " << GOLDEN << std::endl;
     return 6;
   }
-  std::string golden_line;
-  std::getline(g, golden_line);
-  std::string golden_actual;
-  bool golden_publish = false;
-  std::string golden_breaker;
-  std::string golden_input;
-  double golden_gap = -1;
-  double golden_corrupt = -1;
-  double golden_skew = -1;
-  double golden_burst_ms = -1;
-  int golden_cpu_pin = -999;
+  nlohmann::json gj;
+  try
   {
-    std::smatch mg;
-    std::regex rg_actual("\"actual\"\\s*:\\s*\"([0-9a-fA-F]+)\"");
-    if (std::regex_search(golden_line, mg, rg_actual))
-      golden_actual = mg[1];
+    g >> gj;
   }
+  catch (const std::exception &e)
   {
-    std::smatch mg;
-    std::regex rg_input("\"input\"\\s*:\\s*\"([^\"]+)\"");
-    if (std::regex_search(golden_line, mg, rg_input))
-      golden_input = mg[1];
+    std::cerr << "JSON parse error for golden file: " << e.what() << std::endl;
+    return 7;
   }
-  {
-    std::smatch mg;
-    std::regex rg_gap("\"gap_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    if (std::regex_search(golden_line, mg, rg_gap))
-      golden_gap = std::stod(mg[1]);
-  }
-  {
-    std::smatch mg;
-    std::regex rg_corrupt("\"corrupt_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    if (std::regex_search(golden_line, mg, rg_corrupt))
-      golden_corrupt = std::stod(mg[1]);
-  }
-  {
-    std::smatch mg;
-    std::regex rg_skew("\"skew_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    if (std::regex_search(golden_line, mg, rg_skew))
-      golden_skew = std::stod(mg[1]);
-  }
-  {
-    std::smatch mg;
-    std::regex rg_burst("\"burst_ms\"\\s*:\\s*([0-9\.eE+-]+)");
-    if (std::regex_search(golden_line, mg, rg_burst))
-      golden_burst_ms = std::stod(mg[1]);
-  }
-  {
-    std::smatch mg;
-    std::regex rg_cpu("\"cpu_pin\"\\s*:\\s*(-?[0-9]+)");
-    if (std::regex_search(golden_line, mg, rg_cpu))
-      golden_cpu_pin = std::stoi(mg[1]);
-  }
-  {
-    std::smatch mg;
-    std::regex rg_publish("\"publish\"\\s*:\\s*(true|false)");
-    if (std::regex_search(golden_line, mg, rg_publish))
-      golden_publish = (mg[1] == "true");
-  }
-  {
-    std::smatch mg;
-    std::regex rg_breaker("\"breaker\"\\s*:\\s*\"([a-zA-Z0-9_]+)\"");
-    if (std::regex_search(golden_line, mg, rg_breaker))
-      golden_breaker = mg[1];
-  }
+
+  std::string golden_actual = gj.value("actual", std::string());
+  bool golden_publish = gj.value("publish", false);
+  std::string golden_breaker = gj.value("breaker", std::string());
+  std::string golden_input = gj.value("input", std::string());
+  double golden_gap = gj.value("gap_ppm", -1.0);
+  double golden_corrupt = gj.value("corrupt_ppm", -1.0);
+  double golden_skew = gj.value("skew_ppm", -1.0);
+  double golden_burst_ms = gj.value("burst_ms", -1.0);
+  int golden_cpu_pin = gj.value("cpu_pin", -999);
 
   // Compare fields: input, actual, publish, breaker, detectors and cpu_pin
   bool ok = true;
@@ -191,11 +140,7 @@ int main(int argc, char **argv)
 
   if (golden_gap >= 0)
   {
-    std::smatch m;
-    std::regex rg_gapv("\"gap_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    double gap_v = -1;
-    if (std::regex_search(last_line, m, rg_gapv))
-      gap_v = std::stod(m[1]);
+    double gap_v = j.value("gap_ppm", -1.0);
     if (std::abs(gap_v - golden_gap) > 1e-6)
     {
       std::cerr << "gap mismatch: got " << gap_v << " expected " << golden_gap << std::endl;
@@ -204,11 +149,7 @@ int main(int argc, char **argv)
   }
   if (golden_corrupt >= 0)
   {
-    std::smatch m;
-    std::regex rg_cv("\"corrupt_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    double c_v = -1;
-    if (std::regex_search(last_line, m, rg_cv))
-      c_v = std::stod(m[1]);
+    double c_v = j.value("corrupt_ppm", -1.0);
     if (std::abs(c_v - golden_corrupt) > 1e-6)
     {
       std::cerr << "corrupt mismatch: got " << c_v << " expected " << golden_corrupt << std::endl;
@@ -217,11 +158,7 @@ int main(int argc, char **argv)
   }
   if (golden_skew >= 0)
   {
-    std::smatch m;
-    std::regex rg_sv("\"skew_ppm\"\\s*:\\s*([0-9\.eE+-]+)");
-    double s_v = -1;
-    if (std::regex_search(last_line, m, rg_sv))
-      s_v = std::stod(m[1]);
+    double s_v = j.value("skew_ppm", -1.0);
     if (std::abs(s_v - golden_skew) > 1e-6)
     {
       std::cerr << "skew mismatch: got " << s_v << " expected " << golden_skew << std::endl;
@@ -230,11 +167,7 @@ int main(int argc, char **argv)
   }
   if (golden_burst_ms >= 0)
   {
-    std::smatch m;
-    std::regex rg_bv("\"burst_ms\"\\s*:\\s*([0-9\.eE+-]+)");
-    double b_v = -1;
-    if (std::regex_search(last_line, m, rg_bv))
-      b_v = std::stod(m[1]);
+    double b_v = j.value("burst_ms", -1.0);
     if (std::abs(b_v - golden_burst_ms) > 1e-6)
     {
       std::cerr << "burst mismatch: got " << b_v << " expected " << golden_burst_ms << std::endl;
@@ -243,11 +176,7 @@ int main(int argc, char **argv)
   }
   if (golden_cpu_pin != -999)
   {
-    std::smatch m;
-    std::regex rg_cp("\"cpu_pin\"\\s*:\\s*(-?[0-9]+)");
-    int cp = -999;
-    if (std::regex_search(last_line, m, rg_cp))
-      cp = std::stoi(m[1]);
+    int cp = static_cast<int>(j.value("cpu_pin", -999));
     if (cp != golden_cpu_pin)
     {
       std::cerr << "cpu_pin mismatch: got " << cp << " expected " << golden_cpu_pin << std::endl;

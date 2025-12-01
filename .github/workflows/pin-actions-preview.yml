@@ -69,7 +69,7 @@ jobs:
         if: steps.eval.outputs.found == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev jq
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j
           ART_DIR=artifacts/${{ github.run_id }} make bench || true
