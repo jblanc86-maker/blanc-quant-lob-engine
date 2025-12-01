@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <system_error>
 #include <cmath>
 #include <nlohmann/json.hpp>
 
 int main(int argc, char **argv)
 {
   const char *BIN = "./bin/replay"; // run from build dir
-  const std::string ART_DIR = "../tests/out";
+  const std::filesystem::path ART_DIR{"../tests/out"};
   const std::string INPUT = "../data/golden/itch_1m.bin";
   const std::string input = "data/golden/itch_1m.bin"; // value used in JSON
   std::string GOLDEN = "../tests/golden/book_snapshot.golden.json";
@@ -23,14 +25,19 @@ int main(int argc, char **argv)
   }
 
   // Ensure the directory exists
-  std::string mkdir = "mkdir -p " + ART_DIR;
-  system(mkdir.c_str());
+  std::error_code ec;
+  std::filesystem::create_directories(ART_DIR, ec);
+  if (ec)
+  {
+    std::cerr << "failed to create ART_DIR: " << ec.message() << std::endl;
+    return 1;
+  }
 
   // Run replay and write to ART_DIR
-  std::string cmd = "ART_DIR=" + ART_DIR + " " + BIN + " --input " + INPUT + " 2>&1";
+  std::string cmd = "ART_DIR=" + ART_DIR.string() + " " + BIN + " --input " + INPUT + " 2>&1";
   if (burst_mode)
   {
-    cmd = "ART_DIR=" + ART_DIR + " " + BIN + " --input " + INPUT + " --burst-ms 100 2>&1";
+    cmd = "ART_DIR=" + ART_DIR.string() + " " + BIN + " --input " + INPUT + " --burst-ms 100 2>&1";
   }
   int rc = std::system(cmd.c_str());
   if (rc != 0)
@@ -40,7 +47,7 @@ int main(int argc, char **argv)
   }
 
   // Read the latest bench.jsonl
-  std::string bench_path = ART_DIR + "/bench.jsonl";
+  std::string bench_path = (ART_DIR / "bench.jsonl").string();
   std::ifstream f(bench_path);
   if (!f)
   {

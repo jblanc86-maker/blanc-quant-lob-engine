@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
+#include <filesystem>
 #include <iostream>
+#include <system_error>
 #include <fstream>
 #include <string>
 #include "telemetry.hpp"
@@ -21,12 +23,17 @@ int main()
   t.breaker = BreakerState::Fuse;
   t.publish_allowed = true;
 
-  const std::string out_dir = "tests/out";
-  const std::string json_file = out_dir + "/telemetry.jsonl";
-  const std::string prom_file = out_dir + "/metrics.prom";
+  const std::filesystem::path out_dir{"tests/out"};
+  const std::string json_file = (out_dir / "telemetry.jsonl").string();
+  const std::string prom_file = (out_dir / "metrics.prom").string();
 
-  // Ensure the directory exists (best effort) - C++ function not used here
-  system((std::string("mkdir -p ") + out_dir).c_str());
+  std::error_code ec;
+  std::filesystem::create_directories(out_dir, ec);
+  if (ec)
+  {
+    std::cerr << "failed to create output dir: " << ec.message() << std::endl;
+    return 10;
+  }
 
   if (!write_jsonl(json_file, t))
   {
