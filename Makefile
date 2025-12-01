@@ -37,7 +37,7 @@ bench: build
 	# 1) Run with current knobs (deterministic input ⇒ deterministic digest)
 	@ART_DIR=$(ART_DIR) $(BIN) --input $(DATA) --gap-ppm $(GAP_PPM) --burst-ms $(BURST_MS) $(CPU_PIN_ARG) | tee $(ART_DIR)/run.stdout.txt
 	# 2) Optional repo scripts (no-ops if missing)
-	@if [ -x scripts/bench.sh ]; then scripts/bench.sh 9 || true; fi
+	@if [ -x scripts/bench.sh ]; then ART_DIR=$(ART_DIR) CPU_PIN=$(CPU_PIN) scripts/bench.sh 9 || true; fi
 	@if [ -x scripts/prom_textfile.sh ]; then scripts/prom_textfile.sh $(ART_DIR)/metrics.prom || true; fi
 	# 3) Ensure bench.jsonl exists (make a minimal line if your scripts didn’t produce it)
 	@if [ ! -s "$(ART_DIR)/bench.jsonl" ]; then \

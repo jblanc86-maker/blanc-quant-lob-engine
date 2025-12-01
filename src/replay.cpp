@@ -145,16 +145,19 @@ int main(int argc, char **argv)
   Breaker br(BreakerThresholds{});
   auto st = br.step(det.readings());
 
-  ensure_dir("artifacts");
+  const char *env_artdir = std::getenv("ART_DIR");
+  std::string out_dir = env_artdir && *env_artdir ? std::string(env_artdir) : std::string("artifacts");
+  ensure_dir(out_dir);
   TelemetrySnapshot t;
   t.input_path = input;
   t.golden_digest_hex = "<sha256-file>";
   t.actual_digest_hex = hex64(d);
+  t.cpu_pin = cpu_pin;
   t.readings = det.readings();
   t.breaker = st;
   t.publish_allowed = br.publish_allowed();
-  write_jsonl("artifacts/bench.jsonl", t);
-  write_prom("artifacts/metrics.prom", t);
+  write_jsonl(out_dir + "/bench.jsonl", t);
+  write_prom(out_dir + "/metrics.prom", t);
 
   auto end = clock::now();
   double elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();

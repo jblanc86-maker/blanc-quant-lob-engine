@@ -10,7 +10,7 @@
 
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-ff69b4)]
 [![CMake+Ninja](https://img.shields.io/badge/CMake-Ninja-informational)]
-[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)]
 
 
 
