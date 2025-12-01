@@ -183,6 +183,8 @@ The project includes a golden-state check based on a functionally deterministic 
 
 Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
 
+The build now emits the deterministic `data/golden/itch_1m.bin` fixture automatically via the `gen_synth` helper, so CI and local runs never have to download blobs. If you ever need to regenerate it manually, run `cmake --build build -t golden_sample` (after configuring) or `make golden`.
+
 ## Developer setup (local)
 
 If you plan to build and run tests locally, install the OS packages required for the build and the `nlohmann_json` package which is used by the `book_snapshot` tests.
