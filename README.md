@@ -1,11 +1,18 @@
-# Blanc LOB Engine (v0.9-RC)
-<<<<<<< HEAD
 
-C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
-=======
+# Blanc LOB Engine (v0.9-RC)
 
 [![CI](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-lob-engine/actions/workflows/determinism.yml)
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
+[![Repro](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/repro.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/repro.yml)
+[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
+[![Secrets](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/secrets-scan.yml)
+[![Container Scan](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/container-scan.yml)
+[![License: BUSL-1.1](https://img.shields.io/badge/license-BUSL--1.1-informational.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/jblanc86-maker/quant-lob-engine)](https://github.com/jblanc86-maker/quant-lob-engine/releases)
+
+C++20 market data replay + lightweight order-book signal path. Built with CMake/Ninja, ships simple bench + telemetry export for reproducible runs.
 
 ## License model
 
@@ -14,33 +21,28 @@ This project uses **BUSL-1.1 (Business Source License)**.
 - Research and non-commercial evaluation are permitted.
 - **Production use in live trading or other revenue-generating systems requires a commercial license.**
 - On the Change Date, the project converts to a permissive license (Apache-2.0).
-<<<<<<< HEAD
   - Change Date: 24 months after the first public release tag of this repository
->>>>>>> 238af94 (ci: add CI + Determinism badges with determinism workflow)
-=======
- 	- Change Date: 24 months after the first public release tag of this repository
->>>>>>> 7fbba9c (WIP: save work before rebase)
 
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
-[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
-[![Security Scan](https://img.shields.io/badge/Secrets--Scan-active-blueviolet.svg)](.github/workflows/secrets-scan.yml)
-[![Reproducible Build](https://img.shields.io/badge/Reproducible-Builds-success-green.svg)](.github/workflows/ci.yml)
-![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-ready-blue.svg)
-![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)
+Benchmarking and publication of results are permitted; please include commit hash, hardware, and methodology details. See `LICENSE` for authoritative terms.
 
-<<<<<<< HEAD
-## Features
+## Commercial use
 
-- C++20, single binary (`replay`)
-- Replays a binary input file and produces telemetry and a simple breaker state
-- Artifacts written to `artifacts/`:
-  - `bench.jsonl`: one-line JSON snapshot per run
-  - `metrics.prom`: Prometheus textfile metrics
-- Helper scripts in `scripts/`:
-  - `verify_golden.sh` — conformance check against golden data
-  - `bench.sh` — quick p50/p95/p99 timing loop
-  - `prom_textfile.sh` — convenience exporter for metrics
+For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
+
+## Why buy BQS L2
+
+- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
+- **Tight tails:** we optimize **p99 stability**, not just throughput.
+- **Time-to-green:** one-command benches + sample adapters.
+- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
+- **Adaptable core:** SoA book + branch-light parser.
+- **Anonymous option:** attribution can be waived in the commercial license.
+
+## Why invest / sponsor
+
+- **Own the roadmap:** fund adapters/features you need.
+- **Proof transparency:** reproducible claims with artifacts.
+- **Talent magnet:** open, measured performance work attracts systems engineers.
 
 ## Build
 
@@ -100,37 +102,6 @@ scripts/prom_textfile.sh artifacts/metrics.prom
 
 ## Security & Safety
 
-- Bounded read of input file to mitigate memory exhaustion:
-  - Default: 128 MiB
-  - Override: `REPLAY_MAX_BYTES=<bytes>`
-- Build hardening (Linux Release): `-fstack-protector-strong`, `-D_FORTIFY_SOURCE=2`, PIE compile/link when available
-- CI/Pre-commit (repository-level): clang-format, codespell, Ruff, detect-secrets
-- Artifacts ignored by git (`/artifacts/`) to avoid accidental commits
-
-## Development
-
-Pre-commit hooks
-
-```sh
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
-```
-
-Common CMake options
-
-- `-DCMAKE_BUILD_TYPE=Release|Debug`
-- `-DENABLE_SANITIZERS=ON` (Debug; Clang/GCC)
-
-## CI (pipeline)
-
-- GitHub Actions workflow runs pre-commit checks on push/PR
-- Recommended next steps (tracked separately):
-  - CodeQL code scanning
-  - Trivy filesystem/image scanning
-  - hadolint for Dockerfiles
-  - Pin Actions by commit SHA and enable caching for pip/compilers
-
 ## Repository Layout
 
 ```text
@@ -157,25 +128,3 @@ See `LICENSE`. Third-party dependencies remain under their respective licenses. 
 - Build fails with missing Ninja: install Ninja (`brew install ninja`, `apt-get install ninja-build`).
 - Oversized input rejected: lower input size or raise `REPLAY_MAX_BYTES`.
 - Pre-commit rejects artifacts: ensure `/artifacts/` remains untracked; re-run `git rm -r --cached artifacts` if needed.
-
-[![Commercial licenses available](https://img.shields.io/badge/Commercial-licenses%20available-informational.svg)](#commercial-use)
-=======
-## Commercial use
-
-For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated licensing channel.
-
-## Why buy BQS L2
-
-- **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
-- **Tight tails:** we optimize **p99 stability**, not just throughput.
-- **Time-to-green:** one-command benches + sample adapters.
-- **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
-- **Adaptable core:** SoA book + branch-light parser.
-- **Anonymous option:** attribution can be waived in the commercial license.
-
-## Why invest / sponsor
-
-- **Own the roadmap:** fund adapters/features you need.
-- **Proof transparency:** reproducible claims with artifacts.
-- **Talent magnet:** open, measured performance work attracts systems engineers.
->>>>>>> 238af94 (ci: add CI + Determinism badges with determinism workflow)

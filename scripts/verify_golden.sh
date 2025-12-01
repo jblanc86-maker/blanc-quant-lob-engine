@@ -10,9 +10,9 @@ INPUT="data/golden/itch_1m.bin"
 echo "Running determinism check..."
 
 line="$($BIN --input $INPUT)"
-digest="$(sed -n 's/.*digest_fnv=0x\([0-9a-f]*\).*/\1/p' <<< "$line")"
+digest="$(sed -n 's/.*digest_fnv=0x\([0-9a-f]*\).*/\1/p' <<< "$line")" # pragma: allowlist secret
 
-if [[ "$digest" != "36b7011851960792" ]]; then
+if [[ "$digest" != "36b7011851960792" ]]; then # pragma: allowlist secret
   echo "Determinism FAILED: digest $digest != expected"
   exit 1
 fi

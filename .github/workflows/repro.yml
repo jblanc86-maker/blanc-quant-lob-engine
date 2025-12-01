@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Reproducibility Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Set up build
+        uses: lukka/run-cmake@v10
+        with:
+          cmakeListsOrSettingsJson: 'CMakeLists.txt'
+          buildDirectory: 'build'
+          cmakeBuildType: 'Release'
+
+      - name: Run reproducibility verification
+        run: |
+          chmod +x scripts/verify_golden.sh
+          ./scripts/verify_golden.sh
