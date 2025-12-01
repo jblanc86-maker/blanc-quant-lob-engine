@@ -3,6 +3,7 @@
 This repository distinguishes between two complementary gate concepts:
 
 ## Dynamic Execution Gates (runtime)
+
 Shape pathological flows during replay to keep tails tight and preserve determinism.
 
 - Pros: contain bursts/skews without blowing up p99; great for stress scenarios.
@@ -20,12 +21,15 @@ Runtime metrics (Prometheus/textfile):
 - `gate_suppressed_msgs_total`
 - `gate_tail_delta_ms{phase=...,p="p99"}`
 
-Every activation should be logged with: timestamp, rule id, input window stats, before/after tail deltas.
+Every activation should be logged with: timestamp, rule id, input window
+stats, before/after tail deltas.
 
 ## Release Gates (CI/CD)
+
 Block merges/releases unless determinism and performance budgets hold.
 
-- Pros: stop regressions cold; ensure byte-for-byte reproducibility and latency SLOs.
+- Pros: stop regressions cold; ensure byte-for-byte reproducibility and
+  latency SLOs.
 - Cons: need good thresholds and fixtures; too‑tight budgets can slow iteration.
 
 Release checks (inputs typically produced by benchmark jobs):
@@ -46,12 +50,22 @@ Release checks (inputs typically produced by benchmark jobs):
   - Clearly label outputs as “gated” vs “ungated” for reviewers
 
 ## Separation of concerns
+
 Store baselines separately:
 
 - Ungated: `artifacts/golden/...`
 - Gated: `artifacts/stress/...`
 
 ## Bottom line
+
 - Dynamic execution gates keep runs behaving under adversarial inputs.
 - Release gates keep the codebase honest across time.
 - Run ungated for truth, gated for resilience — ship only when both pass.
+
+## Tooling
+
+- `scripts/verify_bench.py` enforces the policies above using `bench.jsonl`,
+  `metrics.prom`, and the per-runner baselines under `artifacts/baselines/`.
+- `.github/workflows/verify-bench.yml` wires the script into a
+  `workflow_dispatch` entry point so you can run gates on demand (or clone the
+  workflow for nightly CI).
