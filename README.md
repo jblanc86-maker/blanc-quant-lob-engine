@@ -39,7 +39,7 @@ flowchart LR
   B --> C[Order-book core (SoA)]
   C --> D[Detectors + Breaker gates]
   D --> E[Digest (deterministic)]
-  D --> F[Latency metrics p50/p90/p99]
+  D --> F[Latency metrics p50/p95/p99]
   D --> G[Publish mode summary]
   E --> H[[artifacts/bench.jsonl]]
   F --> I[[artifacts/metrics.prom]]
@@ -51,7 +51,7 @@ If Mermaid isn’t rendering on your GitHub preview, it will still render on the
 ## Why buy BQS L2
 
 - **Deterministic & auditable:** golden end-state hash + bench JSON/CSV.
-- **Tight tails:** we optimize **p99 stability**, not just throughput.
+- **Tail metrics:** p50/p95/p99 latency + throughput.
 - **Time-to-green:** one-command benches + sample adapters.
 - **Hygiene baked in:** pre-commit, sanitizers, secrets baseline, pinned Docker builds.
 - **Adaptable core:** SoA book + branch-light parser.
@@ -118,6 +118,43 @@ scripts/bench.sh 9
 # Export Prometheus textfile metrics
 scripts/prom_textfile.sh artifacts/metrics.prom
 ```
+
+
+## Tools — pin GitHub Actions
+
+There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
+
+Usage:
+```sh
+# Preview (dry-run): lists proposed changes without editing files
+./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposals.json
+
+# Apply to files (makes in-place changes):
+./scripts/pin_actions_by_shas.sh
+```
+
+There's a preview workflow `.github/workflows/pin-actions-preview.yml` to run the script and create a draft PR with pinned changes (run via 'Actions' -> 'Pin Actions Preview').
+
+## CPU pinning (Linux-only)
+
+You can optionally pin the replay process to a CPU core to reduce scheduling noise and improve determinism during benchmarks. This is a best-effort, Linux-only feature.
+
+Usage examples:
+
+```sh
+# Pin to CPU 3 via the CLI
+build/bin/replay --input data/golden/itch_1m.bin --cpu-pin 3
+
+# Or use the Makefile convenience wrapper; pass an integer core id into `CPU_PIN`:
+CPU_PIN=3 make bench
+```
+
+Notes:
+
+- CPU pinning is only implemented on Linux via pthread_setaffinity_np. On other platforms this is a no-op.
+- Pinning the main process is usually sufficient; future work can add thread-level pinning for worker threads if required.
+
+
 
 ## Security & Safety
 

@@ -101,10 +101,11 @@ done
 if [[ $DRY_RUN -eq 1 ]]; then
   # Print proposals as a JSON array
   if [[ ${#proposals[@]} -ne 0 ]]; then
+    joined=$(printf "%s\n" "${proposals[@]}" | paste -sd "," -)
     if [[ -n "$OUTPUT_JSON" ]]; then
-      printf "%s\n" "[${proposals[*]}]" > "$OUTPUT_JSON"
+      printf "%s\n" "[$joined]" > "$OUTPUT_JSON"
     fi
-    printf "%s\n" "[${proposals[*]}]"
+    printf "%s\n" "[$joined]"
   else
     echo "[]"
   fi
