@@ -50,16 +50,6 @@ jobs:
             echo "--- run1 ---"; cat "$ART_DIR/run1.txt"; echo "--- run2 ---"; cat "$ART_DIR/run2.txt"
             exit 1
           fi
-      - name: Run bench and collect artifacts
-        shell: bash
-        run: |
-          set -euxo pipefail
-          ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
-          if [ -x scripts/bench.sh ]; then
-            ART_DIR="$ART_DIR" scripts/bench.sh 9
-          else
-            ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
-          fi
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
