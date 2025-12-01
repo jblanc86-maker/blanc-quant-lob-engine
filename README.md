@@ -123,6 +123,8 @@ scripts/prom_textfile.sh artifacts/metrics.prom
 
 The project includes a golden-state check based on a functionally deterministic digest produced by the replay run. The expected FNV digest is kept in `data/golden/itch_1m.fnv`; the `scripts/verify_golden.sh` script and the `golden_state` CTest validate this value. To regenerate golden files from a synthetic trace, use `make golden`.
 
+Note: the current "book snapshot" tests are telemetry-based: the test reads `bench.jsonl` and verifies a set of telemetry fields (digest, publish flag, breaker state, and detector/readings). Full per-orderbook serialization (a byte-for-byte L2 book snapshot) is tracked as Phase 2 in the roadmap and will provide deeper, per-level state diffs once implemented.
+
 ## Tools — pin GitHub Actions
 
 There's a small helper `scripts/pin_actions_by_shas.sh` to pin `uses:` entries in `.github/workflows` to commit SHAs.
