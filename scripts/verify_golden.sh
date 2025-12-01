@@ -12,7 +12,12 @@ echo "Running determinism check..."
 line="$($BIN --input $INPUT)"
 digest="$(sed -n 's/.*digest_fnv=0x\([0-9a-f]*\).*/\1/p' <<< "$line")" # pragma: allowlist secret
 
-if [[ "$digest" != "36b7011851960792" ]]; then # pragma: allowlist secret
+expected_fnv="36b7011851960792"
+if [[ -f "$INPUT.fnv" ]]; then
+  read -r expected_fnv < "$INPUT.fnv"
+fi
+
+if [[ "$digest" != "$expected_fnv" ]]; then # pragma: allowlist secret
   echo "Determinism FAILED: digest $digest != expected"
   exit 1
 fi

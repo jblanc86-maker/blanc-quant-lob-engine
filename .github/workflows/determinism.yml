@@ -32,16 +32,16 @@ jobs:
         shell: bash
         run: |
           # Build is already done; run bench to collect artifacts
-          mkdir -p artifacts
+          ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
           # Run bench script if present, else run the binary directly
           if [ -x scripts/bench.sh ]; then
-            scripts/bench.sh 9
+            ART_DIR="$ART_DIR" scripts/bench.sh 9
           else
-            ./build/bin/replay --input data/golden/itch_1m.bin | tee artifacts/run.stdout.txt
+            ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
           fi
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: determinism-artifacts-${{ github.run_id }}
           path: |
-            artifacts/**
+            artifacts/${{ github.run_id }}/**

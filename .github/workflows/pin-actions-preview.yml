@@ -49,6 +49,7 @@ jobs:
 
       - name: Create draft PR
         if: steps.eval.outputs.found == 'true'
+        id: create_pr
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,3 +58,43 @@ jobs:
           base: main
           head: ${{ steps.create_preview_pr.outputs.pr_branch }}
           draft: true
+
+      - name: Checkout preview branch
+        if: steps.eval.outputs.found == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.create_preview_pr.outputs.pr_branch }}
+
+      - name: Run bench for preview
+        if: steps.eval.outputs.found == 'true'
+        run: |
+          ART_DIR=artifacts/${{ github.run_id }} make bench || true
+
+      - name: Parse bench summary and add PR comment
+        if: steps.eval.outputs.found == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = `artifacts/${process.env.GITHUB_RUN_ID}/bench.jsonl`;
+            let summary = {p50: null, p95: null, p99: null};
+            if (fs.existsSync(path)) {
+              const lines = fs.readFileSync(path, 'utf8').trim().split('\n');
+              for (let i = lines.length - 1; i >= 0; i--) {
+                try {
+                  const j = JSON.parse(lines[i]);
+                  if (j.summary) {
+                    summary.p50 = j.p50_ms; summary.p95 = j.p95_ms; summary.p99 = j.p99_ms; break;
+                  }
+                } catch (e) {}
+              }
+            }
+            const prNumber = parseInt(core.getInput('pull_request_number') || process.env.PR_NUMBER || (require('@actions/core').getInput('pull_request_number')) || '${{ steps.create_pr.outputs.pull-request-number }}');
+            const body = `Preview pin PR bench results:\n- p50_ms: ${summary.p50}\n- p95_ms: ${summary.p95}\n- p99_ms: ${summary.p99}\nArtifacts: artifacts/${process.env.GITHUB_RUN_ID}/`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ steps.create_pr.outputs.pull-request-number }}'),
+              body
+            });
