@@ -41,6 +41,8 @@ jobs:
           brew list --versions cmake  >/dev/null || brew install cmake
           brew list --versions jq >/dev/null || brew install jq
           brew list --versions nlohmann-json >/dev/null || brew install nlohmann-json
+          # Boost is required for program_options; ensure it's installed on macOS runners
+          brew list --versions boost >/dev/null || brew install boost
 
       - name: Pre-commit (lint)
         run: |
