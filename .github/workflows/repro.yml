@@ -27,6 +27,11 @@ jobs:
         run: |
           cmake --build build -j
 
+      - name: Ensure golden input
+        run: |
+          set -euxo pipefail
+          scripts/ensure_golden_input.sh
+
       - name: Run reproducibility verification
         run: |
           chmod +x scripts/verify_golden.sh

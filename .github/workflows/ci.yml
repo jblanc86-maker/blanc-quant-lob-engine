@@ -58,6 +58,11 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j
 
+      - name: Ensure golden input
+        run: |
+          set -euxo pipefail
+          scripts/ensure_golden_input.sh
+
       - name: Run Bench (optional)
         run: |
           make bench ART_DIR=artifacts/${{ github.run_id }} || true

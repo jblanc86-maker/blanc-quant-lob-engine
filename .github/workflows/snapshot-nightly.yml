@@ -17,6 +17,10 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
           cmake --build build -j
+      - name: Ensure golden input
+        run: |
+          set -euxo pipefail
+          scripts/ensure_golden_input.sh
       - name: Clean and create test output
         run: |
           rm -rf tests/out || true
