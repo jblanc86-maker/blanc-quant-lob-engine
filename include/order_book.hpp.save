@@ -1,0 +1,27 @@
+#pragma once
+#include <map>
+#include <vector>
+#include <cstdint>
+#include <functional>
+
+struct Order {
+    uint64_t id;
+    uint32_t quantity;
+    double price;
+};
+
+class OrderBook {
+public:
+    void add_order(const Order &order) {
+        bids[order.price].push_back(order);
+    }
+
+    void clear() {
+        bids.clear();
+    }
+
+private:
+    std::map<double, std::vector<Order>, std::greater<double>> bids;
+};
+
+

@@ -1,11 +1,14 @@
-# Exclude local build artifacts and VCS
-build/
-cmake-build-*/
+# Exclude VCS metadata and local build products from Docker context
 .git/
 .gitignore
 .github/
 .vscode/
 .DS_Store
+
+# Build output
+build/
+cmake-build-*/
+docs/
 **/*.o
 **/*.obj
 **/*.a

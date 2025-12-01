@@ -1,16 +1,82 @@
 Business Source License 1.1
 
 Parameters
-Licensor: Jean Blanc
+Licensor: Jean Blanc / Blanc Quant Systems
 Licensed Work: Blanc LOB Engine (quant-lob-engine repository contents)
-Additional Use Grant: Research and non-commercial evaluation permitted. Production use in live trading or
-  other revenue-generating systems requires a commercial license from the Licensor. Benchmarking and
-  publication of results are permitted, provided they include commit hash, hardware, and methodology disclosures.
+Additional Use Grant: Research, benchmarking, and non-commercial evaluation are permitted. Production use in
+  live or revenue-generating trading systems requires a commercial license from the Licensor. Publications must
+  disclose commit hash, hardware, and methodology.
 Change Date: 24 months after the first public release tag of this repository
 Change License: Apache-2.0
 
 License Text
-The Licensed Work is provided under the Business Source License 1.1.
-On the Change Date, the License will convert to the Change License.
-A copy of the full Business Source License 1.1 terms is incorporated herein.
+
+The Licensed Work is provided under the Business Source License 1.1 (the “License”). The License is intended to
+allow use of the Licensed Work for non-production purposes, while ensuring that production use is subject to a
+commercial license.
+
+1. Grant of Rights.
+1.1 Permitted Use. Subject to the conditions of this License, Licensor hereby grants to You a non-exclusive,
+  worldwide, non-transferable, non-sublicensable, royalty-free right to use, copy, modify, create derivative
+  works of, and redistribute the Licensed Work for the Permitted Use. “Permitted Use” means any use of the
+  Licensed Work that is not production use. Production use means use of the Licensed Work, in whole or in part,
+  in or to provide software-as-a-service, hosted services, managed services, or other services provided to a
+  third party, or any use of the Licensed Work in or for the direct benefit of any trade, business, or
+  governmental organization whose primary purpose is the generation of revenue.
+1.2 Additional Use Grant. The Additional Use Grant may provide express permissions with respect to the Licensed
+  Work. Any additional grant shall be set forth under “Additional Use Grant” above. If there is any conflict
+  between the terms of an Additional Use Grant and the terms of this License, the Additional Use Grant
+  controls only with respect to the Licensed Work identified in the Additional Use Grant.
+
+2. Conditions and Limitations.
+2.1 No Trademark License. This License does not grant any rights to use the trademarks or service marks of the
+  Licensor, except as required for reasonable and customary use in describing the origin of the Licensed Work
+  and reproducing the content of the copyright notice.
+2.2 No Patent License. This License does not grant any rights to use Licensor’s patents or patent applications.
+2.3 Notices. You must keep intact all copyright notices and license notices in the Licensed Work and any
+  derivative works thereof. You must include a copy of this License with every copy of the Licensed Work you
+  distribute or make available.
+
+3. Non-Production Use Requirement. You may use the Licensed Work only for the Permitted Use. You must obtain a
+   commercial license from Licensor prior to any production use of the Licensed Work.
+
+4. Change Date and Change License.
+4.1 Change Date. The Change Date is the date identified above. If no date is specified, the Change Date is four
+  years after the date the Licensed Work was made available under this License.
+4.2 Change License. On the Change Date, the License will convert automatically to the Change License specified
+  above. If no Change License is specified, the Licensed Work will become available under the Apache License,
+  Version 2.0.
+
+5. Termination.
+5.1 Automatic Termination. Your rights under this License will terminate automatically if You fail to comply with
+  any of its terms.
+5.2 Notice of Violation. If You breach this License, You must notify Licensor and take reasonable steps to cure
+  the breach.
+5.3 Effect of Termination. Upon termination, You must immediately cease use of the Licensed Work and destroy all
+  copies in Your possession or control. Termination of this License will not terminate any sublicense in
+  effect as of the date of termination, provided that such sublicensees remain in full compliance with the
+  terms of this License.
+
+6. Disclaimer of Warranty. TO THE EXTENT PERMITTED UNDER APPLICABLE LAW, THE LICENSED WORK IS PROVIDED “AS IS”
+   WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, TITLE, OR NON-INFRINGEMENT. LICENSOR DOES NOT WARRANT THAT THE LICENSED
+   WORK WILL BE ERROR-FREE OR OPERATE WITHOUT INTERRUPTION.
+
+7. Limitation of Liability. EXCEPT AS REQUIRED BY APPLICABLE LAW, IN NO EVENT WILL LICENSOR BE LIABLE FOR ANY
+   INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF
+   PROFITS OR LOSS OF DATA, ARISING OUT OF THE USE OF THE LICENSED WORK, EVEN IF LICENSOR HAS BEEN ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGES.
+
+8. General.
+8.1 Governing Law. This License will be governed by and construed in accordance with the laws specified by the
+  Licensor, or if no such laws are specified, the laws of the jurisdiction where the Licensor is organized,
+  without regard to conflict-of-law principles.
+8.2 Entire Agreement. This License constitutes the entire agreement between the parties with respect to the
+  Licensed Work licensed hereunder and supersedes all prior or contemporaneous understandings.
+8.3 Severability. If any provision of this License is held to be unenforceable, that provision will be
+  interpreted to accomplish the objectives of such provision to the greatest extent possible and the
+  remaining provisions will continue in full force and effect.
+8.4 Waiver. No failure or delay by Licensor in exercising any right under this License shall constitute a waiver
+  of that right.
+
 THE LICENSED WORK IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND.
