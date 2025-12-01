@@ -3,16 +3,41 @@
 # Pin GitHub Action uses: lines in .github/workflows to commit SHAs
 set -euo pipefail
 
+# CLI: --dry-run (prints JSON proposals), --output-json <file> for dry-run; --commit (apply, default is to apply), --no-backup
+DRY_RUN=0
+OUTPUT_JSON=""
+COMMIT=1
+NO_BACKUP=0
+
+while (( "$#" )); do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=1; shift;;
+    --output-json)
+      OUTPUT_JSON="$2"; shift 2;;
+    --commit)
+      COMMIT=1; shift;;
+    --no-backup)
+      NO_BACKUP=1; shift;;
+    --help)
+      echo "Usage: $0 [--dry-run] [--output-json file] [--no-backup]"; exit 0;;
+    *)
+      echo "Unknown option: $1"; exit 2;;
+  esac
+done
+
 BASEDIR="$(cd "$(dirname "$0")/.." && pwd)"
 WORKFLOWS_DIR="$BASEDIR/.github/workflows"
 BACKUP_DIR="$WORKFLOWS_DIR/.backup_$(date -u +%Y%m%d%H%M%S)"
 
-mkdir -p "$BACKUP_DIR"
-cp -r "$WORKFLOWS_DIR"/* "$BACKUP_DIR" || true
-
-printf "Backed up workflows to %s\n" "$BACKUP_DIR"
+if [[ $NO_BACKUP -ne 1 && $DRY_RUN -eq 0 ]]; then
+  mkdir -p "$BACKUP_DIR"
+  cp -r "$WORKFLOWS_DIR"/* "$BACKUP_DIR" || true
+  printf "Backed up workflows to %s\n" "$BACKUP_DIR"
+fi
 
 changed=0
+proposals=()
 
 for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
   [[ -f "$file" ]] || continue
@@ -53,11 +78,15 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
       old="${repo}@${ref}"
       new="${repo}@${sha}"
       if grep -qF "$old" "$tmpfile"; then
-        echo "Pinning $old -> $new in $file"
-        content=$(<"$tmpfile")
-        content=${content//$old/$new}
-        printf "%s" "$content" > "$tmpfile"
-        updated=1
+        if [[ $DRY_RUN -eq 1 ]]; then
+          proposals+=("{\"file\":\"$file\",\"old\":\"$old\",\"new\":\"$new\"}")
+        else
+          echo "Pinning $old -> $new in $file"
+          content=$(<"$tmpfile")
+          content=${content//$old/$new}
+          printf "%s" "$content" > "$tmpfile"
+          updated=1
+        fi
       fi
     fi
   done < "$file"
@@ -69,10 +98,27 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
   fi
 done
 
-if [[ $changed -eq 1 ]]; then
-  echo "One or more files were updated; please review, git add, and commit."
+if [[ $DRY_RUN -eq 1 ]]; then
+  # Print proposals as a JSON array
+  if [[ ${#proposals[@]} -ne 0 ]]; then
+    if [[ -n "$OUTPUT_JSON" ]]; then
+      printf "%s\n" "[${proposals[*]}]" > "$OUTPUT_JSON"
+    fi
+    printf "%s\n" "[${proposals[*]}]"
+  else
+    echo "[]"
+  fi
+  if [[ ${#proposals[@]} -ne 0 ]]; then
+    exit 0
+  else
+    exit 0
+  fi
 else
-  echo "No updates required; all actions appear pinned to commit SHAs."
+  if [[ $changed -eq 1 ]]; then
+    echo "One or more files were updated; please review, git add, and commit."
+  else
+    echo "No updates required; all actions appear pinned to commit SHAs."
+  fi
 fi
 
 exit 0
