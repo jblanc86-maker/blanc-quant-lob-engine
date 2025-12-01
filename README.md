@@ -380,7 +380,10 @@ For production licensing, see `COMMERCIAL_LICENSE.md` or contact your designated
 
 ## How it works
 
-```mermaid
+```
+
+> See also: [Dynamic Execution Gates (DEG) & Release Gates](docs/gates.md)
+mermaid
 flowchart LR
   A[Binary capture<br/>data/golden/itch_1m.bin] --> B["Replay harness<br/>C++20, cache-friendly"]
   B --> C["Order-book core SoA"]
