@@ -31,7 +31,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq libnlohmann-json3-dev zip unzip
 
       - name: Toolchain (macOS)
         if: matrix.os == 'macos-latest'
@@ -41,6 +41,11 @@ jobs:
           brew list --versions cmake  >/dev/null || brew install cmake
           brew list --versions jq >/dev/null || brew install jq
           brew list --versions nlohmann-json >/dev/null || brew install nlohmann-json
+          # Boost is required for program_options; ensure it's installed on macOS runners
+          brew list --versions boost >/dev/null || brew install boost
+          # Ensure packaging tools are available on macOS runners
+          brew list --versions zip >/dev/null || brew install zip
+          brew list --versions unzip >/dev/null || brew install unzip
 
       - name: Pre-commit (lint)
         run: |
@@ -57,6 +62,11 @@ jobs:
         run: |
           make bench ART_DIR=artifacts/${{ github.run_id }} || true
 
+      - name: Release package (optional)
+        if: always()
+        run: |
+          # Create release package (script will write into artifacts/release)
+          scripts/release_package.sh || echo "release packaging failed or produced no artifacts"
       - name: Parse bench summary
         if: always()
         run: |
@@ -84,4 +94,8 @@ jobs:
             artifacts/${{ github.run_id }}/bench.jsonl
             artifacts/${{ github.run_id }}/metrics.prom
             artifacts/${{ github.run_id }}/blanc-lob-engine-rc.tar.gz
+            artifacts/release/*.zip
+            artifacts/release/*.sig
+            artifacts/release/manifest.json
+            artifacts/release/rights_manifest.json
           if-no-files-found: ignore
