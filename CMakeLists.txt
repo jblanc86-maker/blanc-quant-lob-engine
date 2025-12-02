@@ -1,3 +1,10 @@
+# Option to build benchmarks
+option(BUILD_BENCHMARKS "Build microbenchmark suite" ON)
+
+# Add bench subdirectory if enabled
+if (BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
 cmake_minimum_required(VERSION 3.20)
 project(blanc_lob_engine VERSION 0.9 LANGUAGES CXX)
 
