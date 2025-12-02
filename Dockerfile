@@ -3,7 +3,7 @@
 FROM ubuntu:24.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends cmake ninja-build g++ ca-certificates make \
+	&& apt-get install -y --no-install-recommends cmake ninja-build g++ ca-certificates make git \
 	libboost-program-options-dev libboost-dev nlohmann-json3-dev \
 	&& rm -rf /var/lib/apt/lists/*
 WORKDIR /src
