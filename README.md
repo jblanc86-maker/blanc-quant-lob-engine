@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD013 -->
-# Owner avatar
+# Blanc Quant LOB Engine
 
-Blanc Quant LOB Engine
+BQL Engine
 
 [![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
