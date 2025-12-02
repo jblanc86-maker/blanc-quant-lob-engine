@@ -30,12 +30,11 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B build -G Ninja \
+          rm -rf build
+          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=OFF \
-            -DBUILD_BENCHMARKS=OFF \
-            -DCMAKE_CXX_COMPILER=g++ \
-            -DCMAKE_C_COMPILER=gcc
+            -DBUILD_BENCHMARKS=OFF
           cmake --build build --config Release -j $(nproc)
 
       - name: Perform CodeQL Analysis

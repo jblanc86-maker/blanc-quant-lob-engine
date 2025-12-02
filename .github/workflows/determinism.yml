@@ -25,12 +25,11 @@ jobs:
       - name: Build (Release + Benchmarks)
         run: |
           set -euxo pipefail
-          cmake -S . -B build -G Ninja \
+          rm -rf build
+          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
-            -DBUILD_BENCHMARKS=ON \
-            -DCMAKE_CXX_COMPILER=g++ \
-            -DCMAKE_C_COMPILER=gcc
+            -DBUILD_BENCHMARKS=ON
           cmake --build build -j$(nproc)
 
       - name: Verify deterministic replay (2 runs)
