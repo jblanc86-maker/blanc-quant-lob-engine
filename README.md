@@ -11,6 +11,11 @@
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/feature_specs.md)
+[![Clang](https://img.shields.io/badge/Clang-14%2B-yellow.svg)](https://clang.llvm.org/)
+[![Linux](https://img.shields.io/badge/Linux-OS-333.svg?logo=linux)](https://www.kernel.org/)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%2B-e95420.svg?logo=ubuntu)](https://ubuntu.com/)
+[![macOS](https://img.shields.io/badge/macOS-12%2B-007aff.svg?logo=apple)](https://www.apple.com/macos/)
+[![Systems & Infra](https://img.shields.io/badge/🖥️-Systems%20%26%20Infra-brightgreen.svg)](#)
 ![Issue Visitors](https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.issue.18)
 
 Deterministic C++20 limit order book (LOB) replay engine for quantitative and
