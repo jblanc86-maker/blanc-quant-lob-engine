@@ -14,6 +14,11 @@ tests/out/
 # Python virtual environment
 .venv/
 
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
 # Binaries & artifacts
 /**/*.o
 /**/*.a
