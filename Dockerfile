@@ -30,7 +30,7 @@ RUN useradd --system --home /app --shell /usr/sbin/nologin appuser \
 USER appuser
 
 # Copy in only what we need to run
-COPY --from=builder /src/build/replay /app/replay
+COPY --from=builder /src/build/bin/replay /app/replay
 COPY --from=builder /src/data/golden /app/data/golden
 COPY --from=builder /src/scripts/verify_golden.sh /app/scripts/verify_golden.sh
 
