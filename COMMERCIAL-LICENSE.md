@@ -1,6 +1,6 @@
 # Blanc Quant Systems — L2 Replay (Commercial License)
 Version 1.0 — Licensor: Jean Blanc — Work: BQS L2
-Contact: licensing@yourdomain.com
+Contact: Via GitHub Issues or Discussions
 
 Grant: non-exclusive, non-transferable license for **live trading / production** use within the agreed scope.
 Includes: source access under this commercial grant, updates for 12 months, limited integration support, permission to publish benchmarks with methodology.

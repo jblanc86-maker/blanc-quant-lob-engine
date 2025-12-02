@@ -4,7 +4,8 @@
 We support the latest main branch and the most recent tagged release.
 
 ## Reporting a Vulnerability
-Please email **security@yourdomain.com** with:
+Please use GitHub's Private Vulnerability Reporting or contact via GitHub
+Issues/Discussions with:
 - A minimal, reproducible description (what, where, how to trigger)
 - Commit hash / tag, OS + compiler, and any scripts or inputs used
 - Impact assessment if known (e.g., crash, data corruption, RCE)
