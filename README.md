@@ -40,8 +40,75 @@ books, built for:
 - **Structured observability:** every run emits JSONL + Prometheus-compatible
   textfiles for diffing, dashboards, and CI.
 
-If you care about *“can we replay this exactly, under load, and prove it didn’t
-get slower or weirder at the tails?”* this engine is the answer.
+If you care about *"can we replay this exactly, under load, and prove it didn't
+get slower or weirder at the tails?"* this engine is the answer.
+
+## What Makes This Innovative
+
+### 1. **Golden-State Deterministic Replay**
+
+Unlike conventional replay systems that merely "look similar," this engine
+guarantees **byte-for-byte identical results** across runs:
+
+- **FNV-1a digest verification:** Every replay produces a cryptographic
+  fingerprint of the final order book state
+- **Automated dual-run CI:** GitHub Actions runs the same input twice and fails
+  if digests differ - catching non-determinism bugs instantly
+- **Environment normalization:** Fixed timezone, locale, and compiler ensure
+  reproducibility across machines and time
+
+**Why it matters:** In quantitative research and compliance, "approximately
+correct" isn't good enough. This proves your results are reproducible by others.
+
+### 2. **Integrated Determinism + Performance Testing**
+
+Most systems test determinism OR performance. This engine does both
+simultaneously:
+
+- Same workflow that proves determinism also measures p50/p95/p99 tail latency
+- Release gates enforce SLO budgets: if p99 regresses, CI fails
+- Structured artifacts (`bench.jsonl`, `metrics.prom`) enable historical
+  tracking and automated dashboards
+
+**Why it matters:** You can't optimize what you can't measure reliably. This
+proves your optimizations don't break determinism.
+
+### 3. **Dynamic Execution Gates (Patent-Pending)**
+
+Traditional circuit breakers sacrifice determinism for safety. DEG does both:
+
+- Breaker-style state machine (Fuse → Local → Feeder → Main → Kill)
+- Preserves deterministic replay while containing pathological scenarios
+- Explicit publish control: corrupted runs are flagged, not silently trusted
+
+**Why it matters:** Financial systems need safety rails that don't compromise
+auditability. DEG provides verifiable protection.
+
+### 4. **Telemetry-Driven Golden-State Validation**
+
+Every run produces machine-readable, CI-auditable artifacts:
+
+- **Structured outputs:** JSONL event logs + Prometheus textfiles (not just
+  stdout logs)
+- **Release gates as code:** `scripts/verify_bench.py` treats performance
+  budgets as pass/fail gates, not suggestions
+- **Artifact packaging:** Automated artifact creation with provenance metadata
+  for compliance and audit trails
+
+**Why it matters:** "It worked on my machine" doesn't fly in finance. This
+provides auditable proof of performance and correctness.
+
+### 5. **Canonical Serialization for Order Books**
+
+Order book state is serialized in a deterministic, canonical order:
+
+- Structure-of-Arrays (SoA) layout for cache efficiency
+- Fixed iteration order regardless of insertion sequence
+- FNV-1a rolling hash captures exact state, not approximations
+
+**Why it matters:** Most order books use hash maps or trees that produce
+different orderings across runs. Canonical serialization is required for
+byte-for-byte reproducibility.
 
 ## System architecture
 
