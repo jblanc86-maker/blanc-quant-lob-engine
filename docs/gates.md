@@ -2,6 +2,11 @@
 
 This repository distinguishes between two complementary gate concepts:
 
+> **Note:** The current open-source implementation includes the core breaker
+> state machine and threshold-based detection. Some advanced DEG features
+> (adaptive thresholding, multi-window analysis, and certain proprietary
+> optimizations) have been omitted from this public release.
+
 ## Dynamic Execution Gates (runtime)
 
 Shape pathological flows during replay to keep tails tight and preserve determinism.

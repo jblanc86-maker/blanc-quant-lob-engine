@@ -28,7 +28,9 @@ books, built for:
 - **Deterministic replay:** byte-for-byte golden-state checks over ITCH binaries
   and synthetic bursts.
 - **Patent-pending Dynamic Execution Gates (DEG):** breaker-style gate policies
-  that wrap the datapath with explicit safety and tail-latency controls.
+  that wrap the datapath with explicit safety and tail-latency controls. *Note:
+  The open-source release includes the core breaker state machine; some advanced
+  DEG features remain proprietary.*
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets
   as **release gates**, not suggestions.
 - **Structured observability:** every run emits JSONL + Prometheus-compatible
