@@ -297,7 +297,7 @@ def generate_html_report(data: ReportData, ga_id: Optional[str] = None) -> str:
         </div>
 
         <div class="visitor-badge">
-            <img src="https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.report" alt="Visitor Badge">
+            <img src="https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine.report" alt="Visitor Badge">
         </div>
 
         <footer>
