@@ -29,10 +29,12 @@ target_link_libraries(blanc_bench
         blanc_quant_lob_engine        # <- your main library/target name
 )
 
-target_compile_features(blanc_bench PRIVATE cxx_std_20)
 target_compile_options(blanc_bench PRIVATE -O3 -DNDEBUG)
 
-# Put benchmark binary under build/bench
+# Put benchmark binary under build/bench and enforce C++20
 set_target_properties(blanc_bench PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bench"
 )
