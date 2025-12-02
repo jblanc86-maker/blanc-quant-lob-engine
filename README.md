@@ -1,5 +1,7 @@
 <!-- markdownlint-disable MD013 -->
-# Quant LOB Engine
+# Owner avatar
+
+Blanc Quant LOB Engine
 
 [![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
