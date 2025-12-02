@@ -22,11 +22,16 @@ add_executable(blanc_bench
     bench_gates.cpp
 )
 
+target_include_directories(blanc_bench
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+)
+
 target_link_libraries(blanc_bench
     PRIVATE
         benchmark::benchmark
         benchmark::benchmark_main
-        blanc_quant_lob_engine        # <- your main library/target name
 )
 
 target_compile_options(blanc_bench PRIVATE -O3 -DNDEBUG)
