@@ -11,6 +11,7 @@
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/feature_specs.md)
+[![Systems & Infra](https://img.shields.io/badge/🖥️-Systems%20%26%20Infra-brightgreen.svg)](#)
 [![Clang](https://img.shields.io/badge/Clang-14%2B-yellow.svg)](https://clang.llvm.org/)
 [![Linux](https://img.shields.io/badge/Linux-OS-333.svg?logo=linux)](https://www.kernel.org/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%2B-e95420.svg?logo=ubuntu)](https://ubuntu.com/)
