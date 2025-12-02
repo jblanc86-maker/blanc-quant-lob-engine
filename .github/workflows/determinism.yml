@@ -22,10 +22,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev unzip zip
-      - name: Build (Release)
+      - name: Build (Release + Benchmarks)
         run: |
           set -euxo pipefail
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DBUILD_BENCHMARKS=ON
           cmake --build build -j
 
       - name: Verify deterministic replay (2 runs)
@@ -50,10 +50,10 @@ jobs:
         run: |
           set -euxo pipefail
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
-          if [ -x scripts/bench.sh ]; then
-            ART_DIR="$ART_DIR" scripts/bench.sh 9
+          if [ -x scripts/run-benchmarks.sh ]; then
+            ./scripts/run-benchmarks.sh | tee "$ART_DIR/blanc_bench.log"
           else
-            ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run.stdout.txt"
+            ./build/bench/blanc_bench --benchmark_counters_tabular=true | tee "$ART_DIR/blanc_bench.log"
           fi
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
