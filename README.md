@@ -11,8 +11,6 @@
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/quant-lob-engine/pulls)
 
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.quant-lob-engine)
-
 ![Issue Visitors](https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.issue.18)
 
 Deterministic C++20 limit order book (LOB) replay engine for quantitative and
