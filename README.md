@@ -1,22 +1,3 @@
-### Live Visitor Badge for Issue #18
-
-![Issue Visitors](https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.issue.18)
-## Analytics Report Output
-...existing code...
-
-### Issue Visitor Badge
-
-To track visitors to a specific GitHub issue, use the following badge format:
-
-```markdown
-![Issue Visitors](https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.issue.<issue_id>)
-```
-
-Replace `<issue_id>` with the actual issue number. For example, for issue #1:
-
-```markdown
-![Issue Visitors](https://visitor-badge.laobi.icu/badge?page_id=blanc86-maker.blanc-quant-lob-engine.issue.1)
-```
 <!-- markdownlint-disable MD013 -->
 # Quant LOB Engine
 
