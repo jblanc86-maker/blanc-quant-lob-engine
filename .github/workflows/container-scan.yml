@@ -35,6 +35,23 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
+      - name: Run Trivy scan (fs, JSON)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          exit-code: '0'
+          format: 'json'
+          output: 'trivy-fs.json'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Trivy summary (fs)
+        run: |
+          echo "Filesystem scan summary:"
+          jq -r '[.Results[]?.Vulnerabilities[]?.Severity] | group_by(.) |
+            map({severity: .[0], count: length}) |
+            sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-fs.json || echo "No findings"
+
       - name: Run Trivy scan (image)
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
@@ -44,6 +61,23 @@ jobs:
           format: 'sarif'
           output: 'trivy-image.sarif'
           severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy scan (image, JSON)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          image-ref: 'quant-lob-engine:ci'
+          ignore-unfixed: true
+          exit-code: '0'
+          format: 'json'
+          output: 'trivy-image.json'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Trivy summary (image)
+        run: |
+          echo "Image scan summary:"
+          jq -r '[.Results[]?.Vulnerabilities[]?.Severity] | group_by(.) |
+            map({severity: .[0], count: length}) |
+            sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-image.json || echo "No findings"
 
       - name: Upload SARIF
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
