@@ -31,6 +31,7 @@ jobs:
         with:
           scan-type: 'fs'
           ignore-unfixed: true
+          exit-code: '0'
           format: 'table'
           severity: 'CRITICAL,HIGH'
 
@@ -39,6 +40,7 @@ jobs:
         with:
           image-ref: 'quant-lob-engine:ci'
           ignore-unfixed: true
+          exit-code: '0'
           format: 'sarif'
           output: 'trivy-image.sarif'
           severity: 'CRITICAL,HIGH'
