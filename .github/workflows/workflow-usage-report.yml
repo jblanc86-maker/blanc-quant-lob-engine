@@ -1,0 +1,71 @@
+name: Workflow Usage Report
+
+on:
+  schedule:
+    - cron: '0 7 * * 1' # Weekly Monday 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate weekly workflow run summary
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const since = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+            const workflows = [
+              'ci.yml',
+              'container-scan.yml',
+              'determinism.yml',
+              'codeql.yml',
+              'secrets-scan.yml',
+              'smoke-sitrep.yml',
+              'repro.yml',
+              'snapshot-nightly.yml'
+            ];
+            const summary = {};
+            for (const wf of workflows) {
+              try {
+                const { data } = await github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id: wf, per_page: 100 });
+                const runs = data.workflow_runs.filter(r => new Date(r.created_at).toISOString() >= since);
+                summary[wf] = {
+                  count: runs.length,
+                  success: runs.filter(r => r.conclusion === 'success').length,
+                  failure: runs.filter(r => r.conclusion === 'failure').length,
+                  cancelled: runs.filter(r => r.conclusion === 'cancelled').length
+                };
+              } catch (e) {
+                summary[wf] = { error: e.message };
+              }
+            }
+            const lines = Object.entries(summary).map(([wf, s]) => {
+              if (s.error) return `- ${wf}: error ${s.error}`;
+              return `- ${wf}: total=${s.count}, success=${s.success}, failure=${s.failure}, cancelled=${s.cancelled}`;
+            });
+            const body = `Weekly workflow run summary (last 7 days):\n` + lines.join('\n');
+            core.setOutput('summary', body);
+            console.log(body);
+      - name: Create or update issue with summary
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = 'Weekly CI Usage Summary';
+            const summaryStep = core.getInput('summary');
+            // Search for existing open issue
+            const { data: issues } = await github.rest.search.issuesAndPullRequests({ q: `repo:${owner}/${repo} is:issue is:open "${title}"` });
+            let issueNumber = issues.items?.[0]?.number;
+            if (!issueNumber) {
+              const { data: created } = await github.rest.issues.create({ owner, repo, title, body: summaryStep });
+              issueNumber = created.number;
+              console.log(`Created issue #${issueNumber}`);
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issueNumber, body: summaryStep });
+              console.log(`Updated issue #${issueNumber}`);
+            }
