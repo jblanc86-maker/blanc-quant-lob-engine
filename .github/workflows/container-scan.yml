@@ -17,6 +17,11 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
 
+      - name: Set up Trivy v0.67.2
+        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+        with:
+          version: v0.67.2
+
       - name: Build image (no push)
         run: |
           docker build -t quant-lob-engine:ci .
