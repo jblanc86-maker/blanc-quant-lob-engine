@@ -99,6 +99,24 @@ jobs:
           # Copy any produced benchmark jsonl / metrics if available
           cp -n artifacts/bench.jsonl "$ART_DIR/bench.jsonl" 2>/dev/null || true
           cp -n artifacts/metrics.prom "$ART_DIR/metrics.prom" 2>/dev/null || true
+
+      - name: Parse bench summary (p50/p95/p99)
+        if: always()
+        run: |
+          set -euo pipefail
+          OUT=artifacts/${{ github.run_id }}/bench.jsonl
+          if [ -f "$OUT" ]; then
+            line=$(tail -n1 "$OUT")
+            p50=$(jq -r '.p50_ms' <<<"$line")
+            p95=$(jq -r '.p95_ms' <<<"$line")
+            p99=$(jq -r '.p99_ms' <<<"$line")
+            echo "bench_p50_ms=$p50" >> $GITHUB_OUTPUT
+            echo "bench_p95_ms=$p95" >> $GITHUB_OUTPUT
+            echo "bench_p99_ms=$p99" >> $GITHUB_OUTPUT
+            echo "$line" > artifacts/${{ github.run_id }}/bench-summary.json
+          else
+            echo "bench summary not found at $OUT"
+          fi
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
