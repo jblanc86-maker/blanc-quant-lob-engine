@@ -1,25 +1,24 @@
 <!-- markdownlint-disable MD013 -->
-# Blanc Quant LOB Engine 
+# Blanc Quant LOB Engine
 
+
+<!-- Core CI & Security Badges -->
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
+[![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
-[![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
+[![Container Scan](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
-[![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
+
+<!-- Performance Badges -->
 [![p99 ms](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
-[![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
-[![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
-[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
-[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
-[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
->>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
+
+<!-- Repo & Build Info Badges -->
+// ...existing code...
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
@@ -30,85 +29,49 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay & benchmarking engine for
-quantitative and low-latency research.
+Deterministic C++20 limit order book (LOB) replay engine for quantitative and
+low-latency research.
 
-Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order
+Quant LOB Engine is a **replay + benchmarking harness** for HFT-style order
 books, built for:
 
-- **Deterministic replay:** byte-for-byte golden-state checks over ITCH binaries
-  and synthetic bursts.
-- **Patent-pending Dynamic Execution Gates (DEG):** breaker-style gate policies
-  that wrap the datapath with explicit safety and tail-latency controls. *Note:
-  The open-source release includes the core breaker state machine; some advanced
-  DEG features remain proprietary.*
-- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets
-  as **release gates**, not suggestions.
-- **Structured observability:** every run emits JSONL + Prometheus-compatible
-  textfiles for diffing, dashboards, and CI.
+- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
+- **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
+- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
+- **Structured observability:** Every run emits JSONL and Prometheus-compatible textfiles for diffing, dashboards, and CI.
 
-<<<<<<< HEAD
 If you care about *"can we replay this exactly, under load, and prove it didn't
 get slower or weirder at the tails?"* this engine is the answer.
 
 ## What Makes This Innovative
 
-### 1. **Golden-State Deterministic Replay**
+### 1. Golden-State Deterministic Replay
 
-Unlike conventional replay systems that merely "look similar," this engine
-guarantees **byte-for-byte identical results** across runs:
+- Guarantees byte-for-byte identical results across runs.
+- FNV-1a digest verification: Every replay produces a cryptographic fingerprint of the final order book state.
+- Automated dual-run CI: GitHub Actions runs the same input twice and fails if digests differ—catching non-determinism instantly.
+- Environment normalization: Fixed timezone, locale, and compiler ensure reproducibility.
 
-- **FNV-1a digest verification:** Every replay produces a cryptographic
-  fingerprint of the final order book state
-- **Automated dual-run CI:** GitHub Actions runs the same input twice and fails
-  if digests differ - catching non-determinism bugs instantly
-- **Environment normalization:** Fixed timezone, locale, and compiler ensure
-  reproducibility across machines and time
+### 2. Integrated Determinism + Performance Testing
 
-**Why it matters:** In quantitative research and compliance, "approximately
-correct" isn't good enough. This proves your results are reproducible by others.
+- Same workflow proves determinism and measures p50/p95/p99 tail latency.
+- Release gates enforce SLO budgets: if p99 regresses, CI fails.
+- Structured artifacts (`bench.jsonl`, `metrics.prom`) enable historical tracking and automated dashboards.
 
-### 2. **Integrated Determinism + Performance Testing**
+### 3. Dynamic Execution Gates (Patent-Pending)
 
-Most systems test determinism OR performance. This engine does both
-simultaneously:
+- Breaker-style state machine (Fuse → Local → Feeder → Main → Kill).
+- Preserves deterministic replay while containing pathological scenarios.
+- Explicit publish control: corrupted runs are flagged, not silently trusted.
 
-- Same workflow that proves determinism also measures p50/p95/p99 tail latency
-- Release gates enforce SLO budgets: if p99 regresses, CI fails
-- Structured artifacts (`bench.jsonl`, `metrics.prom`) enable historical
-  tracking and automated dashboards
+### 4. Telemetry-Driven Golden-State Validation
 
-**Why it matters:** You can't optimize what you can't measure reliably. This
-proves your optimizations don't break determinism.
+- Every run produces machine-readable, CI-auditable artifacts.
+- Structured outputs: JSONL event logs + Prometheus textfiles.
+- Release gates as code: `scripts/verify_bench.py` treats performance budgets as pass/fail gates.
+- Artifact packaging: Automated artifact creation with provenance metadata.
 
-### 3. **Dynamic Execution Gates (Patent-Pending)**
-
-Traditional circuit breakers sacrifice determinism for safety. DEG does both:
-
-- Breaker-style state machine (Fuse → Local → Feeder → Main → Kill)
-- Preserves deterministic replay while containing pathological scenarios
-- Explicit publish control: corrupted runs are flagged, not silently trusted
-
-**Why it matters:** Financial systems need safety rails that don't compromise
-auditability. DEG provides verifiable protection.
-
-### 4. **Telemetry-Driven Golden-State Validation**
-
-Every run produces machine-readable, CI-auditable artifacts:
-
-- **Structured outputs:** JSONL event logs + Prometheus textfiles (not just
-  stdout logs)
-- **Release gates as code:** `scripts/verify_bench.py` treats performance
-  budgets as pass/fail gates, not suggestions
-- **Artifact packaging:** Automated artifact creation with provenance metadata
-  for compliance and audit trails
-
-**Why it matters:** "It worked on my machine" doesn't fly in finance. This
-provides auditable proof of performance and correctness.
-
-### 5. **Canonical Serialization for Order Books**
-
-Order book state is serialized in a deterministic, canonical order:
+### 5. Canonical Serialization for Order Books
 
 - Structure-of-Arrays (SoA) layout for cache efficiency
 - Fixed iteration order regardless of insertion sequence
@@ -117,22 +80,6 @@ Order book state is serialized in a deterministic, canonical order:
 **Why it matters:** Most order books use hash maps or trees that produce
 different orderings across runs. Canonical serialization is required for
 byte-for-byte reproducibility.
-=======
-## Quickstart
-
-```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-build/bin/replay --input data/golden/itch_1m.bin
-```
-
-This replays the ITCH 1m golden sample, emits `artifacts/bench.jsonl` and
-`artifacts/metrics.prom`, and verifies determinism against
-`data/golden/itch_1m.fnv`.
-
-If you care about *“can we replay this exactly, under load, and prove it didn’t
-get slower or weirder at the tails?”* this engine is the answer.
->>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
 
 ## System architecture
 
@@ -343,18 +290,12 @@ scripts/        # bench, verify, release, pin helpers
 artifacts/      # generated outputs (gitignored)
 ```
 
-## Security & safety
 
-`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
-<<<<<<< HEAD
-and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp
-artifacts. Quant LOB Engine is opinionated toward safety-by-default: determinism,
-=======
-and CodeQL. Signing helpers live under `scripts/` if you need to stamp
-artifacts. Blanc LOB Engine is opinionated toward safety-by-default: determinism,
->>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
-repeatable benches, and explicit tail SLOs are non-negotiable controls rather
-than after-the-fact monitoring.
+## Security & Safety
+
+`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp artifacts.
+
+Blanc LOB Engine is opinionated toward safety-by-default: determinism, repeatable benches, and explicit tail SLOs are non-negotiable controls rather than after-the-fact monitoring.
 
 ## Contributing
 
