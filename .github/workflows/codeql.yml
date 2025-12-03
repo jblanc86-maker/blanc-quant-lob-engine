@@ -3,13 +3,34 @@ name: CodeQL
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/codeql.yml'
   pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/codeql.yml'
   schedule:
+    # Weekly on Tuesdays 03:24 UTC
     - cron: '24 3 * * 2'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual CodeQL run reason'
+        required: false
+        default: 'manual'
 
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       actions: read
       contents: read

@@ -4,12 +4,34 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request: {}
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/ci.yml'
+      - 'tests/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/ci.yml'
+      - 'tests/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual CI run reason'
+        required: false
+        default: 'manual'
 
 jobs:
   build:
     name: build • ${{ matrix.os }} • py${{ matrix.python }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:

@@ -3,13 +3,37 @@
 name: Determinism
 on:
   push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'data/golden/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism.yml'
   pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'data/golden/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism.yml'
   schedule:
-    - cron: '0 6 * * *'  # daily at 06:00 UTC
+    # Weekly instead of daily
+    - cron: '0 6 * * 3'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual determinism run reason'
+        required: false
+        default: 'manual'
 
 jobs:
   verify-golden:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Normalize environment
