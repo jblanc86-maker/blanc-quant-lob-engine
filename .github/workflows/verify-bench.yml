@@ -1,6 +1,20 @@
 name: verify-bench
 
 on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/verify-bench.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/verify-bench.yml'
   workflow_dispatch:
     inputs:
       profile:
@@ -16,6 +30,9 @@ jobs:
   verify:
     name: Verify deterministic bench
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     env:
       PROFILE: ${{ github.event.inputs.profile || 'standard' }}
       RUNNER_ID: ${{ github.event.inputs.runner_id || 'gh-ubuntu-latest' }}

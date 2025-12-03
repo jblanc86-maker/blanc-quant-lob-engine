@@ -3,7 +3,14 @@ name: Smoke SITREP
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
   pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
