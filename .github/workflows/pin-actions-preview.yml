@@ -1,6 +1,16 @@
 name: Pin Actions Preview
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
 
 jobs:
   preview:

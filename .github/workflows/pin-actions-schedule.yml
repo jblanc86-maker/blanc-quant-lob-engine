@@ -3,6 +3,16 @@ name: Pin Actions by SHA (Scheduled)
 on:
   schedule:
     - cron: '0 6 * * 1' # weekly on Monday at 06:00 UTC
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
 
 jobs:
   pin:
