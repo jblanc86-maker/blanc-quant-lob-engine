@@ -33,6 +33,9 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
+    if: >-
+      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
+          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     env:
       PROFILE: ${{ github.event.inputs.profile || 'standard' }}
       RUNNER_ID: ${{ github.event.inputs.runner_id || 'gh-ubuntu-latest' }}
