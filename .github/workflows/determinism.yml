@@ -114,6 +114,16 @@ jobs:
             echo "bench_p95_ms=$p95" >> $GITHUB_OUTPUT
             echo "bench_p99_ms=$p99" >> $GITHUB_OUTPUT
             echo "$line" > artifacts/${{ github.run_id }}/bench-summary.json
+            # Surface metrics in job summary and as notices
+            {
+              echo "# Bench summary"
+              echo "p50_ms: $p50"
+              echo "p95_ms: $p95"
+              echo "p99_ms: $p99"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice title=Bench p50::${p50} ms"
+            echo "::notice title=Bench p95::${p95} ms"
+            echo "::notice title=Bench p99::${p99} ms"
           else
             echo "bench summary not found at $OUT"
           fi
