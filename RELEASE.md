@@ -1,4 +1,4 @@
-# Blanc Quant LOB Engine v0.5.0
+# Blanc Quant LOB Engine v1.0.0
 
 Release date: 2025-12-02
 
@@ -51,26 +51,26 @@ Thanks to contributors and reviewers for CI/security hardening and observability
 
 For the GitHub “Release” dialog:
 
-**Title:** `v0.5.0 – CI, Security & Observability Hardening`
+**Title:** `v1.0.0 – Stable Deterministic Replay + Tail SLOs`
 
 **Body:**
 
-> This release doesn’t change the public API of the engine, but it upgrades how we **measure, secure, and ship** it:
+> First stable release. Deterministic replay, explicit tail-latency gates, hardened CI/security, and automated release packaging.
 
-> - CI + Determinism now surface **p50/p95/p99** in job summaries with robust benchmark execution and artifact capture.
-> - Repo-wide **SHA-pinned actions**, Trivy v0.67.2 scanning, and SARIF integration tighten security without blocking merges.
-> - Skip guards and concurrency keep workflows green and low-noise, and a weekly CI usage report provides operational visibility.
-> - README and tooling helpers are updated to reflect how the system actually behaves today.
+> - CI + Determinism surface **p50/p95/p99** in job summaries and badges; artifacts captured for historical diffing.
+> - Repo-wide **SHA-pinned actions**, Trivy v0.67.2 scanning, and SARIF integration — secure by default, non-blocking visibility.
+> - Skip guards + concurrency reduce noise; weekly workflow usage report improves operability.
+> - Automated release packaging with rights-marked bundles and optional signatures.
 
 If you paste any of these into your repo, we can do a quick next pass where we tune tone (more “quant infra lab” or more “OSS maintainer”) depending on which audience you’re aiming at.
 
 ---
 
-## v0.5.0 Release Notes (Detailed)
+## v1.0.0 Release Notes (Detailed)
 
 ## Overview
 
-This release hardens the Blanc Quant LOB Engine’s CI, security posture, and observability layer. The engine itself is unchanged from an API perspective, but the way we **measure, validate, and ship** is materially more production-like.
+This is the first stable release of the Blanc Quant LOB Engine. The engine delivers deterministic replay with explicit tail SLO enforcement and a hardened CI + security posture. Public APIs remain compatible, with observability and packaging elevated to production-ready.
 
 ### Full Highlights
 
@@ -78,7 +78,7 @@ This release hardens the Blanc Quant LOB Engine’s CI, security posture, and ob
 
 - Skip guards (`[skip-ci]`, `docs-only` label) and concurrency cancel-in-progress reduce redundant and overlapping runs.
 - Determinism + CI workflows now:
-  - Enforce C++17 builds.
+  - Enforce modern C++ builds (C++20 target in codebase, workflows previously tested against C++17).
   - Standardize benchmark execution (`scripts/run-benchmarks.sh` with fallbacks).
   - Emit p50 / p95 / p99 latency into `$GITHUB_STEP_SUMMARY` and as notices.
   - Upload `bench.jsonl` and `metrics.prom` artifacts.
@@ -117,6 +117,6 @@ Before tagging:
 Once all checks are green, tag:
 
 ```bash
-git tag -a v0.5.0 -m "v0.5.0 – CI, security, and observability hardening"
-git push origin v0.5.0
+git tag -a v1.0.0 -m "v1.0.0 – Stable deterministic replay + tail SLOs"
+git push origin v1.0.0
 ```

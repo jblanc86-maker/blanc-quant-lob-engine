@@ -47,10 +47,17 @@ jobs:
             p99=$(jq -r '.p99_ms' <<<"$line")
             p95=$(jq -r '.p95_ms' <<<"$line")
             p50=$(jq -r '.p50_ms' <<<"$line")
+            # Color thresholds for p99 (ms)
+            # green: <= 500ms, yellow: <= 800ms, red: > 800ms
             color="blue"
-            # Simple color mapping
-            awk 'BEGIN{exit}' || true
-            if (( $(printf '%.0f' "$p99") > 1000 )); then color="red"; fi
+            p99_int=$(printf '%.0f' "$p99")
+            if [ "$p99_int" -le 500 ]; then
+              color="green"
+            elif [ "$p99_int" -le 800 ]; then
+              color="yellow"
+            else
+              color="red"
+            fi
             jq -n --arg p99 "$p99" --arg color "$color" \
               '{schemaVersion:1,label:"p99 ms",message:$p99,color:$color,namedLogo:"github"}' > badges/performance.json
             jq -n --arg p50 "$p50" --arg p95 "$p95" --arg p99 "$p99" --arg color "$color" \
