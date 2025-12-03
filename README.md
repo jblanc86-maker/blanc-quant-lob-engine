@@ -17,10 +17,7 @@
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
-[![GCC/Clang](https://img.shields.io/badge/Compiler-GCC%2013%2B%20%7C%20Clang%2010%2B-yellow.svg)](https://isocpp.org/)
-[![Linux](https://img.shields.io/badge/Linux-OS-333.svg?logo=linux)](https://www.kernel.org/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%2B-e95420.svg?logo=ubuntu)](https://ubuntu.com/)
-[![macOS](https://img.shields.io/badge/macOS-12%2B-007aff.svg?logo=apple)](https://www.apple.com/macos/)
+[![Platforms & Compilers](https://img.shields.io/badge/Platforms-Linux%20%7C%20Ubuntu%2020.04%2B%20%7C%20macOS%2012%2B%20%E2%80%A2%20Compilers-GCC%2013%2B%20%7C%20Clang%2010%2B-yellow.svg)](https://isocpp.org/)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
 Deterministic C++20 limit order book (LOB) replay engine for quantitative and
@@ -216,6 +213,22 @@ Artifacts land in `artifacts/bench.jsonl`, `artifacts/metrics.prom`, and the
 new HTML analytics dashboard at `artifacts/report/index.html`.
 Deterministic fixtures live under `data/golden/`; regenerate with `gen_synth`
 as needed.
+
+### Run in Docker
+
+Build the image and run the containerized replay:
+
+```sh
+# Build (from repo root)
+docker build -t quant-lob-engine:local .
+
+# Run default golden replay inside the container
+docker run --rm quant-lob-engine:local /app/replay --input /app/data/golden/itch_1m.bin
+
+# Pass a custom file mounted from host
+docker run --rm -v "$PWD/data:/data" quant-lob-engine:local \
+  /app/replay --input /data/your_trace.bin
+```
 
 ## Scripts
 
