@@ -10,6 +10,9 @@ on:
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -79,8 +82,7 @@ jobs:
             map({severity: .[0], count: length}) |
             sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-image.json || echo "No findings"
 
-      - name: Upload SARIF
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@b7ab85cb647a6b3ae4ee323e54137b3b60317e75
         with:
-          name: trivy-image-sarif
-          path: trivy-image.sarif
+          sarif_file: trivy-image.sarif
