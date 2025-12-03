@@ -3,13 +3,35 @@ name: Container Scan
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/container-scan.yml'
+      - 'src/**'
+      - 'include/**'
   pull_request:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/container-scan.yml'
+      - 'src/**'
+      - 'include/**'
   schedule:
+    # Weekly schedule, Wednesdays 04:12 UTC
     - cron: '12 4 * * 3'
+  workflow_dispatch:
+    # Allow manual runs when needed
+    inputs:
+      reason:
+        description: 'Why run manually?'
+        required: false
+        default: 'manual trigger'
 
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       contents: read
       security-events: write
