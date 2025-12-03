@@ -16,6 +16,12 @@ on:
 jobs:
   repro:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    if: >-
+      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
+          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
