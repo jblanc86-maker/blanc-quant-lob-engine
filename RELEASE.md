@@ -44,3 +44,79 @@ Release date: 2025-12-02
 ## Acknowledgements
 
 Thanks to contributors and reviewers for CI/security hardening and observability improvements.
+
+---
+
+## 5️⃣ Tiny GitHub Release description (the one-liner + bullets)
+
+For the GitHub “Release” dialog:
+
+**Title:** `v0.5.0 – CI, Security & Observability Hardening`
+
+**Body:**
+
+> This release doesn’t change the public API of the engine, but it upgrades how we **measure, secure, and ship** it:
+
+> - CI + Determinism now surface **p50/p95/p99** in job summaries with robust benchmark execution and artifact capture.
+> - Repo-wide **SHA-pinned actions**, Trivy v0.67.2 scanning, and SARIF integration tighten security without blocking merges.
+> - Skip guards and concurrency keep workflows green and low-noise, and a weekly CI usage report provides operational visibility.
+> - README and tooling helpers are updated to reflect how the system actually behaves today.
+
+If you paste any of these into your repo, we can do a quick next pass where we tune tone (more “quant infra lab” or more “OSS maintainer”) depending on which audience you’re aiming at.
+
+---
+
+## v0.5.0 Release Notes (Detailed)
+
+## Overview
+
+This release hardens the Blanc Quant LOB Engine’s CI, security posture, and observability layer. The engine itself is unchanged from an API perspective, but the way we **measure, validate, and ship** is materially more production-like.
+
+### Full Highlights
+
+### 1. CI Quality & Determinism
+
+- Skip guards (`[skip-ci]`, `docs-only` label) and concurrency cancel-in-progress reduce redundant and overlapping runs.
+- Determinism + CI workflows now:
+  - Enforce C++17 builds.
+  - Standardize benchmark execution (`scripts/run-benchmarks.sh` with fallbacks).
+  - Emit p50 / p95 / p99 latency into `$GITHUB_STEP_SUMMARY` and as notices.
+  - Upload `bench.jsonl` and `metrics.prom` artifacts.
+
+### 2. Security & Supply Chain
+
+- All GitHub Actions pinned to commit SHAs where feasible.
+- **Pin Check** workflow enforces SHA pinning and proposes updates through preview runs.
+- Trivy v0.67.2 runs filesystem and image scans in non-blocking mode, with:
+  - JSON severity summaries via `jq`.
+  - SARIF results uploaded to the GitHub Security tab.
+- Detect-secrets scan is hardened and paired with a guarded baseline refresh workflow.
+
+### 3. Workflow Hygiene & Reporting
+
+- Concurrency and skip guards applied across CI, Determinism, Container Scan, Reproducibility Check, Detect Secrets, Smoke SITREP, Snapshot Nightly, Verify Bench, Pin Actions Preview/Schedule, Pin Check, and Refresh Secrets Baseline.
+- Workflow Usage Report now posts/updates a **“Weekly CI Usage Summary”** issue summarizing the last 7 days of GitHub Actions usage.
+
+### 4. Documentation
+
+- README updated to reflect:
+  - Benchmark surfacing (p50/p95/p99) in job summaries.
+  - Trivy setup and non-blocking behavior.
+  - Docker `run` command consistency.
+  - Expanded tooling helper descriptions aligned with actual workflows.
+
+## Pre-Release Checklist
+
+Before tagging:
+
+- [ ] Manually dispatch **CI** and **Determinism** workflows and confirm green runs with expected artifacts.
+- [ ] Verify the **Security** tab shows the latest SARIF results from the Container Scan workflow.
+- [ ] Run **Pin Check** and confirm there are no unpinned actions.
+- [ ] Execute release packaging scripts and confirm bundles match expected layout.
+
+Once all checks are green, tag:
+
+```bash
+git tag -a v0.5.0 -m "v0.5.0 – CI, security, and observability hardening"
+git push origin v0.5.0
+```
