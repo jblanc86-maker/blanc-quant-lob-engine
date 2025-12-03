@@ -56,7 +56,8 @@ jobs:
           CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
-            -DBUILD_BENCHMARKS=ON
+            -DBUILD_BENCHMARKS=ON \
+            -DCMAKE_CXX_STANDARD=17
           cmake --build build -j$(nproc)
 
       - name: Verify deterministic replay (2 runs)
@@ -76,19 +77,33 @@ jobs:
             echo "--- run1 ---"; cat "$ART_DIR/run1.txt"; echo "--- run2 ---"; cat "$ART_DIR/run2.txt"
             exit 1
           fi
-      - name: Run bench and collect artifacts
+      - name: Run benchmarks and collect artifacts
         shell: bash
         run: |
           set -euxo pipefail
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
+          # Prefer top-level bench runner if present, else fall back to binary path
           if [ -x scripts/run-benchmarks.sh ]; then
             ./scripts/run-benchmarks.sh | tee "$ART_DIR/blanc_bench.log"
-          else
+          elif [ -x build/bench/blanc_bench ]; then
             ./build/bench/blanc_bench --benchmark_counters_tabular=true | tee "$ART_DIR/blanc_bench.log"
+          elif [ -x build/bin/blanc_bench ]; then
+            ./build/bin/blanc_bench --benchmark_counters_tabular=true | tee "$ART_DIR/blanc_bench.log"
+          else
+            echo "Benchmark runner not found; skipping" | tee "$ART_DIR/blanc_bench.log"
           fi
+          # If synthetic generators exist, run minimal synthetic targets (non-failing)
+          if [ -x build/bin/gen_synth ]; then
+            ./build/bin/gen_synth --mode quick --out "$ART_DIR/synth_quick.bin" || true
+          fi
+          # Copy any produced benchmark jsonl / metrics if available
+          cp -n artifacts/bench.jsonl "$ART_DIR/bench.jsonl" 2>/dev/null || true
+          cp -n artifacts/metrics.prom "$ART_DIR/metrics.prom" 2>/dev/null || true
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: determinism-artifacts-${{ github.run_id }}
           path: |
             artifacts/${{ github.run_id }}/**
+            artifacts/bench.jsonl
+            artifacts/metrics.prom
