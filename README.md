@@ -1,6 +1,7 @@
 <!-- markdownlint-disable MD013 -->
-# Blanc Quant LOB Engine
+# Blanc Quant LOB Engine (`blanc-quant-lob-engine`)
 
+<<<<<<< HEAD
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
@@ -16,6 +17,15 @@
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
 [![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
 [![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
+=======
+BQL Engine
+
+![Owner avatar](https://github.com/jblanc86-maker.png)
+
+[![CI](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/ci.yml)
+[![Determinism](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/determinism.yml)
+[![CodeQL](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/quant-lob-engine/actions/workflows/codeql.yml)
+>>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
@@ -26,10 +36,10 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay engine for quantitative and
-low-latency research.
+Deterministic C++20 limit order book (LOB) replay & benchmarking engine for
+quantitative and low-latency research.
 
-Quant LOB Engine is a **replay + benchmarking harness** for HFT-style order
+Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order
 books, built for:
 
 - **Deterministic replay:** byte-for-byte golden-state checks over ITCH binaries
@@ -43,6 +53,7 @@ books, built for:
 - **Structured observability:** every run emits JSONL + Prometheus-compatible
   textfiles for diffing, dashboards, and CI.
 
+<<<<<<< HEAD
 If you care about *"can we replay this exactly, under load, and prove it didn't
 get slower or weirder at the tails?"* this engine is the answer.
 
@@ -112,12 +123,28 @@ Order book state is serialized in a deterministic, canonical order:
 **Why it matters:** Most order books use hash maps or trees that produce
 different orderings across runs. Canonical serialization is required for
 byte-for-byte reproducibility.
+=======
+## Quickstart
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+build/bin/replay --input data/golden/itch_1m.bin
+```
+
+This replays the ITCH 1m golden sample, emits `artifacts/bench.jsonl` and
+`artifacts/metrics.prom`, and verifies determinism against
+`data/golden/itch_1m.fnv`.
+
+If you care about *“can we replay this exactly, under load, and prove it didn’t
+get slower or weirder at the tails?”* this engine is the answer.
+>>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
 
 ## System architecture
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│   QUANT LOB ENGINE — Deterministic Replay & Benchmark Harness                │
+│   BLANC LOB ENGINE — Deterministic Replay & Benchmark Harness                │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ Inputs                              Core                           Outputs    │
 │ ┌─────────────────┐        ┌──────────────────────────────┐      ┌───────────┐│
@@ -162,7 +189,7 @@ byte-for-byte reproducibility.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────┐
-│                    QUANT LOB ENGINE (HFT SYSTEM)                   │
+│                    BLANC LOB ENGINE (HFT SYSTEM)                   │
 ├────────────────────────────────────────────────────────────────────┤
 │  ITCH 5.0 parser  ──▶  L2/L3 order book (SoA) ──▶  Price levels    │
 │            │                             │                        │
@@ -186,6 +213,10 @@ Gate policy details live in `docs/gates.md`; CI wiring is under
 - CI-ready: determinism, bench, and CodeQL workflows pinned to SHAs.
 - Designed to slot into HFT / research pipelines as a replay + guardrail
   module rather than a one-off benchmark toy.
+
+## Dynamic Execution Gates (provisional patent filed)
+
+Hardware-aware flow control for deterministic replay that uses queue/telemetry signals to keep cache/memory behavior and tail latency reproducible under load.
 
 ## Build
 
@@ -321,8 +352,13 @@ artifacts/      # generated outputs (gitignored)
 ## Security & safety
 
 `SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
+<<<<<<< HEAD
 and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp
 artifacts. Quant LOB Engine is opinionated toward safety-by-default: determinism,
+=======
+and CodeQL. Signing helpers live under `scripts/` if you need to stamp
+artifacts. Blanc LOB Engine is opinionated toward safety-by-default: determinism,
+>>>>>>> 3a9e532 (docs: update README and badge workflow; remove duplicate license file)
 repeatable benches, and explicit tail SLOs are non-negotiable controls rather
 than after-the-fact monitoring.
 
@@ -336,9 +372,10 @@ changes.
 
 Distributed under the Business Source License 1.1 (`LICENSE.txt`). Research and
 non-commercial evaluation are permitted; production use requires a commercial
+license until the change date defined in `COMMERCIAL_LICENSE.md`.
+
 Research users can clone and run the engine today; commercial or production
-deployment requires a license until the change date in
-`COMMERCIAL_LICENSE.md`.
+deployment should follow the terms in `COMMERCIAL_LICENSE.md`.
 
 <!-- markdownlint-enable MD013 -->
 
