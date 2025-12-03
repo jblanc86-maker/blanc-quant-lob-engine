@@ -96,6 +96,6 @@ jobs:
           echo "Policy OK: No CRITICAL findings."
 
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@497990dfed22177a82ba1bbab381bc8f6d27058f
         with:
           sarif_file: trivy-image.sarif
