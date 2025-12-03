@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Generate weekly workflow run summary
+        id: generate
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +58,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const title = 'Weekly CI Usage Summary';
-            const summaryStep = core.getInput('summary');
+            const summaryStep = `${{ steps.generate.outputs.summary }}`;
             // Search for existing open issue
             const { data: issues } = await github.rest.search.issuesAndPullRequests({ q: `repo:${owner}/${repo} is:issue is:open "${title}"` });
             let issueNumber = issues.items?.[0]?.number;
