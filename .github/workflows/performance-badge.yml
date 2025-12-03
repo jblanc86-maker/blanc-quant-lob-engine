@@ -1,0 +1,72 @@
+name: Update Performance Badge
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'artifacts/**'
+      - '.github/workflows/performance-badge.yml'
+  # Also update after CI runs
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+      - name: Find latest bench summary
+        id: find
+        run: |
+          set -euo pipefail
+          file=""
+          # Look for the newest bench-summary.json
+          mapfile -t files < <(git ls-files | grep -E '^artifacts/.*/bench-summary.json$' || true)
+          latest_ts=0
+          for f in "${files[@]}"; do
+            ts=$(git log -1 --pretty=format:%ct -- "$f" || echo 0)
+            if [ "$ts" -gt "$latest_ts" ]; then
+              latest_ts=$ts; file="$f"
+            fi
+          done
+          echo "path=$file" >> $GITHUB_OUTPUT
+      - name: Compute badge JSON
+        id: badge
+        run: |
+          set -euo pipefail
+          PATH_IN='${{ steps.find.outputs.path }}'
+          mkdir -p badges
+          if [ -n "$PATH_IN" ] && [ -f "$PATH_IN" ]; then
+            line=$(cat "$PATH_IN")
+            p99=$(jq -r '.p99_ms' <<<"$line")
+            p95=$(jq -r '.p95_ms' <<<"$line")
+            p50=$(jq -r '.p50_ms' <<<"$line")
+            color="blue"
+            # Simple color mapping
+            awk 'BEGIN{exit}' || true
+            if (( $(printf '%.0f' "$p99") > 1000 )); then color="red"; fi
+            jq -n --arg p99 "$p99" --arg color "$color" \
+              '{schemaVersion:1,label:"p99 ms",message:$p99,color:$color,namedLogo:"github"}' > badges/performance.json
+            jq -n --arg p50 "$p50" --arg p95 "$p95" --arg p99 "$p99" --arg color "$color" \
+              '{schemaVersion:1,label:"p50/p95/p99",message:($p50+"/"+$p95+"/"+$p99+" ms"),color:$color}' > badges/performance_extra.json
+          else
+            jq -n '{schemaVersion:1,label:"p99 ms",message:"n/a",color:"lightgrey"}' > badges/performance.json
+          fi
+      - name: Commit badge JSON
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add badges/*.json
+          if git diff --cached --quiet; then
+            echo "No badge updates"
+          else
+            git commit -m "perf: update performance badge JSON"
+            git push
+          fi
