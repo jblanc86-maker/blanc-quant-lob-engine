@@ -287,6 +287,9 @@ workflow runs this and uploads the bundle automatically.
 
 - `scripts/pin_actions_by_shas.sh` keeps workflow `uses:` entries pinned.
 - `.github/workflows/verify-bench.yml` exposes a manual/cron gate run.
+- `.github/workflows/determinism.yml` surfaces p50/p95/p99 in the job summary and emits notices for easy viewing.
+- `.github/workflows/ci.yml` mirrors bench summary surfacing in the job summary.
+- `.github/workflows/container-scan.yml` pins Trivy to v0.67.2, runs fs & image scans non-blocking, and uploads SARIF to the Security tab.
 - `docs/technology_transition.md` + `docs/deliverable_marking_checklist.md`
   cover gov delivery and rights-marking guidance.
 
@@ -312,7 +315,7 @@ artifacts/      # generated outputs (gitignored)
 ## Security & safety
 
 `SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets
-and CodeQL. Signing helpers live under `scripts/` if you need to stamp
+and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp
 artifacts. Quant LOB Engine is opinionated toward safety-by-default: determinism,
 repeatable benches, and explicit tail SLOs are non-negotiable controls rather
 than after-the-fact monitoring.
