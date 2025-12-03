@@ -1,4 +1,4 @@
-name: Draft GitHub Release
+name: Publish GitHub Release
 
 on:
   workflow_dispatch:
@@ -7,13 +7,26 @@ on:
       - 'v*'
 
 jobs:
-  draft:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Set up build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build zip libboost-all-dev jq nlohmann-json3-dev
+      - name: Build (Release) and package
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          cmake --build build -j
+          scripts/release_package.sh || true
+      - name: List release artifacts
+        run: |
+          mkdir -p artifacts/release || true
+          echo "Artifacts:"; ls -la artifacts/release || true
       - name: Read RELEASE.md
         id: notes
         run: |
@@ -21,10 +34,12 @@ jobs:
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$body" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      - name: Create release draft
+      - name: Publish release and upload artifacts
         uses: softprops/action-gh-release@6f1aa3a2d2ce9abfa3775106f1978a6d6d144ba2
         with:
-          draft: true
+          draft: false
           body: ${{ steps.notes.outputs.body }}
+          files: |
+            artifacts/release/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
