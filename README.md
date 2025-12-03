@@ -220,13 +220,13 @@ Build the image and run the containerized replay:
 
 ```sh
 # Build (from repo root)
-docker build -t quant-lob-engine:local .
+docker build -t blanc-quant-lob-engine:local .
 
 # Run default golden replay inside the container
-docker run --rm quant-lob-engine:local /app/replay --input /app/data/golden/itch_1m.bin
+docker run --rm blanc-quant-lob-engine:local /app/replay --input /app/data/golden/itch_1m.bin
 
 # Pass a custom file mounted from host
-docker run --rm -v "$PWD/data:/data" quant-lob-engine:local \
+docker run --rm -v "$PWD/data:/data" blanc-quant-lob-engine:local \
   /app/replay --input /data/your_trace.bin
 ```
 
