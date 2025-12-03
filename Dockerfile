@@ -30,7 +30,9 @@ RUN useradd --system --home /app --shell /usr/sbin/nologin appuser \
 USER appuser
 
 # Copy in only what we need to run
-COPY --from=builder /src/build/bin/replay /app/replay
+	# Copy in only what we need to run
+	# The CMake build links the executable to bin/replay under the build directory
+	COPY --from=builder /src/build/bin/replay /app/replay
 COPY --from=builder /src/data/golden /app/data/golden
 COPY --from=builder /src/scripts/verify_golden.sh /app/scripts/verify_golden.sh
 
