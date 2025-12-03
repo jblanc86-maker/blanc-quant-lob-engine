@@ -353,35 +353,3 @@ The repository uses visitor badges to track page views. Badge format:
 ```
 
 Replace `<issue_id>` with the GitHub issue number.
-
-### Google Analytics Integration
-
-To enable visitor/location tracking in your HTML report, add the following Google
-Analytics snippet to your HTML output:
-
-```html
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() { dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX');
-</script>
-```
-
-Replace `G-XXXXXXXXXX` with your Google Analytics 4 measurement ID
-(or use `UA-XXXXXX-X` format for Universal Analytics properties).
-
-Alternatively, pass the `--ga-id` flag to `bench_report.py`:
-
-```sh
-python3 scripts/bench_report.py --ga-id G-XXXXXXXXXX
-```
-
-Or set the `GOOGLE_ANALYTICS_ID` environment variable:
-
-```sh
-export GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
-python3 scripts/bench_report.py
-```
