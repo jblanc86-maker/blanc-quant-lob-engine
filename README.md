@@ -1,4 +1,4 @@
-# Project Badges
+# Badges
 
 [![GitHub release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
