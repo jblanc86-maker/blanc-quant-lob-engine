@@ -1,3 +1,12 @@
+# Project Badges
+
+[![GitHub release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![License](https://img.shields.io/github/license/jblanc86-maker/blanc-quant-lob-engine.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
+[![Lines of Code](https://img.shields.io/tokei/lines/github/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
+[![Code Style: clang-format](https://img.shields.io/badge/code%20style-clang--format-brightgreen.svg)](https://clang.llvm.org/docs/ClangFormat.html)
+[![codecov](https://codecov.io/gh/jblanc86-maker/blanc-quant-lob-engine/branch/main/graph/badge.svg)](https://codecov.io/gh/jblanc86-maker/blanc-quant-lob-engine)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jblanc86-maker/blanc-quant-lob-engine)](https://hub.docker.com/r/jblanc86-maker/blanc-quant-lob-engine)
 <!-- markdownlint-disable MD013 -->
 # Blanc Quant LOB Engine
 
