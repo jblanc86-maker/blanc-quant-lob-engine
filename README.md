@@ -3,7 +3,6 @@
 [![GitHub release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![Code Style: clang-format](https://img.shields.io/badge/code%20style-clang--format-brightgreen.svg)](https://clang.llvm.org/docs/ClangFormat.html)
-[![codecov](https://codecov.io/gh/jblanc86-maker/blanc-quant-lob-engine/branch/main/graph/badge.svg)](https://codecov.io/gh/jblanc86-maker/blanc-quant-lob-engine)
 <!-- markdownlint-disable MD013 -->
 # Blanc Quant LOB Engine
 
@@ -13,7 +12,6 @@
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
-[![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
 
 <!-- Performance Badges -->
 
