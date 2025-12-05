@@ -149,6 +149,118 @@ byte-for-byte reproducibility.
 Gate policy details live in `docs/gates.md`; CI wiring is under
 `.github/workflows/verify-bench.yml`.
 
+## Visual Diagrams
+
+These Mermaid diagrams can be pasted into the README directly (GitHub renders them) or any Mermaid-aware viewer.
+
+### Mermaid: System View
+
+```mermaid
+flowchart LR
+    subgraph Inputs
+      A[Golden Trace<br/>(ITCH bin)]
+      B[Fault Knobs<br/>(gap/skew/burst/corrupt)]
+    end
+
+    subgraph Core
+      C[Deterministic Scheduler<br/>(single-thread, fixed seeds)]
+      D[Book Core (C++20)<br/>SoA layout]
+    end
+
+    subgraph Gates
+      E[Execution Gates Controller<br/>(breaker-style, adaptive)]
+    end
+
+    subgraph Verifier
+      F[Golden-State Verifier<br/>(byte-for-byte)]
+    end
+
+    subgraph Outputs
+      G[Stdout Summary<br/>(digest_fnv, breaker, publish)]
+      H[Artifacts<br/>bench.jsonl, metrics.prom]
+    end
+
+    A --> C
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    C --> G
+    E --> H
+```
+
+### Mermaid: Gate Logic
+
+```mermaid
+flowchart TD
+    A[Next event from replay]
+    B[Measure features<br/>(Delta t, size, burst run)]
+    C[Compare to baseline<br/>(MAD/quantile bands)]
+    D{Pathological?}
+    E[Apply Gate<br/>- pace tiny window<br/>- coalesce bounded batch<br/>- retry-once stabilization]
+    F[Telemetry log<br/>(gate=ON, reason=...)]
+    N[Process normally]
+
+    A --> B --> C --> D
+    D -- No --> N
+    D -- Yes --> E --> F --> N
+```
+
+### Mermaid: "No Tail Widening" Claim
+
+```mermaid
+flowchart LR
+    subgraph p99_latency_over_time[Concept Sketch]
+      base[Baseline p99 (flat-ish)]
+      ungated[Ungated burst (hump)]
+      gated[Gated (flat, at/below baseline)]
+    end
+    base --> ungated --> gated
+    %% (Use this as a legend; the PDF shows the visual plot.)
+```
+
+### Concept Sketch (ASCII)
+
+```text
+               ┌──────────────────────────┐
+               │ Next event from replay   │
+               └─────────────┬────────────┘
+                             ▼
+                 ┌─────────────────────┐
+                 │ Measure features    │  (inter-arrival Delta t, size, burst run)
+                 └──────────┬──────────┘
+                            ▼
+                ┌───────────────────────┐
+                │ Compare to baseline   │  (MAD/quantile bands per profile)
+                └──────────┬────────────┘
+                           ▼
+                  ┌────────────────┐
+          Yes ───▶│ Pathological?  │─── No ──▶ Process normally
+                  └──────┬─────────┘
+                         ▼
+            ┌─────────────────────────────┐
+            │ Apply gate:                 │
+            │ - pause/pace tiny window    │
+            │ - coalesce bounded batch    │
+            │ - retry-once stabilization  │
+            └───────────┬─────────────────┘
+                        ▼
+                ┌────────────────┐
+                │ Telemetry log  │  (gate=ON, reason=<burst>, p99 OK)
+                └──────┬─────────┘
+                       ▼
+                 Resume normal flow
+"No Tail Widening" - Concept Sketch.          p99 latency (ms)
+^
+|
+|         ungated burst
+|        ╭──────────────╮
+|       ╭╯              ╰╮
+|  p99 ─┤   gated (flat) ├──────── baseline envelope
+|      ╰                  ╯
++─────────────────────────────────────▶ time
+```
+
 ## Highlights
 
 - Golden digest + explicit tail budgets so regressions fail CI early.
