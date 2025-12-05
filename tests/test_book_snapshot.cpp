@@ -8,7 +8,109 @@
 #include <sstream>
 #include <string>
 #include <cmath>
-#include <nlohmann/json.hpp>
+#include <map>
+#include <cctype>
+
+namespace
+{
+  struct SimpleJson
+  {
+    std::map<std::string, std::string> strings;
+    std::map<std::string, double> numbers;
+    std::map<std::string, bool> bools;
+  };
+
+  bool parse_simple_json(const std::string &text, SimpleJson &out)
+  {
+    size_t i = 0;
+    auto skip_ws = [&](void) {
+      while (i < text.size() && isspace(static_cast<unsigned char>(text[i])))
+        ++i;
+    };
+    skip_ws();
+    if (i >= text.size() || text[i] != '{')
+      return false;
+    ++i;
+    while (i < text.size())
+    {
+      skip_ws();
+      if (i < text.size() && text[i] == '}')
+      {
+        ++i;
+        break;
+      }
+      if (i >= text.size() || text[i] != '"')
+        return false;
+      size_t key_start = ++i;
+      size_t key_end = text.find('"', key_start);
+      if (key_end == std::string::npos)
+        return false;
+      std::string key = text.substr(key_start, key_end - key_start);
+      i = key_end + 1;
+      skip_ws();
+      if (i >= text.size() || text[i] != ':')
+        return false;
+      ++i;
+      skip_ws();
+      if (i >= text.size())
+        return false;
+      if (text[i] == '"')
+      {
+        size_t val_start = ++i;
+        size_t val_end = text.find('"', val_start);
+        if (val_end == std::string::npos)
+          return false;
+        out.strings[key] = text.substr(val_start, val_end - val_start);
+        i = val_end + 1;
+      }
+      else if (text.compare(i, 4, "true") == 0)
+      {
+        out.bools[key] = true;
+        i += 4;
+      }
+      else if (text.compare(i, 5, "false") == 0)
+      {
+        out.bools[key] = false;
+        i += 5;
+      }
+      else
+      {
+        size_t val_end = text.find_first_of(",}", i);
+        if (val_end == std::string::npos)
+          val_end = text.size();
+        std::string num = text.substr(i, val_end - i);
+        char *end_ptr = nullptr;
+        double v = std::strtod(num.c_str(), &end_ptr);
+        if (end_ptr == num.c_str())
+          return false;
+        out.numbers[key] = v;
+        i = val_end;
+      }
+      skip_ws();
+      if (i < text.size() && text[i] == ',')
+      {
+        ++i;
+        continue;
+      }
+      else if (i < text.size() && text[i] == '}')
+      {
+        ++i;
+        break;
+      }
+    }
+    return true;
+  }
+
+  std::string read_text(const std::string &path)
+  {
+    std::ifstream f(path);
+    if (!f)
+      return {};
+    std::ostringstream ss;
+    ss << f.rdbuf();
+    return ss.str();
+  }
+}
 
 int main(int argc, char **argv)
 {
@@ -24,7 +126,6 @@ int main(int argc, char **argv)
     GOLDEN = "../tests/golden/book_snapshot_burst.golden.json";
   }
 
-  // Ensure the directory exists
   std::error_code ec;
   std::filesystem::create_directories(ART_DIR, ec);
   if (ec)
@@ -33,7 +134,6 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  // Run replay and write to ART_DIR
   std::string cmd = "ART_DIR=" + ART_DIR + " " + BIN + " --input " + INPUT + " 2>&1";
   if (burst_mode)
   {
@@ -46,7 +146,6 @@ int main(int argc, char **argv)
     return 2;
   }
 
-  // Read the latest bench.jsonl
   std::string bench_path = ART_DIR + "/bench.jsonl";
   std::ifstream f(bench_path);
   if (!f)
@@ -66,51 +165,40 @@ int main(int argc, char **argv)
     return 4;
   }
 
-  // Parse JSON summary for bench.jsonl
-  nlohmann::json j;
-  try
+  SimpleJson bench_json;
+  if (!parse_simple_json(last_line, bench_json))
   {
-    j = nlohmann::json::parse(last_line);
-  }
-  catch (const std::exception &e)
-  {
-    std::cerr << "JSON parse error for bench.jsonl last line: " << e.what() << std::endl;
+    std::cerr << "JSON parse error for bench.jsonl last line" << std::endl;
     return 5;
   }
 
-  std::string actual = j.value("actual", std::string());
-  bool publish = j.value("publish", false);
-  std::string breaker = j.value("breaker", std::string());
+  std::string actual = bench_json.strings["actual"];
+  bool publish = bench_json.bools["publish"];
+  std::string breaker = bench_json.strings["breaker"];
 
-  // Load golden
-  std::ifstream g(GOLDEN);
-  if (!g)
+  std::string golden_text = read_text(GOLDEN);
+  if (golden_text.empty())
   {
     std::cerr << "cannot open golden file: " << GOLDEN << std::endl;
     return 6;
   }
-  nlohmann::json gj;
-  try
+  SimpleJson golden_json;
+  if (!parse_simple_json(golden_text, golden_json))
   {
-    g >> gj;
-  }
-  catch (const std::exception &e)
-  {
-    std::cerr << "JSON parse error for golden file: " << e.what() << std::endl;
+    std::cerr << "JSON parse error for golden file" << std::endl;
     return 7;
   }
 
-  std::string golden_actual = gj.value("actual", std::string());
-  bool golden_publish = gj.value("publish", false);
-  std::string golden_breaker = gj.value("breaker", std::string());
-  std::string golden_input = gj.value("input", std::string());
-  double golden_gap = gj.value("gap_ppm", -1.0);
-  double golden_corrupt = gj.value("corrupt_ppm", -1.0);
-  double golden_skew = gj.value("skew_ppm", -1.0);
-  double golden_burst_ms = gj.value("burst_ms", -1.0);
-  int golden_cpu_pin = gj.value("cpu_pin", -999);
+  std::string golden_actual = golden_json.strings["actual"];
+  bool golden_publish = golden_json.bools["publish"];
+  std::string golden_breaker = golden_json.strings["breaker"];
+  std::string golden_input = golden_json.strings["input"];
+  double golden_gap = golden_json.numbers.count("gap_ppm") ? golden_json.numbers["gap_ppm"] : -1.0;
+  double golden_corrupt = golden_json.numbers.count("corrupt_ppm") ? golden_json.numbers["corrupt_ppm"] : -1.0;
+  double golden_skew = golden_json.numbers.count("skew_ppm") ? golden_json.numbers["skew_ppm"] : -1.0;
+  double golden_burst_ms = golden_json.numbers.count("burst_ms") ? golden_json.numbers["burst_ms"] : -1.0;
+  int golden_cpu_pin = golden_json.numbers.count("cpu_pin") ? static_cast<int>(golden_json.numbers["cpu_pin"]) : -999;
 
-  // Compare fields: input, actual, publish, breaker, detectors and cpu_pin
   bool ok = true;
   if (!golden_input.empty())
   {
@@ -128,7 +216,7 @@ int main(int argc, char **argv)
       ok = false;
     }
   }
-  if (golden_publish)
+  if (golden_json.bools.count("publish"))
   {
     if (publish != golden_publish)
     {
@@ -147,7 +235,7 @@ int main(int argc, char **argv)
 
   if (golden_gap >= 0)
   {
-    double gap_v = j.value("gap_ppm", -1.0);
+    double gap_v = bench_json.numbers.count("gap_ppm") ? bench_json.numbers["gap_ppm"] : -1.0;
     if (std::abs(gap_v - golden_gap) > 1e-6)
     {
       std::cerr << "gap mismatch: got " << gap_v << " expected " << golden_gap << std::endl;
@@ -156,7 +244,7 @@ int main(int argc, char **argv)
   }
   if (golden_corrupt >= 0)
   {
-    double c_v = j.value("corrupt_ppm", -1.0);
+    double c_v = bench_json.numbers.count("corrupt_ppm") ? bench_json.numbers["corrupt_ppm"] : -1.0;
     if (std::abs(c_v - golden_corrupt) > 1e-6)
     {
       std::cerr << "corrupt mismatch: got " << c_v << " expected " << golden_corrupt << std::endl;
@@ -165,7 +253,7 @@ int main(int argc, char **argv)
   }
   if (golden_skew >= 0)
   {
-    double s_v = j.value("skew_ppm", -1.0);
+    double s_v = bench_json.numbers.count("skew_ppm") ? bench_json.numbers["skew_ppm"] : -1.0;
     if (std::abs(s_v - golden_skew) > 1e-6)
     {
       std::cerr << "skew mismatch: got " << s_v << " expected " << golden_skew << std::endl;
@@ -174,7 +262,7 @@ int main(int argc, char **argv)
   }
   if (golden_burst_ms >= 0)
   {
-    double b_v = j.value("burst_ms", -1.0);
+    double b_v = bench_json.numbers.count("burst_ms") ? bench_json.numbers["burst_ms"] : -1.0;
     if (std::abs(b_v - golden_burst_ms) > 1e-6)
     {
       std::cerr << "burst mismatch: got " << b_v << " expected " << golden_burst_ms << std::endl;
@@ -183,7 +271,7 @@ int main(int argc, char **argv)
   }
   if (golden_cpu_pin != -999)
   {
-    int cp = static_cast<int>(j.value("cpu_pin", -999));
+    int cp = bench_json.numbers.count("cpu_pin") ? static_cast<int>(bench_json.numbers["cpu_pin"]) : -999;
     if (cp != golden_cpu_pin)
     {
       std::cerr << "cpu_pin mismatch: got " << cp << " expected " << golden_cpu_pin << std::endl;

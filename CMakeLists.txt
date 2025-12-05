@@ -53,9 +53,6 @@ endif()
 # Put binaries in build/bin for consistent paths
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(nlohmann_json CONFIG REQUIRED)
-
 add_executable(replay
   src/replay.cpp
   src/breaker.cpp
@@ -63,7 +60,6 @@ add_executable(replay
 )
 target_include_directories(replay PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(replay PRIVATE -O3 -march=native)
-target_link_libraries(replay PRIVATE Boost::program_options)
 
 add_executable(gen_synth
   tools/gen_synth.cpp
@@ -127,7 +123,6 @@ if (BUILD_TESTING)
       tests/test_book_snapshot.cpp
     )
     target_include_directories(test_book_snapshot PRIVATE ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(test_book_snapshot PRIVATE nlohmann_json::nlohmann_json)
     add_test(NAME book_snapshot COMMAND test_book_snapshot)
     set_tests_properties(book_snapshot PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   else()

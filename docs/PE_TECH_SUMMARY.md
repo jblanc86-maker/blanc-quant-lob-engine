@@ -5,7 +5,7 @@ Blanc LOB Engine — quick tech snapshot to support private-equity diligence:
 TL;DR
 
 - Functionally deterministic C++20 Level-2 order-book replay and benchmarking framework.
-- Built with CMake + Ninja; small dependency surface (Boost program_options, standard C++) and a minimal CI for reproducible builds & artifacts.
+- Built with CMake + Ninja; minimal dependency surface (standard C++) and a minimal CI for reproducible builds & artifacts.
 - Golden-state verification via FNV digest + telemetry-driven book snapshot test to detect functional (state) regressions.
 
 Core capabilities
