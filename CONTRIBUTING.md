@@ -15,7 +15,7 @@ pre-commit run -a
 ## Development Environment
 
 * CMake ≥ 3.20, Ninja, and a C++20 compiler (Clang/GCC).
-* Boost (currently program_options) and standard build tools.
+* Standard build tools (CMake + Ninja) and a modern C++20 compiler.
 * Python 3.11+ for scripts and pre-commit hooks.
 * Optional: Docker (see `Dockerfile`) for hermetic builds.
 

@@ -2,13 +2,14 @@
 #include "breaker.hpp"
 #include "detectors.hpp"
 #include "telemetry.hpp"
-#include <boost/program_options.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <optional>
+#include <unordered_map>
 #ifdef __linux__
 #include <pthread.h>
 #include <sched.h>
@@ -16,7 +17,6 @@
 #include <cstring>
 #endif
 using namespace lob;
-namespace po = boost::program_options;
 
 static uint64_t fnv1a(const std::vector<uint8_t> &v)
 {
@@ -69,79 +69,178 @@ static bool read_all(const std::string &p, std::vector<uint8_t> &out)
   return f.read(reinterpret_cast<char *>(out.data()), n).good();
 }
 
+struct ReplayOptions
+{
+  std::string input = "data/golden/itch_1m.bin";
+  double gap_ppm = 0.0;
+  double corrupt_ppm = 0.0;
+  double skew_ppm = 0.0;
+  double burst_ms = 0.0;
+  int cpu_pin = -1;
+  bool help = false;
+};
+
+static void print_help()
+{
+  std::cout << "Blanc LOB Engine - Market Data Replay and Analysis\n\n"
+            << "Options:\n"
+            << "  --help, -h            Show this help message\n"
+            << "  --input <path>        Input binary file path (default data/golden/itch_1m.bin)\n"
+            << "  --gap-ppm <value>     Gap rate in parts per million (default 0)\n"
+            << "  --corrupt-ppm <value> Corrupt rate in parts per million (default 0)\n"
+            << "  --skew-ppm <value>    Skew rate in parts per million (default 0)\n"
+            << "  --burst-ms <value>    Burst duration in milliseconds (default 0)\n"
+            << "  --cpu-pin <core>      Pin main thread to CPU core (Linux-only; default -1)\n\n"
+            << "Exit Codes:\n"
+            << "  0 - Success\n"
+            << "  1 - Invalid argument\n"
+            << "  2 - File read error\n";
+}
+
+static std::optional<double> parse_double(const std::string &s)
+{
+  char *end = nullptr;
+  double v = std::strtod(s.c_str(), &end);
+  if (end == s.c_str() || *end != '\0')
+    return std::nullopt;
+  return v;
+}
+
+static std::optional<int> parse_int(const std::string &s)
+{
+  char *end = nullptr;
+  long v = std::strtol(s.c_str(), &end, 10);
+  if (end == s.c_str() || *end != '\0')
+    return std::nullopt;
+  return static_cast<int>(v);
+}
+
+static bool parse_args(int argc, char **argv, ReplayOptions &out)
+{
+  for (int i = 1; i < argc; ++i)
+  {
+    std::string arg = argv[i];
+    if (arg == "--help" || arg == "-h")
+    {
+      out.help = true;
+      continue;
+    }
+
+    auto consume_value = [&](std::string &dst) -> bool {
+      if (i + 1 >= argc)
+        return false;
+      dst = argv[++i];
+      return true;
+    };
+
+    if (arg == "--input")
+    {
+      if (!consume_value(out.input))
+        return false;
+    }
+    else if (arg == "--gap-ppm")
+    {
+      std::string v;
+      if (!consume_value(v))
+        return false;
+      auto parsed = parse_double(v);
+      if (!parsed)
+        return false;
+      out.gap_ppm = *parsed;
+    }
+    else if (arg == "--corrupt-ppm")
+    {
+      std::string v;
+      if (!consume_value(v))
+        return false;
+      auto parsed = parse_double(v);
+      if (!parsed)
+        return false;
+      out.corrupt_ppm = *parsed;
+    }
+    else if (arg == "--skew-ppm")
+    {
+      std::string v;
+      if (!consume_value(v))
+        return false;
+      auto parsed = parse_double(v);
+      if (!parsed)
+        return false;
+      out.skew_ppm = *parsed;
+    }
+    else if (arg == "--burst-ms")
+    {
+      std::string v;
+      if (!consume_value(v))
+        return false;
+      auto parsed = parse_double(v);
+      if (!parsed)
+        return false;
+      out.burst_ms = *parsed;
+    }
+    else if (arg == "--cpu-pin")
+    {
+      std::string v;
+      if (!consume_value(v))
+        return false;
+      auto parsed = parse_int(v);
+      if (!parsed)
+        return false;
+      out.cpu_pin = *parsed;
+    }
+    else
+    {
+      std::cerr << "Unknown argument: " << arg << "\n";
+      return false;
+    }
+  }
+  return true;
+}
+
 int main(int argc, char **argv)
 {
-  po::options_description desc("Blanc LOB Engine - Market Data Replay and Analysis");
-  desc.add_options()("help,h", "Show this help message")("input", po::value<std::string>()->default_value("data/golden/itch_1m.bin"),
-                                                         "Input binary file path")("gap-ppm", po::value<double>()->default_value(0.0),
-                                                                                   "Gap rate in parts per million")("corrupt-ppm", po::value<double>()->default_value(0.0),
-                                                                                                                    "Corrupt rate in parts per million")("skew-ppm", po::value<double>()->default_value(0.0),
-                                                                                                                                                         "Skew rate in parts per million")("burst-ms", po::value<double>()->default_value(0.0),
-                                                                                                                                                                                           "Burst duration in milliseconds");
-  desc.add_options()("cpu-pin", po::value<int>()->default_value(-1), "Pin main thread to CPU core (Linux-only)");
-
-  po::variables_map vm;
-  try
+  ReplayOptions opt;
+  if (!parse_args(argc, argv, opt))
   {
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-  }
-  catch (const po::error &e)
-  {
-    std::cerr << "Error: " << e.what() << "\n\n";
-    std::cerr << desc << "\n";
-    std::cerr << "Exit Codes:\n"
-              << "  0 - Success\n"
-              << "  1 - Invalid argument\n"
-              << "  2 - File read error\n";
+    print_help();
     return 1;
   }
 
-  if (vm.count("help"))
+  if (opt.help)
   {
-    std::cout << desc << "\n";
-    std::cout << "Exit Codes:\n"
-              << "  0 - Success\n"
-              << "  1 - Invalid argument\n"
-              << "  2 - File read error\n";
+    print_help();
     return 0;
   }
 
-  std::string input = vm["input"].as<std::string>();
-  double g = vm["gap-ppm"].as<double>();
-  double c = vm["corrupt-ppm"].as<double>();
-  double sk = vm["skew-ppm"].as<double>();
-  double burst_ms = vm["burst-ms"].as<double>();
-  int cpu_pin = vm["cpu-pin"].as<int>();
   std::vector<uint8_t> buf;
-  if (!read_all(input, buf))
+  if (!read_all(opt.input, buf))
   {
-    std::cerr << "Blanc LOB Engine: could not read " << input << "\n";
+    std::cerr << "Blanc LOB Engine: could not read " << opt.input << "\n";
     return 2;
   }
 
   using clock = std::chrono::steady_clock;
   auto start = clock::now();
   // Set CPU affinity as requested (best-effort; Linux-only)
-  if (cpu_pin >= 0)
+  if (opt.cpu_pin >= 0)
   {
 #ifdef __linux__
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
-    CPU_SET(cpu_pin, &cpuset);
+    CPU_SET(opt.cpu_pin, &cpuset);
     int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
     if (rc != 0)
     {
       std::cerr << "Warning: pthread_setaffinity_np failed: " << std::strerror(errno) << "\n";
     }
 #else
-    (void)cpu_pin; // no-op on non-Linux platforms
+    (void)opt.cpu_pin; // no-op on non-Linux platforms
 #endif
   }
   uint64_t d = fnv1a(buf);
   Detectors det;
   det.on_message(buf.size());
-  det.inject_ppm(g, c, sk, burst_ms);
+  det.inject_ppm(opt.gap_ppm, opt.corrupt_ppm, opt.skew_ppm, opt.burst_ms);
   Breaker br(BreakerThresholds{});
   auto st = br.step(det.readings());
 
@@ -149,10 +248,10 @@ int main(int argc, char **argv)
   std::string out_dir = env_artdir && *env_artdir ? std::string(env_artdir) : std::string("artifacts");
   ensure_dir(out_dir);
   TelemetrySnapshot t;
-  t.input_path = input;
+  t.input_path = opt.input;
   t.golden_digest_hex = "<sha256-file>";
   t.actual_digest_hex = hex64(d);
-  t.cpu_pin = cpu_pin;
+  t.cpu_pin = opt.cpu_pin;
   t.readings = det.readings();
   t.breaker = st;
   t.publish_allowed = br.publish_allowed();
