@@ -161,6 +161,8 @@ Hardware-aware flow control for deterministic replay that uses queue/telemetry s
 Prereqs: CMake ≥ 3.20, Ninja, modern C++20 compiler, Boost, and
 `nlohmann-json`.
 
+See `docs/BEST_PRACTICES.md` for reproducible build and review habits before diving in.
+
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
