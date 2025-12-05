@@ -1,44 +1,51 @@
-# Badges
+# Blanc Quant LOB Engine (`blanc-quant-lob-engine`)
 
-[![GitHub release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-blue.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
-[![Code Style: clang-format](https://img.shields.io/badge/code%20style-clang--format-brightgreen.svg)](https://clang.llvm.org/docs/ClangFormat.html)
-<!-- markdownlint-disable MD013 -->
-# Blanc Quant LOB Engine
-
+[![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
-[![Container Scan](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
+[![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
-
-<!-- Performance Badges -->
-
-<!-- Repo & Build Info Badges -->
+[![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
+[![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
+[![p99 ms](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
+[![Code Style: clang-format](https://img.shields.io/badge/code%20style-clang--format-brightgreen.svg)](https://clang.llvm.org/docs/ClangFormat.html)
+[![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
+[![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://hub.docker.com/)
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay engine for quantitative and
-low-latency research.
+Deterministic C++20 limit order book (LOB) replay engine for quantitative and low-latency research.
 
-Quant LOB Engine is a **replay + benchmarking harness** for HFT-style order
-books, built for:
+Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
 
 - **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
 - **Structured observability:** Every run emits JSONL and Prometheus-compatible textfiles for diffing, dashboards, and CI.
 
-If you care about *"can we replay this exactly, under load, and prove it didn't
-get slower or weirder at the tails?"* this engine is the answer.
+If you care about *"can we replay this exactly, under load, and prove it didn't get slower or weirder at the tails?"* this engine is the answer.
+
+## Quickstart
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+build/bin/replay --input data/golden/itch_1m.bin
+```
+
+This replays the ITCH 1M golden sample, emits `artifacts/bench.jsonl` and `artifacts/metrics.prom`, and verifies determinism against `data/golden/itch_1m.fnv`.
 
 ## What Makes This Innovative
 
@@ -289,9 +296,7 @@ artifacts/      # generated outputs (gitignored)
 
 ## Security & Safety
 
-`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp artifacts.
-
-Blanc LOB Engine is opinionated toward safety-by-default: determinism, repeatable benches, and explicit tail SLOs are non-negotiable controls rather than after-the-fact monitoring.
+`SECURITY.md` documents coordinated disclosure. CI integrates detect-secrets and CodeQL. Container scanning is handled by Trivy (v0.67.2) with SARIF ingestion to the Security tab and JSON summaries (non-blocking severity gates). Signing helpers live under `scripts/` if you need to stamp artifacts. Blanc LOB Engine is opinionated toward safety-by-default: determinism, repeatable benches, and explicit tail SLOs are non-negotiable controls rather than after-the-fact monitoring.
 
 ## Contributing
 
