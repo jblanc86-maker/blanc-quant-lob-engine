@@ -31,4 +31,3 @@ jobs:
           git add badges/performance.json
           git commit -m "perf: update performance badge JSON"
           git push origin main
-          
