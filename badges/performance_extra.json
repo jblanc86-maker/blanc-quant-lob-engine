@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "label": "p50/p95/p99",
+  "message": "10.36/10.49/10.49 ms",
+  "color": "green"
+}
