@@ -161,26 +161,26 @@ These Mermaid diagrams can be pasted into the README directly (GitHub renders th
 ```mermaid
 flowchart LR
     subgraph Inputs
-      A[Golden Trace<br/>(ITCH bin)]
-      B[Fault Knobs<br/>(gap/skew/burst/corrupt)]
+      A["Golden Trace\n(ITCH bin)"]
+      B["Fault Knobs\n(gap/skew/burst/corrupt)"]
     end
 
     subgraph Core
-      C[Deterministic Scheduler<br/>(single-thread, fixed seeds)]
-      D[Book Core (C++20)<br/>SoA layout]
+      C["Deterministic Scheduler\n(single-thread, fixed seeds)"]
+      D["Book Core (C++20)\nSoA layout"]
     end
 
     subgraph Gates
-      E[Execution Gates Controller<br/>(breaker-style, adaptive)]
+      E["Execution Gates Controller\n(breaker-style, adaptive)"]
     end
 
     subgraph Verifier
-      F[Golden-State Verifier<br/>(byte-for-byte)]
+      F["Golden-State Verifier\n(byte-for-byte)"]
     end
 
     subgraph Outputs
-      G[Stdout Summary<br/>(digest_fnv, breaker, publish)]
-      H[Artifacts<br/>bench.jsonl, metrics.prom]
+      G["Stdout Summary\n(digest_fnv, breaker, publish)"]
+      H["Artifacts\nbench.jsonl, metrics.prom"]
     end
 
     A --> C
@@ -197,11 +197,11 @@ flowchart LR
 ```mermaid
 flowchart TD
     A[Next event from replay]
-    B[Measure features<br/>(Delta t, size, burst run)]
-    C[Compare to baseline<br/>(MAD/quantile bands)]
+  B["Measure features\n(Delta t, size, burst run)"]
+  C["Compare to baseline\n(MAD/quantile bands)"]
     D{Pathological?}
-    E[Apply Gate<br/>- pace tiny window<br/>- coalesce bounded batch<br/>- retry-once stabilization]
-    F[Telemetry log<br/>(gate=ON, reason=...)]
+  E["Apply Gate\n- pace tiny window\n- coalesce bounded batch\n- retry-once stabilization"]
+  F["Telemetry log\n(gate=ON, reason=...)"]
     N[Process normally]
 
     A --> B --> C --> D
@@ -214,9 +214,9 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph p99_latency_over_time[Concept Sketch]
-      base[Baseline p99 (flat-ish)]
-      ungated[Ungated burst (hump)]
-      gated[Gated (flat, at/below baseline)]
+      base["Baseline p99 (flat-ish)"]
+      ungated["Ungated burst (hump)"]
+      gated["Gated (flat, at/below baseline)"]
     end
     base --> ungated --> gated
     %% (Use this as a legend; the PDF shows the visual plot.)
