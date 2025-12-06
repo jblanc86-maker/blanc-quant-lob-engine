@@ -334,6 +334,7 @@ docker run --rm -v "$PWD/data:/data" blanc-quant-lob-engine:local \
 scripts/verify_golden.sh     # digest determinism check
 scripts/bench.sh 9           # multi-run benchmark harness
 scripts/prom_textfile.sh ... # emit metrics.prom schema
+scripts/run_local_checks.sh  # export PYTHONPATH and run local build/test gates
 scripts/verify_bench.py      # release gate enforcement
 scripts/bench_report.py      # render HTML latency/digest dashboard
 ```
