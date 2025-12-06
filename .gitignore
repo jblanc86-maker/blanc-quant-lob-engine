@@ -8,7 +8,10 @@
 /compile_commands.json
 
 # Repo artifacts
-/artifacts/
+/artifacts/*
+!/artifacts/baselines/
+/artifacts/baselines/*
+!/artifacts/baselines/sample_runner.json
 tests/out/
 
 # Python virtual environment
@@ -31,4 +34,4 @@ __pycache__/
 .DS_Store
 .Trash/
 
-/artifacts/
+# Legacy duplicate entry consolidated above
