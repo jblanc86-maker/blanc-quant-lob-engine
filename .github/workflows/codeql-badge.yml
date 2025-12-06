@@ -1,0 +1,34 @@
+name: Refresh CodeQL Badge
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  security-events: read
+
+jobs:
+  refresh-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Update CodeQL badge JSON
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 scripts/update_codeql_badge.py --output badges/codeql_alerts.json
+
+      - name: Commit badge if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: refresh CodeQL badge"
+          file_pattern: badges/codeql_alerts.json

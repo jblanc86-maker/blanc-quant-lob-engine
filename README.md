@@ -418,7 +418,8 @@ determinism, repeatable benches, and explicit tail SLOs are non-negotiable contr
 monitoring.
 
 Run `python3 scripts/update_codeql_badge.py --output badges/codeql_alerts.json` (set `GITHUB_TOKEN` for accurate counts)
-to refresh the JSON used by the **CodeQL Summary** badge.
+to refresh the JSON used by the **CodeQL Summary** badge. The scheduled workflow `codeql-badge.yml` runs nightly (03:00 UTC)
+and automatically commits the updated `badges/codeql_alerts.json` so the badge never goes stale.
 
 ## Contributing
 
