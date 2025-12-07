@@ -1,9 +1,33 @@
-- name: Commit changes if needed
-  run: |
-    git add .
-    if [[ -n "$(git status --porcelain)" ]]; then
-      git commit -m "Update badge"
-      git push
-    else
-      echo "No changes to commit."
-    fi
+name: Update Performance Badge
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  update-badge:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update badge (example)
+        run: |
+          echo '{"performance": "updated"}' > badges/performance.json
+
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git add badges/performance.json
+          git commit -m "perf: update performance badge JSON"
+          git push origin main
