@@ -26,15 +26,17 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay engine for quantitative and low-latency research.
+The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; all advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
+If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones as of 12/07/25).
+
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
 
-- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
+- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts. 
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls.
-  (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
+  (Open-source release includes simple breaker state machine; ALL advanced DEG features remain proprietary.)
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
-- **Structured observability:** Every run emits JSONL and Prometheus-compatible textfiles for diffing, dashboards, and CI.
+- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
 
 If you care about *"can we replay this exactly, under load, and prove it didn't get slower or weirder at the tails?"* this engine is the answer.
 
@@ -335,7 +337,13 @@ scripts/prom_textfile.sh ... # emit metrics.prom schema
 scripts/run_local_checks.sh  # export PYTHONPATH and run local build/test gates
 scripts/verify_bench.py      # release gate enforcement
 scripts/bench_report.py      # render HTML latency/digest dashboard
+./run_local_checks.sh        # export PYTHONPATH + run verify/report locally
 ```
+
+Need structured data or tuning hints? Append `--run-metrics-exporter --auto-tune`
+to `scripts/verify_bench.py` to emit `artifacts/metrics-export.json` with the
+current run, Prometheus metrics, and suggested gate multipliers.
+See `docs/local-checks.md` for more local workflow tips.
 
 ## Golden-state validation
 
