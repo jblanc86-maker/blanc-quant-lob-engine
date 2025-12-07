@@ -28,6 +28,7 @@ on:
 
 jobs:
   verify:
+    # permissions block already present, removed duplicate
     name: Verify deterministic bench
     runs-on: ubuntu-latest
     permissions:

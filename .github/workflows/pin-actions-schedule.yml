@@ -16,6 +16,7 @@ on:
 
 jobs:
   pin:
+    # permissions block already present, removed duplicate
     runs-on: ubuntu-latest
     permissions:
       contents: write

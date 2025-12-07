@@ -1,0 +1,5 @@
+# Example policy file for app
+policy:
+  name: default_policy
+  threshold: 10
+  enabled: true

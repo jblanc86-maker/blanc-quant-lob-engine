@@ -1,0 +1,43 @@
+name: Enterprise CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bql-enterprise/**'
+      - 'include/**'
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'ci/workflows/enterprise-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'bql-enterprise/**'
+      - 'include/**'
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'ci/workflows/enterprise-ci.yml'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+      checks: read
+      statuses: read
+      issues: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+      - name: Build enterprise module
+        run: |
+          mkdir -p build && cd build
+          cmake ..
+          make
+      - name: Run tests
+        run: |
+          ctest --output-on-failure
