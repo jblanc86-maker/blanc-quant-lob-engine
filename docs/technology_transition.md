@@ -9,17 +9,17 @@ This document describes how development, funding, and transition typically works
 - Agencies (DARPA, DoD services, DHS, etc.) fund work via BAAs, SBIR/STTR, or OTAs.
 - You build prototypes, hit milestones, and report data + deliverables with specific IP/data rights markings.
 
-2. Proof → Transition
+1. Proof → Transition
 
 - You demonstrate at a lab/test event (e.g., TRL raise). Government sponsors look for a path into a Program of Record or a follow-on buy.
 - For DoD, an OTA prototype can roll into follow-on production without a new competition if criteria are met.
 
-3. Tech Transfer (T2) Mechanisms
+1. Tech Transfer (T2) Mechanisms
 
 - If the government or a federal lab owns IP/data: commercialization via licenses, CRADAs, or public releases (e.g., Distribution A) handled by their tech-transfer office.
 - If you own the IP (typical under Bayh-Dole with a university or contractor): you commercialize directly; the government retains a license per the contract.
 
-4. Scale → Commercial
+1. Scale → Commercial
 
 - Harden the product, get on a contract vehicle (GSA, OT follow-on, IDIQ, SBIR Phase III), or sell direct to industry.
 - Parallel civilian markets (finance, energy, healthcare) grow from the same core tech.
@@ -60,7 +60,7 @@ Pack artifacts by TRL
 ## Parallel IP actions now
 
 1. File a provisional patent on breaker-style gating + determinism approach.
-2. Keep open-source components separable from proprietary gating logic with clean modular boundaries.
+1. Keep open-source components separable from proprietary gating logic with clean modular boundaries.
 
 ## Transition map (concrete)
 

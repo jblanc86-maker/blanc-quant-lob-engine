@@ -7,10 +7,16 @@ on:
 
 jobs:
   update-badge:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
+ copilot/fixpin-actions-again
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+ main
 
       - name: Set up git user
         run: |
@@ -23,9 +29,9 @@ jobs:
 
       - name: Push changes
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git add badges/performance.json
           git commit -m "perf: update performance badge JSON"
           git push origin main
