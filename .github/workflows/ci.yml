@@ -138,3 +138,10 @@ jobs:
             artifacts/release/manifest.json
             artifacts/release/rights_manifest.json
           if-no-files-found: ignore
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+      checks: read
+      statuses: read
+      issues: read

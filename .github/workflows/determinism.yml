@@ -81,6 +81,13 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+              permissions:
+                actions: read
+                contents: read
+                pull-requests: read
+                checks: read
+                statuses: read
+                issues: read
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
           # Prefer top-level bench runner if present, else fall back to binary path
           if [ -x scripts/run-benchmarks.sh ]; then

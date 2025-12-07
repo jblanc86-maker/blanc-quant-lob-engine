@@ -36,9 +36,13 @@ jobs:
       ${{ !contains(github.event.head_commit.message, '[skip-ci]')
           && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     permissions:
-      actions: read
-      contents: read
-      security-events: write
+      actions: read           # Allow reading workflow run details
+      contents: read          # Allow reading repository contents
+      security-events: write  # Allow writing security alerts
+      pull-requests: read     # Allow reading PR metadata (for PR context)
+      checks: read            # Allow reading check run status
+      statuses: read          # Allow reading commit statuses
+      issues: read            # Allow reading issues (for context)
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
