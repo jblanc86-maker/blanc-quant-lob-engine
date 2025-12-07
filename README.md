@@ -32,11 +32,11 @@ If you’re working on low-latency trading or quant infrastructure and would lik
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
 
-- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
+- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts. 
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls.
-  (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
+  (Open-source release includes simple breaker state machine; ALL advanced DEG features remain proprietary.)
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
-- **Structured observability:** Every run emits JSONL and Prometheus-compatible textfiles for diffing, dashboards, and CI.
+- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
 
 If you care about *"can we replay this exactly, under load, and prove it didn't get slower or weirder at the tails?"* this engine is the answer.
 
