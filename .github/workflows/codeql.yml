@@ -48,19 +48,43 @@ jobs:
         with:
           languages: cpp
 
-      - name: Install build deps
+      - name: Install build deps (explicit compilers + regex dev)
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
+          # Install explicit compilers and common dev packages
+          sudo apt-get install -y \
+            build-essential \
+            gcc-13 g++-13 \
+            cmake ninja-build \
+            libboost-all-dev \
+            nlohmann-json3-dev \
+            libpcre3-dev libpcre2-dev libpcre++-dev \
+            libgnuregex-dev || true
+          # Debug prints
+          /usr/bin/gcc-13 --version || true
+          /usr/bin/g++-13 --version || true
+          which g++ || true
+          g++ --version || true
+          cmake --version
 
-      - name: Build
+      - name: Build (use explicit compilers)
         run: |
+          set -euo pipefail
           rm -rf build
-          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
+          # Force the compilers explicitly to avoid ambiguous detection
+          export CC=/usr/bin/gcc-13
+          export CXX=/usr/bin/g++-13
+          echo "Using compilers: $(which $CC) $(which $CXX)"
+          # Pass explicit compiler paths to CMake as well
+          /usr/bin/cmake -S . -B build -G Ninja \
+            -DCMAKE_C_COMPILER=/usr/bin/gcc-13 \
+            -DCMAKE_CXX_COMPILER=/usr/bin/g++-13 \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=OFF \
-            -DBUILD_BENCHMARKS=OFF
-          cmake --build build --config Release -j $(nproc)
+            -DBUILD_BENCHMARKS=OFF \
+            -D CMAKE_EXPORT_COMPILE_COMMANDS=ON
+          /usr/bin/cmake --build build --config Release -j $(nproc)
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2
