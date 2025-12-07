@@ -26,7 +26,7 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; some advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
+The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; all advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
 If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones to date).
 
 
