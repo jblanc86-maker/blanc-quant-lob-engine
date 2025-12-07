@@ -4,52 +4,137 @@ on:
   schedule:
     - cron: '0 7 * * 1' # Weekly Monday 07:00 UTC
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      DATADOG_API_KEY:
+        required: false
+      DATADOG_APP_KEY:
+        required: false
+      DATADOG_SITE:
+        required: false
 
 jobs:
   report:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      WINDOW_DAYS: '7'
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+      DATADOG_SITE: ${{ secrets.DATADOG_SITE }}
     steps:
       - name: Generate weekly workflow run summary
         id: generate
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        env:
+          WINDOW_DAYS: ${{ env.WINDOW_DAYS }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const since = new Date(Date.now() - 7*24*60*60*1000).toISOString();
-            const workflows = [
-              'ci.yml',
-              'container-scan.yml',
-              'determinism.yml',
-              'codeql.yml',
-              'secrets-scan.yml',
-              'smoke-sitrep.yml',
-              'repro.yml',
-              'snapshot-nightly.yml'
-            ];
+            const days = parseInt(process.env.WINDOW_DAYS || '7', 10);
+            const windowMs = days * 24 * 60 * 60 * 1000;
+            const since = new Date(Date.now() - windowMs);
+
+            const { data: wfList } = await github.rest.actions.listRepoWorkflows({ owner, repo, per_page: 100 });
+            const tracked = (wfList.workflows || [])
+              .filter((wf) => wf.state === 'active')
+              .map((wf) => ({ id: wf.id, path: wf.path, name: wf.name }));
+
+            async function fetchRuns(wfId) {
+              const runs = [];
+              let page = 1;
+              while (true) {
+                const { data } = await github.rest.actions.listWorkflowRuns({
+                  owner,
+                  repo,
+                  workflow_id: wfId,
+                  per_page: 100,
+                  page
+                });
+                if (!data.workflow_runs?.length) {
+                  break;
+                }
+                for (const run of data.workflow_runs) {
+                  const created = new Date(run.created_at);
+                  if (created < since) {
+                    return runs;
+                  }
+                  runs.push(run);
+                }
+                page += 1;
+              }
+              return runs;
+            }
+
+            function durationMs(run) {
+              if (typeof run.run_duration_ms === 'number') return run.run_duration_ms;
+              const start = new Date(run.run_started_at || run.created_at).getTime();
+              const end = new Date(run.updated_at || run.completed_at || Date.now()).getTime();
+              return Math.max(end - start, 0);
+            }
+
             const summary = {};
-            for (const wf of workflows) {
+            for (const wf of tracked) {
               try {
-                const { data } = await github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id: wf, per_page: 100 });
-                const runs = data.workflow_runs.filter(r => new Date(r.created_at).toISOString() >= since);
-                summary[wf] = {
-                  count: runs.length,
-                  success: runs.filter(r => r.conclusion === 'success').length,
-                  failure: runs.filter(r => r.conclusion === 'failure').length,
-                  cancelled: runs.filter(r => r.conclusion === 'cancelled').length
+                const runs = await fetchRuns(wf.id);
+                const count = runs.length;
+                const success = runs.filter((r) => r.conclusion === 'success').length;
+                const failure = runs.filter((r) => r.conclusion === 'failure').length;
+                const cancelled = runs.filter((r) => r.conclusion === 'cancelled').length;
+                const inProgress = runs.filter((r) => r.status !== 'completed').length;
+                const avgDuration = count ? runs.reduce((acc, r) => acc + durationMs(r), 0) / count : 0;
+                const successRate = count ? +(success / count * 100).toFixed(1) : 0;
+                summary[wf.path] = {
+                  workflow: wf.name,
+                  file: wf.path,
+                  count,
+                  success,
+                  failure,
+                  cancelled,
+                  inProgress,
+                  successRate,
+                  avgDurationMs: Math.round(avgDuration)
                 };
-              } catch (e) {
-                summary[wf] = { error: e.message };
+              } catch (error) {
+                summary[wf.path] = { workflow: wf.name, file: wf.path, error: error.message };
               }
             }
-            const lines = Object.entries(summary).map(([wf, s]) => {
-              if (s.error) return `- ${wf}: error ${s.error}`;
-              return `- ${wf}: total=${s.count}, success=${s.success}, failure=${s.failure}, cancelled=${s.cancelled}`;
+
+            const rows = Object.values(summary).sort((a, b) => (b.failure || 0) - (a.failure || 0));
+            const header = '| Workflow | Runs | Success % | Success | Failure | Cancelled | Avg Duration |';
+            const separator = '|---|---:|---:|---:|---:|---:|---:|';
+            const table = rows.map((s) => {
+              if (s.error) {
+                return `| ${s.workflow} | – | – | – | – | – | error: ${s.error} |`;
+              }
+              const avg = s.avgDurationMs ? `${(s.avgDurationMs / 60000).toFixed(2)} min` : 'n/a';
+              return `| ${s.workflow} | ${s.count} | ${s.successRate}% | ${s.success} | ${s.failure} | ${s.cancelled} | ${avg} |`;
             });
-            const body = `Weekly workflow run summary (last 7 days):\n` + lines.join('\n');
-            core.setOutput('summary', body);
-            console.log(body);
+            const markdown = [
+              `Weekly workflow run summary (last ${days} days)`,
+              header,
+              separator,
+              ...table
+            ].join('\n');
+
+            const report = {
+              generatedAt: new Date().toISOString(),
+              windowDays: days,
+              workflows: rows
+            };
+
+            const fs = require('fs');
+            fs.mkdirSync('reports', { recursive: true });
+            fs.writeFileSync('reports/summary.md', markdown);
+            fs.writeFileSync('reports/workflow-usage-report.json', JSON.stringify(report, null, 2));
+
+            core.setOutput('summary', markdown);
+            core.setOutput('summary_markdown', markdown);
+            core.setOutput('summary_json', JSON.stringify(report, null, 2));
+            console.log(markdown);
+
       - name: Create or update issue with summary
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
         with:
@@ -58,8 +143,8 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const title = 'Weekly CI Usage Summary';
-            const summaryStep = `${{ steps.generate.outputs.summary }}`;
-            // Search for existing open issue
+            const fs = require('fs');
+            const summaryStep = fs.readFileSync('reports/summary.md', 'utf8');
             const { data: issues } = await github.rest.search.issuesAndPullRequests({ q: `repo:${owner}/${repo} is:issue is:open "${title}"` });
             let issueNumber = issues.items?.[0]?.number;
             if (!issueNumber) {
@@ -70,3 +155,93 @@ jobs:
               await github.rest.issues.createComment({ owner, repo, issue_number: issueNumber, body: summaryStep });
               console.log(`Updated issue #${issueNumber}`);
             }
+
+      - name: Push metrics to Datadog
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            if (!process.env.DATADOG_API_KEY || !process.env.DATADOG_APP_KEY) {
+              core.notice('DATADOG_API_KEY or DATADOG_APP_KEY not configured; skipping Datadog export');
+              return;
+            }
+            const fs = require('fs');
+            const payloadPath = 'reports/workflow-usage-report.json';
+            if (!fs.existsSync(payloadPath)) {
+              throw new Error(`Missing report file at ${payloadPath}`);
+            }
+            const data = JSON.parse(fs.readFileSync(payloadPath, 'utf8'));
+            const series = [];
+            const now = Math.floor(Date.now() / 1000);
+            const repoName = `${context.repo.owner}/${context.repo.repo}`;
+
+            for (const wf of data.workflows) {
+              if (wf.error) {
+                continue;
+              }
+              const tags = [
+                `workflow:${wf.workflow}`,
+                `file:${wf.file}`,
+                `repo:${repoName}`
+              ];
+              const resources = [
+                { name: repoName, type: 'repo' },
+                { name: wf.workflow, type: 'workflow' }
+              ];
+
+              const metrics = [
+                { metric: 'ci.workflow.runs.total', value: wf.count },
+                { metric: 'ci.workflow.runs.success', value: wf.success },
+                { metric: 'ci.workflow.runs.failure', value: wf.failure },
+                { metric: 'ci.workflow.runs.cancelled', value: wf.cancelled },
+                { metric: 'ci.workflow.success_rate_pct', value: wf.successRate },
+                { metric: 'ci.workflow.avg_duration_ms', value: wf.avgDurationMs }
+              ];
+
+              for (const entry of metrics) {
+                if (typeof entry.value !== 'number' || Number.isNaN(entry.value)) {
+                  continue;
+                }
+                series.push({
+                  metric: entry.metric,
+                  type: 0,
+                  points: [{ timestamp: now, value: entry.value }],
+                  tags,
+                  resources
+                });
+              }
+            }
+
+            if (!series.length) {
+              core.warning('No series to send to Datadog');
+              return;
+            }
+
+            const site = (process.env.DATADOG_SITE || 'datadoghq.com').replace(/^https?:\/\//, '');
+            const endpoint = `https://api.${site}/api/v2/series`;
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'DD-API-KEY': process.env.DATADOG_API_KEY,
+                'DD-APPLICATION-KEY': process.env.DATADOG_APP_KEY
+              },
+              body: JSON.stringify({ series })
+            });
+
+            if (!response.ok) {
+              const text = await response.text();
+              throw new Error(`Datadog ingestion failed: ${response.status} ${response.statusText} -> ${text}`);
+            }
+
+            const body = await response.json();
+            console.log(`Published ${series.length} metrics to Datadog`, body);
+
+      - name: Upload usage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-usage-report
+          retention-days: 14
+          path: |
+            reports/workflow-usage-report.json
+            reports/summary.md

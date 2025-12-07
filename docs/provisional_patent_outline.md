@@ -2,8 +2,7 @@
 
 This document is a draft provisional patent outline for the core inventions embodied in the Blanc LOB Engine. It is intended to be used as a technical resource for patent counsel and engineering teams when preparing a provisional patent filing and figure set.
 
-Summary of innovations
------------------------
+## Summary of innovations
 
 - Deterministic replay of time-ordered event streams (e.g., ITCH) with canonical serialization and auditable end-state digests (e.g., FNV rolling hash) for reproducible verification.
 - Breaker-style gating logic integrated into a low-latency signal processing pipeline that mitigates pathological conditions while preserving tail-latency bounds.
@@ -101,11 +100,10 @@ Dependent Claim Examples (draft):
 - FIG. 8: Packaging rights manifest and signed artifact flow diagram.
 - FIG. 9: Example histograms / violin plots for latency analysis.
 
-11. Next Steps & Deliverables for Counsel
----------------------------------------
+## Next Steps & Deliverables for Counsel
 1. Add simplified pseudocode for the deterministic loop and the breaker's state machine (sufficiently detailed but not production code).
-2. Generate FIG. 1–9 with vector diagrams (SVG), and annotate the diagrams with parameter/threshold names used in the detectors and gates.
-3. Draft final provisional-language claims with counsel and include the figure set in the provisional filing.
+1. Generate FIG. 1–9 with vector diagrams (SVG), and annotate the diagrams with parameter/threshold names used in the detectors and gates.
+1. Draft final provisional-language claims with counsel and include the figure set in the provisional filing.
 
 Note: keep the system modularly partitioned so commercialization options can be selected (e.g., keep gating logic proprietary and open-source the telemetry export if desired).
 

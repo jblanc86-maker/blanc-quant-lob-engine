@@ -9,14 +9,40 @@ if [[ -n "${CPU_PIN:-}" ]]; then
 fi
 # Run bench in the same ART_DIR and with CPU_PIN if provided, then parse the quantiles.
 read p50 p95 p99 < <(ART_DIR="$ART_DIR" CPU_PIN="${CPU_PIN:-}" scripts/bench.sh 9 | awk '/p50_ms=/{gsub("p50_ms=","");gsub("p95_ms=","");gsub("p99_ms=",""); print $1,$2,$3}')
+p50=${p50:-0}
+p95=${p95:-0}
+p99=${p99:-0}
 tmp_out=$(mktemp /tmp/lob_metrics.XXXXXX.prom)
-echo -e "lob_bench_p50_ms $p50\nlob_bench_p95_ms $p95\nlob_bench_p99_ms $p99" > "$tmp_out"
-# If replay wrote a telemetry metrics.prom into ART_DIR, append lob_cpu_pin from it (best-effort).
-if [[ -f "$ART_DIR/metrics.prom" ]]; then
-  lob_cpu_pin_value=$(grep -E '^lob_cpu_pin ' "$ART_DIR/metrics.prom" | awk '{print $2}' || true)
-  if [[ -n "$lob_cpu_pin_value" ]]; then
-    echo "lob_cpu_pin $lob_cpu_pin_value" >> "$tmp_out"
-  fi
+
+if [[ -f "$out" ]]; then
+  awk '!/^lob_bench_/ && $1 != "lob_p50_ms" && $1 != "lob_p95_ms" && $1 != "lob_p99_ms"' "$out" > "$tmp_out"
+else
+  : > "$tmp_out"
 fi
+
+ensure_metric() {
+  local key="$1"
+  local value="$2"
+  if ! grep -q "^${key} " "$tmp_out"; then
+    printf '%s %s\n' "$key" "$value" >> "$tmp_out"
+  fi
+}
+
+existing_publish=$(awk '/^lob_publish_allowed / {print $2; exit}' "$out" 2>/dev/null || true)
+if [[ -z "${existing_publish:-}" ]]; then
+  existing_publish=1
+fi
+
+ensure_metric "lob_publish_allowed" "$existing_publish"
+
+{
+  printf 'lob_p50_ms %s\n' "$p50"
+  printf 'lob_p95_ms %s\n' "$p95"
+  printf 'lob_p99_ms %s\n' "$p99"
+  printf 'lob_bench_p50_ms %s\n' "$p50"
+  printf 'lob_bench_p95_ms %s\n' "$p95"
+  printf 'lob_bench_p99_ms %s\n' "$p99"
+} >> "$tmp_out"
+
 mv "$tmp_out" "$out"
 echo "wrote $out"
