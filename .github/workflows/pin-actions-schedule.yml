@@ -1,5 +1,6 @@
 name: Pin Actions by SHA (Scheduled)
 
+
 on:
   schedule:
     - cron: '0 6 * * 1' # weekly on Monday at 06:00 UTC
@@ -13,6 +14,13 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docs/**'
+
+permissions:
+  contents: read
+  # Minimal permissions for pin-actions-schedule workflow; restrict GITHUB_TOKEN to read-only
+  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+  # Do not remove unless workflow requires write access
+  # Copilot Autofix: actions/missing-workflow-permissions
 
 jobs:
   pin:
