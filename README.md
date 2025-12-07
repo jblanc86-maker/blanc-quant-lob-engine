@@ -11,7 +11,7 @@
 [![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![CodeQL Summary](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/codeql_alerts.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/security/code-scanning)
-[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?color=4caf50)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![Code Style: clang-format](https://img.shields.io/badge/code%20style-clang--format-brightgreen.svg)](https://clang.llvm.org/docs/ClangFormat.html)
