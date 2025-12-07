@@ -54,6 +54,10 @@ jobs:
           sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
 
       - name: Build
+        env:
+          # Temporarily disable CodeQL tracing during CMake configuration
+          # to prevent interference with compiler capability detection
+          LD_PRELOAD: ""
         run: |
           rm -rf build
           CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
