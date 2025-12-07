@@ -26,8 +26,16 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; all advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
-If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones as of 12/07/25).
+Blanc LOB Engine is a replay and benchmarking harness for HFT-style order books, designed for:
+
+- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
+- **Dynamic Execution Gates (DEG, patent-pending):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source includes a simple breaker state machine; advanced DEG features are proprietary.)
+- **Tail SLO enforcement:** `scripts/verify_bench.py` enforces p50/p95/p99 latency budgets as release gates.
+- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
+
+The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates. Advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
+
+If you work in low-latency trading or quant infrastructure and want to collaborate or discuss how this engine fits your team, contact me via LinkedIn. (600+ clones as of 12/07/25).
 
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
