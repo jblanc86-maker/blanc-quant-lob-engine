@@ -47,6 +47,15 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev jq nlohmann-json3-dev zip unzip
+
+      - name: Build + emit bench artifacts
+        run: |
+          make bench ART_DIR=artifacts
+
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:

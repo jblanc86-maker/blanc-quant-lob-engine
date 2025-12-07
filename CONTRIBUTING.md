@@ -43,7 +43,12 @@ Scripts for quick checks:
 scripts/verify_golden.sh   # golden data conformance
 scripts/bench.sh           # latency sample run
 scripts/prom_textfile.sh   # export Prometheus metrics
+./run_local_checks.sh      # sets PYTHONPATH + runs verify/bench report locally
 ```
+
+Tip: `scripts/verify_bench.py --run-metrics-exporter --auto-tune` will dump a
+JSON bundle (`artifacts/metrics-export.json`) that downstream dashboards or
+tuning tools can ingest.
 
 ## Pre-commit Hooks
 

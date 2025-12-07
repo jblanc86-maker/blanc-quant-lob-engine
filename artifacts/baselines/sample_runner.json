@@ -1,0 +1,8 @@
+{
+  "defaults": {
+    "median_p99_ms": 10.25,
+    "mad_p99_ms": 0.05,
+    "last_p99_ms": 10.36,
+    "digest_fnv": "0x36b7011851960792"
+  }
+}
