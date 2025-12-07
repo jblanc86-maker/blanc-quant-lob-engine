@@ -3,14 +3,12 @@
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
-[![CodeQL Alerts](https://img.shields.io/github/code-scanning/open/jblanc86-maker/blanc-quant-lob-engine?label=CodeQL%20Alerts&logo=github)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/security/code-scanning)
 [![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
 [![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
-[![p99 ms](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![CodeQL Summary](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/codeql_alerts.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/security/code-scanning)
 [![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
@@ -28,15 +26,17 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay engine for quantitative and low-latency research.
+The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; all advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
+If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones as of 12/07/25).
+
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
 
-- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
+- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts. 
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls.
-  (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
+  (Open-source release includes simple breaker state machine; ALL advanced DEG features remain proprietary.)
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
-- **Structured observability:** Every run emits JSONL and Prometheus-compatible textfiles for diffing, dashboards, and CI.
+- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
 
 If you care about *"can we replay this exactly, under load, and prove it didn't get slower or weirder at the tails?"* this engine is the answer.
 
@@ -161,26 +161,26 @@ These Mermaid diagrams can be pasted into the README directly (GitHub renders th
 ```mermaid
 flowchart LR
     subgraph Inputs
-      A[Golden Trace<br/>(ITCH bin)]
-      B[Fault Knobs<br/>(gap/skew/burst/corrupt)]
+      A["Golden Trace\n(ITCH bin)"]
+      B["Fault Knobs\n(gap/skew/burst/corrupt)"]
     end
 
     subgraph Core
-      C[Deterministic Scheduler<br/>(single-thread, fixed seeds)]
-      D[Book Core (C++20)<br/>SoA layout]
+      C["Deterministic Scheduler\n(single-thread, fixed seeds)"]
+      D["Book Core (C++20)\nSoA layout"]
     end
 
     subgraph Gates
-      E[Execution Gates Controller<br/>(breaker-style, adaptive)]
+      E["Execution Gates Controller\n(breaker-style, adaptive)"]
     end
 
     subgraph Verifier
-      F[Golden-State Verifier<br/>(byte-for-byte)]
+      F["Golden-State Verifier\n(byte-for-byte)"]
     end
 
     subgraph Outputs
-      G[Stdout Summary<br/>(digest_fnv, breaker, publish)]
-      H[Artifacts<br/>bench.jsonl, metrics.prom]
+      G["Stdout Summary\n(digest_fnv, breaker, publish)"]
+      H["Artifacts\nbench.jsonl, metrics.prom"]
     end
 
     A --> C
@@ -197,11 +197,11 @@ flowchart LR
 ```mermaid
 flowchart TD
     A[Next event from replay]
-    B[Measure features<br/>(Delta t, size, burst run)]
-    C[Compare to baseline<br/>(MAD/quantile bands)]
+  B["Measure features\n(Delta t, size, burst run)"]
+  C["Compare to baseline\n(MAD/quantile bands)"]
     D{Pathological?}
-    E[Apply Gate<br/>- pace tiny window<br/>- coalesce bounded batch<br/>- retry-once stabilization]
-    F[Telemetry log<br/>(gate=ON, reason=...)]
+  E["Apply Gate\n- pace tiny window\n- coalesce bounded batch\n- retry-once stabilization"]
+  F["Telemetry log\n(gate=ON, reason=...)"]
     N[Process normally]
 
     A --> B --> C --> D
@@ -214,9 +214,9 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph p99_latency_over_time[Concept Sketch]
-      base[Baseline p99 (flat-ish)]
-      ungated[Ungated burst (hump)]
-      gated[Gated (flat, at/below baseline)]
+      base["Baseline p99 (flat-ish)"]
+      ungated["Ungated burst (hump)"]
+      gated["Gated (flat, at/below baseline)"]
     end
     base --> ungated --> gated
     %% (Use this as a legend; the PDF shows the visual plot.)
@@ -334,9 +334,16 @@ docker run --rm -v "$PWD/data:/data" blanc-quant-lob-engine:local \
 scripts/verify_golden.sh     # digest determinism check
 scripts/bench.sh 9           # multi-run benchmark harness
 scripts/prom_textfile.sh ... # emit metrics.prom schema
+scripts/run_local_checks.sh  # export PYTHONPATH and run local build/test gates
 scripts/verify_bench.py      # release gate enforcement
 scripts/bench_report.py      # render HTML latency/digest dashboard
+./run_local_checks.sh        # export PYTHONPATH + run verify/report locally
 ```
+
+Need structured data or tuning hints? Append `--run-metrics-exporter --auto-tune`
+to `scripts/verify_bench.py` to emit `artifacts/metrics-export.json` with the
+current run, Prometheus metrics, and suggested gate multipliers.
+See `docs/local-checks.md` for more local workflow tips.
 
 ## Golden-state validation
 
