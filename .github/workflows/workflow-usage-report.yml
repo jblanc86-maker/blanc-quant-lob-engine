@@ -15,6 +15,10 @@ on:
 
 jobs:
   report:
+    permissions:
+      contents: read
+      issues: write
+      actions: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
