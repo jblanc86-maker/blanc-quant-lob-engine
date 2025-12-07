@@ -120,3 +120,68 @@ Once all checks are green, tag:
 git tag -a v1.0.0 -m "v1.0.0 – Stable deterministic replay + tail SLOs"
 git push origin v1.0.0
 ```
+
+---
+
+# v1.0.0 – Full Release Notes (2025-12-07)
+
+## Major Changes Since Last Release
+
+### CI/CD and Automation
+- Hardened all GitHub Actions workflows with explicit permissions blocks for CodeQL compliance and security.
+- Added concurrency cancellation, docs-only skip, and [skip-ci] guards to all major workflows.
+- Automated pinning of all GitHub Actions to commit SHAs for reproducibility.
+- Enhanced artifact upload and release packaging in CI workflows.
+- Added dynamic performance badge updates and metrics parsing in CI.
+- Improved workflow triggers with paths filters, weekly cron schedules, and manual dispatch.
+- Added workflow usage reporting and badge automation.
+
+### Codebase and Build System
+- Scaffolded CMakeLists.txt and CMakePresets.json for bql-enterprise module.
+- Created header/source stubs for core, determinism, gates, and other modules.
+- Added Google Benchmark suite and microbenchmark wiring.
+- Improved build scripts for explicit compiler selection and cross-platform support (Linux/macOS).
+- Added Boost and nlohmann-json dependencies to build scripts and CI.
+- Enhanced Makefile and release packaging scripts.
+
+### Documentation
+- Updated README.md with new badges, innovation highlights, and developer setup instructions.
+- Added deliverable marking checklist, technology transition appendix, and roadmap.
+- Documented Dynamic Execution Gates (DEG) and Release Gates (CI/CD) policy.
+- Added comprehensive innovation section and architecture diagrams.
+- Linked all new documentation from README.md and docs/.
+
+### Security and Compliance
+- Refreshed secrets baseline and improved detect-secrets workflow.
+- Added CodeQL and container scan workflows with explicit build steps and artifact uploads.
+- Hardened supply chain and license documentation (SPDX, Apache-2.0, BUSL-1.1).
+- Added SECURITY.md, CONTRIBUTING.md, and commercial license documentation.
+
+### Testing and Observability
+- Added golden-state validation and telemetry-based snapshot tests.
+- Enhanced test coverage for book snapshot, burst golden, and release packaging.
+- Improved metrics and artifact reporting in CI and determinism workflows.
+
+## Breaking Changes
+- All workflows now require explicit permissions blocks.
+- All GitHub Actions are pinned to commit SHAs.
+- CMake and build scripts require explicit compiler selection.
+
+## Upgrade Notes
+- Review new documentation in README.md and docs/ for setup and usage.
+- Ensure all local builds use updated CMake and Makefile scripts.
+- Review CI workflows for new permissions and artifact handling.
+
+## Contributors
+Special thanks to all contributors and reviewers for their work on automation, compliance, and innovation.
+
+---
+
+## Next Steps
+- Continue enterprise module population and automation.
+- Expand policy, test, and benchmark coverage.
+- Harden documentation and release automation for future versions.
+
+---
+
+This release marks v1.0.0 of Blanc Quant LOB Engine with robust automation, compliance, and innovation features.
