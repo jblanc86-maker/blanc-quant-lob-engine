@@ -428,6 +428,9 @@ Run `python3 scripts/update_codeql_badge.py --output badges/codeql_alerts.json` 
 to refresh the JSON used by the **CodeQL Summary** badge. The scheduled workflow `codeql-badge.yml` runs nightly (03:00 UTC)
 and automatically commits the updated `badges/codeql_alerts.json` so the badge never goes stale.
 
+
+<!-- DO NOT REMOVE: Visitors badge for repo analytics -->
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 ## Contributing
 
 See `CONTRIBUTING.md` for workflow expectations. Pull requests should pin new
