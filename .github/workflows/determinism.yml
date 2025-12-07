@@ -58,13 +58,12 @@ jobs:
           sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev unzip zip
       - name: Build (Release + Benchmarks)
         run: |
-          set -euxo pipefail
           rm -rf build
           CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
             -DBUILD_BENCHMARKS=ON \
-            -DCMAKE_CXX_STANDARD=17
+            -DCMAKE_CXX_STANDARD=20
           cmake --build build -j$(nproc)
 
       - name: Verify deterministic replay (2 runs)
