@@ -50,28 +50,14 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
         with:
-          languages: cpp
+          sudo apt-get install -y build-essential gcc-13 g++-13 cmake ninja-build libboost-all-dev nlohmann-json3-dev libpcre3-dev libpcre2-dev
 
       - name: Install build deps (explicit compilers + regex dev)
         run: |
-          set -euo pipefail
+          # Removed: libpcre++-dev libgnuregex-dev (unavailable)
           sudo apt-get update
-          # Install explicit compilers and common dev packages
-          sudo apt-get install -y \
-            build-essential \
-            gcc-13 g++-13 \
-            cmake ninja-build \
-            libboost-all-dev \
-            nlohmann-json3-dev \
-            libpcre3-dev libpcre2-dev libpcre++-dev \
-            libgnuregex-dev || true
-          # Debug prints
-          /usr/bin/gcc-13 --version || true
-          /usr/bin/g++-13 --version || true
-          which g++ || true
-          g++ --version || true
-          sudo apt-get install -y build-essential gcc-13 g++-13 cmake ninja-build libboost-all-dev nlohmann-json3-dev libpcre3-dev libpcre2-dev libpcre++-dev libgnuregex-dev
-          cmake --version
+          sudo apt-get install -y build-essential gcc-13 g++-13 cmake ninja-build libboost-all-dev nlohmann-json3-dev libpcre3-dev libpcre2-dev
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
 
       - name: Build (use explicit compilers)
         run: |
