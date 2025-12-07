@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BUSL-1.1
 name: CI
 
+
 on:
   push:
     branches: [main]
@@ -24,6 +25,13 @@ on:
         description: 'Manual CI run reason'
         required: false
         default: 'manual'
+
+permissions:
+  contents: read
+  # Minimal permissions for CI workflow; restrict GITHUB_TOKEN to read-only
+  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+  # Do not remove unless workflow requires write access
+  # Copilot Autofix: actions/missing-workflow-permissions
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

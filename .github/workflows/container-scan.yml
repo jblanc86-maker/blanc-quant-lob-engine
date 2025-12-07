@@ -1,5 +1,6 @@
 name: Container Scan
 
+
 on:
   push:
     branches: [ main ]
@@ -25,6 +26,13 @@ on:
         description: 'Why run manually?'
         required: false
         default: 'manual trigger'
+
+permissions:
+  contents: read
+  # Minimal permissions for container-scan workflow; restrict GITHUB_TOKEN to read-only
+  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+  # Do not remove unless workflow requires write access
+  # Copilot Autofix: actions/missing-workflow-permissions
 
 jobs:
   trivy:

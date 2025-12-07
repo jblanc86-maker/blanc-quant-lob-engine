@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 name: Reproducibility Check
 
+
 on:
   push:
     branches: [main]
@@ -12,6 +13,13 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docs/**'
+
+permissions:
+  contents: read
+  # Minimal permissions for reproducibility check; restrict GITHUB_TOKEN to read-only
+  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+  # Do not remove unless workflow requires write access
+  # Copilot Autofix: actions/missing-workflow-permissions
 
 jobs:
   repro:
