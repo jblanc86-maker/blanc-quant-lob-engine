@@ -335,7 +335,13 @@ scripts/prom_textfile.sh ... # emit metrics.prom schema
 scripts/run_local_checks.sh  # export PYTHONPATH and run local build/test gates
 scripts/verify_bench.py      # release gate enforcement
 scripts/bench_report.py      # render HTML latency/digest dashboard
+./run_local_checks.sh        # export PYTHONPATH + run verify/report locally
 ```
+
+Need structured data or tuning hints? Append `--run-metrics-exporter --auto-tune`
+to `scripts/verify_bench.py` to emit `artifacts/metrics-export.json` with the
+current run, Prometheus metrics, and suggested gate multipliers.
+See `docs/local-checks.md` for more local workflow tips.
 
 ## Golden-state validation
 

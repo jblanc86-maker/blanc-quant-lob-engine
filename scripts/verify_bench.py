@@ -17,8 +17,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
@@ -59,6 +59,71 @@ class BenchResult:
     p99_ms: float
     digest: Optional[str]
     determinism: Optional[bool]
+
+
+def _optional_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def auto_tune_gate(bench: BenchResult, baseline: Dict[str, Any], allowed_ms: float) -> Dict[str, Any]:
+    median = _optional_float(baseline.get("median_p99_ms")) or bench.p99_ms
+    mad = _optional_float(baseline.get("mad_p99_ms"))
+    last = _optional_float(baseline.get("last_p99_ms")) or median or bench.p99_ms
+
+    suggestions: Dict[str, Any] = {
+        "p99_budget_ms": round(bench.p99_ms * 1.05, 4),
+        "current_allowed_ms": round(allowed_ms, 4),
+        "notes": "Adds ~5% headroom using the latest measurement.",
+    }
+    if mad and mad > 0:
+        suggestions["mad_multiplier"] = round(max(1.0, (bench.p99_ms - median) / mad + 0.5), 2)
+    if last and last > 0:
+        suggestions["p99_multiplier"] = round(max(1.0, bench.p99_ms / last + 0.02), 3)
+    return suggestions
+
+
+def export_metrics_bundle(
+    output_path: Path,
+    bench: BenchResult,
+    metrics: Dict[str, float],
+    baseline: Dict[str, Any],
+    allowed_ms: float,
+    status: str,
+    runner_id: str,
+    profile_name: str,
+    profile_cfg: Dict[str, Any],
+    include_auto_tune: bool,
+) -> None:
+    payload: Dict[str, Any] = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": status,
+        "runner": runner_id,
+        "profile": profile_name,
+        "gates": {
+            "allowed_p99_ms": round(allowed_ms, 4),
+            "p99_multiplier": profile_cfg["p99_multiplier"],
+            "mad_multiplier": profile_cfg["mad_multiplier"],
+            "epsilon_ms": profile_cfg["epsilon_ms"],
+        },
+        "bench": {
+            "p99_ms": bench.p99_ms,
+            "digest": bench.digest,
+            "determinism": bench.determinism,
+        },
+        "metrics": metrics,
+        "baseline": baseline,
+    }
+    if include_auto_tune:
+        payload["auto_tune"] = auto_tune_gate(bench, baseline, allowed_ms)
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    print(f"[metrics-exporter] wrote {output_path}")
 
 
 def _read_first_json_line(path: Path) -> Dict[str, Any]:
@@ -187,12 +252,29 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--epsilon-ms", type=float, default=None, help="Override epsilon slack")
     parser.add_argument("--p99-budget-ms", type=float, default=None, help="Absolute cap (optional)")
     parser.add_argument("--require-digest", action="store_true", help="Force digest equality regardless of profile")
+    parser.add_argument(
+        "--run-metrics-exporter",
+        action="store_true",
+        help="Write a JSON bundle with bench, baseline, and Prometheus metrics",
+    )
+    parser.add_argument(
+        "--metrics-export-path",
+        default="artifacts/metrics-export.json",
+        help="Path to write the metrics export bundle",
+    )
+    parser.add_argument(
+        "--auto-tune",
+        action="store_true",
+        help="Include auto-tuned gate suggestions in the export payload",
+    )
     return parser
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    if args.auto_tune:
+        args.run_metrics_exporter = True
 
     profile_cfg = dict(PROFILE_PRESETS[args.profile])
 
@@ -218,7 +300,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     runner_id = resolve_runner_id(args.runner_id)
     bench = parse_bench(Path(args.bench_file))
-    _ = parse_prom_metrics(Path(args.metrics_file))  # schema enforcement side effect
+    metrics = parse_prom_metrics(Path(args.metrics_file))
     baseline = load_baseline(Path(args.baseline_file), runner_id)
 
     allowed_ms = compute_allowed(
@@ -262,6 +344,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print("verdict:", status)
     for line in decision_lines:
         print(line)
+
+    if args.run_metrics_exporter:
+        export_metrics_bundle(
+            Path(args.metrics_export_path),
+            bench=bench,
+            metrics=metrics,
+            baseline=baseline,
+            allowed_ms=allowed_ms,
+            status=status,
+            runner_id=runner_id,
+            profile_name=args.profile,
+            profile_cfg=profile_cfg,
+            include_auto_tune=args.auto_tune,
+        )
 
     return 0 if status == "PASS" else 1
 
