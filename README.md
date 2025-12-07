@@ -26,7 +26,7 @@
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-Deterministic C++20 limit order book (LOB) replay engine for quantitative and low-latency research.
+The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; some advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
 
