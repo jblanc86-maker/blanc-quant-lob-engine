@@ -27,7 +27,7 @@
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
 The public repo focuses on deterministic replay, golden-state input digests, and CI-enforced performance gates; all advanced gate logic and production integrations are reserved for the enterprise version and associated patent work.
-If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones to date).
+If you’re working on low-latency trading or quant infrastructure and would like to explore collaboration—or discuss how this type of engine fits into your team—please feel free to contact me via LinkedIn. (600+ clones as of 12/07/25).
 
 
 Blanc LOB Engine is a **replay + benchmarking harness** for HFT-style order books, built for:
