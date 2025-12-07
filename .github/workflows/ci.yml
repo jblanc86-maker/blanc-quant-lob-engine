@@ -62,13 +62,13 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Toolchain (Ubuntu)
+      - name: Install build dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build libboost-all-dev jq nlohmann-json3-dev zip unzip
 
-      - name: Toolchain (macOS)
+      - name: Install build dependencies
         if: matrix.os == 'macos-latest'
         run: |
           brew update >/dev/null

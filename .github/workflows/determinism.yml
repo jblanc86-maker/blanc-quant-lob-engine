@@ -59,7 +59,7 @@ jobs:
           echo "TZ=UTC" >> $GITHUB_ENV
           echo "LANG=C.UTF-8" >> $GITHUB_ENV
           echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
-      - name: Deps
+      - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev unzip zip
