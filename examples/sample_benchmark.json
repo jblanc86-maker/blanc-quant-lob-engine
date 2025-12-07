@@ -1,0 +1,16 @@
+{
+  "benchmark": {
+    "name": "default-bench",
+    "input_file": "data/golden/itch_1m.bin",
+    "output_metrics": "artifacts/metrics.prom",
+    "output_events": "artifacts/bench.jsonl",
+    "policy_file": "examples/sample_policy.yaml",
+    "runs": 3,
+    "warmup": 1,
+    "latency_budget_ms": {
+      "p50": 1.0,
+      "p95": 2.0,
+      "p99": 5.0
+    }
+  }
+}

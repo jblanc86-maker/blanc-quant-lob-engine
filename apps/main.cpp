@@ -1,12 +1,10 @@
 #include "app_config.hpp"
 #include <iostream>
 
-int main()
+int main(int argc, char *argv[])
 {
-  std::cout << "App started.\n";
-  // Example usage of config
   AppConfig config;
-  config.load();
-  std::cout << "Config loaded: " << config.getInfo() << std::endl;
+  config.load(); // In future, use config.load_from_args(argc, argv);
+  std::cout << "App started with config: " << config.getInfo() << std::endl;
   return 0;
 }

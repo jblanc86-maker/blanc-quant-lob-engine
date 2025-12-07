@@ -481,3 +481,63 @@ The repository uses visitor badges to track page views. Badge format:
 ```
 
 Replace `<issue_id>` with the GitHub issue number.
+
+## App Structure
+
+The main application entry point is located at `apps/main.cpp` and uses a minimal configuration header `apps/app_config.hpp`:
+
+```cpp
+// apps/main.cpp
+#include "app_config.hpp"
+#include <iostream>
+
+int main(int argc, char* argv[]) {
+    AppConfig config;
+    config.load(); // In future, use config.load_from_args(argc, argv);
+    std::cout << "App started with config: " << config.getInfo() << std::endl;
+    // ... main app logic ...
+    return 0;
+}
+```
+
+```cpp
+// apps/app_config.hpp
+#pragma once
+#include <string>
+
+class AppConfig {
+public:
+    void load();
+    void load_from_args(int argc, char* argv[]); // Placeholder for argument-based config
+    std::string getInfo() const;
+    std::string summary() const { return getInfo(); }
+private:
+    std::string info_ = "default config";
+};
+```
+
+This structure provides a clear entry point and configuration pattern for extending the app logic.
+
+## Enterprise CI Workflow
+
+The enterprise module is built and tested using a dedicated GitHub Actions workflow:
+
+- Workflow file: `ci/workflows/enterprise-ci.yml`
+- Triggers on changes to `bql-enterprise/`, `include/`, `src/`, and top-level CMake files
+- Steps:
+  - Checkout code
+  - Set up CMake
+  - Build enterprise module
+  - Run tests with CTest
+
+This ensures all enterprise code is continuously validated and tested.
+
+## Sample Policy, Benchmark, and Test Files
+
+Example configuration files are provided in `examples/`:
+
+- `examples/sample_policy.yaml`: Defines gate thresholds and actions for breaker-style policies.
+- `examples/sample_benchmark.json`: Configures benchmark runs, input files, output metrics, and latency budgets.
+- `examples/sample_test.yaml`: Sets up golden-state replay tests and latency checks.
+
+These templates help you get started with custom policies, benchmarks, and test automation for the BQL Engine.

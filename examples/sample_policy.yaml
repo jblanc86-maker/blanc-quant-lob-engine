@@ -1,0 +1,17 @@
+# Example policy file for BQL Engine
+policy:
+  name: "default-breaker"
+  gates:
+    - name: "Fuse"
+      threshold: 1000
+    - name: "Local"
+      threshold: 5000
+    - name: "Feeder"
+      threshold: 10000
+    - name: "Main"
+      threshold: 20000
+    - name: "Kill"
+      threshold: 50000
+  actions:
+    on_trigger: "log"
+    on_kill: "halt"

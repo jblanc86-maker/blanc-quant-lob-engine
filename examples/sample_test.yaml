@@ -1,0 +1,11 @@
+# Example test file for BQL Engine
+---
+test:
+  name: "golden-replay-test"
+  input: "data/golden/itch_1m.bin"
+  expected_digest: "data/golden/itch_1m.fnv"
+  checks:
+    - type: "determinism"
+      description: "Verify byte-for-byte replay determinism"
+    - type: "latency"
+      p99_budget_ms: 5.0
