@@ -250,7 +250,7 @@ jobs:
             console.log(`Published ${series.length} metrics to Datadog`, body);
 
       - name: Upload usage report artifact
-        uses: actions/upload-artifact@b97b3f2e079c1163185b4a60936f69f766ae16ca
+        uses: actions/upload-artifact@v4
         with:
           name: workflow-usage-report
           retention-days: 14
