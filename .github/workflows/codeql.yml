@@ -2,69 +2,23 @@ name: "CodeQL Analysis"
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/codeql.yml'
+    branches: [main]
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/codeql.yml'
-  schedule:
-    # Weekly on Tuesdays 03:24 UTC
-    - cron: '24 3 * * 2'
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Manual CodeQL run reason'
-        required: false
-        default: 'manual'
+    branches: [main]
 
 jobs:
   analyze:
-    timeout-minutes: 30
+    name: Analyze
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-    if: >-
-      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
-          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
-    permissions:
-      actions: read           # Allow reading workflow run details
-      contents: read          # Allow reading repository contents
-      security-events: write  # Allow writing security alerts
-      pull-requests: read     # Allow reading PR metadata (for PR context)
-      checks: read            # Allow reading check run status
-      statuses: read          # Allow reading commit statuses
-      issues: read            # Allow reading issues (for context)
     steps:
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential cmake ninja-build gcc g++ libboost-all-dev nlohmann-json3-dev zip
-
-
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
+      - uses: actions/checkout@v4
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
-
-
-      - name: Debug Environment
-        run: |
-          echo "PATH: $PATH"
-          which codeql
-          codeql --version
-
-
-      - name: Build (C++20, explicit compilers, synthetic benchmarks)
-        run: |
-          set -euo pipefail
-          rm -rf build
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release -j
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+    env:
+      CODEQL_ACTION_DEBUG: true
