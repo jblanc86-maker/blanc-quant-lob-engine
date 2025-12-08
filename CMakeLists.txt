@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(blanc_lob_engine VERSION 0.9 LANGUAGES CXX)
+project(blanc_lob_engine VERSION 1.00 LANGUAGES CXX)
 
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
