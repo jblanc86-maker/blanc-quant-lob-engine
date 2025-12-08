@@ -60,19 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf build
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: cpp
-      - name: Install build deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev g++ zip
-      - name: Build
-        run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release -j
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2
