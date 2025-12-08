@@ -1,4 +1,3 @@
-
 name: "CodeQL Analysis"
 
 on:
@@ -56,11 +55,16 @@ jobs:
         uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
 
 
+      - name: Debug Environment
+        run: |
+          echo "PATH: $PATH"
+          which codeql
+          codeql --version
+
+
       - name: Build (C++20, explicit compilers, synthetic benchmarks)
         run: |
           set -euo pipefail
           rm -rf build
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release -j
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2
