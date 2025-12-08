@@ -1,7 +1,7 @@
 name: "CodeQL Analysis"
 
 permissions:
-  security-events: read
+  security-events: write
 
 on:
   push:
