@@ -28,7 +28,7 @@
 
 ## Deterministic C++20 Limit Order Book (LOB) Replay & Benchmarking Engine
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. Inquire for FULL proprietary features (600+ verified clones currently). 
+The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. Inquire for FULL proprietary features (600+ unique clones as of 12/07/25). 
 
 - **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
