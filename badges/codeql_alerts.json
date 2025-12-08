@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "label": "CodeQL Alerts",
-  "message": "11 open",
-  "color": "orange"
+  "message": "0 open",
+  "color": "success"
 }
