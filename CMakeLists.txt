@@ -134,3 +134,5 @@ if (BUILD_TESTING)
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
+
+# Note: The test_breaker.cpp file is proprietary and not included in this repository.

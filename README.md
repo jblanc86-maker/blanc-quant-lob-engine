@@ -26,9 +26,15 @@
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
+## About Blanc LOB Engine
+
+The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure.
+
+For inquiries related to trading applications or professional use cases, please feel free to reach out.
+
 ## Deterministic C++20 Limit Order Book (LOB) Replay & Benchmarking Engine
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. Inquire for FULL proprietary features (600+ unique clones as of 12/07/25). 
+The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. Inquire for FULL proprietary features (600+ unique clones as of 12/07/25).
 
 - **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
@@ -300,6 +306,10 @@ Research users can clone and run the engine today; commercial or production
 deployment should follow the terms in `COMMERCIAL_LICENSE.md`.
 
 <!-- markdownlint-enable MD013 -->
+
+## Release Information
+
+This release includes the prebuilt binaries and necessary artifacts for version 1.00 of the Blanc LOB Engine. If you are interested in accessing the full source code, please reach out directly for further details. The project is fully open and available for students and hobbyists to explore and use.
 
 ## Analytics Report Output
 
