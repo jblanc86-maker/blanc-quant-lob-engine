@@ -1,0 +1,49 @@
+name: Canonical IDs Evidence (Phase 6.2)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "include/**"
+      - "tests/**"
+      - "docs/**"
+      - ".github/workflows/canonical_ids_evidence.yml"
+      - "CMakeLists.txt"
+      - "scripts/package_canonical_ids_evidence.sh"
+  workflow_dispatch: {}
+
+jobs:
+  canonical-ids:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ make
+
+      - name: Build test_canonical_digest
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target test_canonical_digest -j$(nproc)
+
+      - name: Run patent evidence tests
+        run: |
+          mkdir -p artifacts/canonical_ids
+          ./build/bin/test_canonical_digest | tee artifacts/canonical_ids/test_output.txt
+
+      - name: Package evidence bundle
+        run: |
+          chmod +x scripts/package_canonical_ids_evidence.sh
+          scripts/package_canonical_ids_evidence.sh
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase6.2-canonical-ids-${{ github.sha }}
+          path: |
+            artifacts/canonical_ids/test_output.txt
+            artifacts/canonical_ids/*.tar.gz
+          retention-days: 365
