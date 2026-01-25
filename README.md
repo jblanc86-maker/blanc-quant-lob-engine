@@ -28,7 +28,8 @@
 
 ## About Blanc LOB Engine
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure.
+The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. It is a C++20 synthetic microbenchmark focused on loop and memory performance—not a full market replay/matching engine. It uses synthetic data, computes FNV-based digests for basic validation, and emits limited telemetry.
+***BQL 2.0 (Patent-Pending)*** is the production-shaped system: real ITCH market-data replay + deterministic order book matching, a per-event binary audit journal (replayable proof), CI-enforced performance contracts (p50/p95/p99/p999 + stability), and coordinated deterministic protection (DEG/DSC/RSC/CDP/DEC/DPL/DEM) 🔁. It also introduces canonical symbol IDs to guarantee order/shard-invariant aggregate verification (Phase 6.2)
 
 For inquiries related to trading applications or professional use cases, please feel free to reach out.
 
