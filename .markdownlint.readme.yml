@@ -13,7 +13,7 @@ MD013:
   strict: false
 
 # Keep these relaxations consistent with repo-wide policy
-MD022: false  # allow headings without surrounding blank lines in some spots
-MD028: false  # allow blank lines inside blockquotes
-MD032: false  # allow lists to touch surrounding text when needed
-MD033: false  # allow inline HTML when necessary
+MD022: false # allow headings without surrounding blank lines in some spots
+MD028: false # allow blank lines inside blockquotes
+MD032: false # allow lists to touch surrounding text when needed
+MD033: false # allow inline HTML when necessary

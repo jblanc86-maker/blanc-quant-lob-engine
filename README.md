@@ -1,7 +1,8 @@
-
 ## Blanc Quant LOB Engine (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
+
+### Status Badges
 
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
@@ -40,12 +41,12 @@
 
 **Key Differentiator:** Most competitors publish match-only numbers without determinism guarantees. Blanc LOB Engine provides all three tiers with byte-for-byte deterministic replay and Selective Coordination Mode (SCM) enforcement.
 
-UPDATE
-# Selective Coordination Mode (SCM): Smarter, Deterministic Protection
+> Update
+
+## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
 
 Selective Coordination Mode brings the “smallest breaker trips first” principle from power systems into trading engines.
-Instead of halting everything when there’s a slowdown, the engine disables or sheds only the affected subsystem—keeping.
-The rest is running and making incident boundaries clean and replayable.
+Instead of halting everything when there’s a slowdown, the engine disables or sheds only the affected subsystem—keeping the rest running and making incident boundaries clean and replayable.
 
 ### How It Works
 
@@ -94,8 +95,7 @@ python3 scripts/ci_test_coordination.py
 python3 scripts/visualize_coordination.py config/coordination_zones.yaml
 ```
 
-CI pipeline validates that zone trips, escalation, and recovery work deterministicare
----
+CI pipeline validates that zone trips, escalation, and recovery work deterministically.
 
 ## How the Safety Controller Works (Breaker-Style State Machine)
 
