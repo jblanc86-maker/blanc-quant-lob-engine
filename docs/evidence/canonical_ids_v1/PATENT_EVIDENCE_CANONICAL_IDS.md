@@ -27,14 +27,14 @@ This document provides comprehensive evidence for a novel method, system, and ap
 
 **Existing Approach 1: Raw Symbol String Sorting**
 
-```cpp
+````cpp
 // Prior art: sort by raw symbol bytes
 std::map<std::string, OrderBook> books_;  // Locale-dependent, padding-sensitive
 
 // Problem: "AAPL" vs "AAPL    " → different sort order
 // Problem: UTF-8 vs ASCII → different sort order
 // Problem: Case sensitivity → different sort order
-```
+
 
 **Issues:**
 
@@ -51,7 +51,7 @@ std::vector<std::pair<Symbol, OrderBook>> books_in_order_;
 
 // Problem: Different insertion order → different digest
 // Problem: Shard count change → different insertion order → different digest
-```
+````
 
 **Issues:**
 
@@ -194,7 +194,7 @@ std::unordered*map<uint64_t, CanonicalSymbolID> order_to_symbol_id*;
 };
 ```
 
-````
+---
 
 ---
 
@@ -234,7 +234,7 @@ Scenario 3 [GOOG, MSFT, AAPL]: 0x3e88522b8e2a4427
 ✅ PASS: Digest is independent of processing order
 PATENT EVIDENCE: Claim verified
 
-````
+```
 
 **Analysis:**
 
@@ -931,7 +931,7 @@ All known prior art has been disclosed in Section 8 of this document. No materia
 
 **Full Output (2026-01-25):**
 
-```
+```text
 ====================================================
 PATENT EVIDENCE TESTS: Canonical Symbol IDs
 ====================================================
@@ -1061,6 +1061,14 @@ SHA-256  docs/evidence/canonical_ids_v1/timestamp.txt     = ebc2ff0440501c614249
 ```
 
 Note: CI job will recompute and archive hashes for cross-platform runs; links to artifacts will be added post‑execution.
+
+Packaging workflow run (branch blanc-quant-lob-engine-PP):
+
+- [Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21399501923)
+  - Created: 2026-01-27T13:42:59Z, Updated: 2026-01-27T13:43:31Z, Conclusion: success
+  - Artifacts (SHA-256):
+    - evidence-bundle-Linux-21399501923.zip: sha256:58772852d85665827c434ab20e31df65653e9eb37ff4c7cef7d5a8e02d55f33d (14880 bytes)
+    - evidence-bundle-macOS-21399501923.zip: sha256:f62d76c992822f7ebed37512d71f069306ed66472cdd4e12d450274c567a9f9b (14875 bytes)
 
 ## 19. Prior Art Notes (Preliminary / Not Exhaustive)
 

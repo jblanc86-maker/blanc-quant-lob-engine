@@ -25,7 +25,7 @@
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://hub.docker.com/)
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)      
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
 ### Performance: Current State vs. Future Targets
 
@@ -93,7 +93,7 @@ python3 scripts/ci_test_coordination.py
 python3 scripts/visualize_coordination.py config/coordination_zones.yaml
 ```
 
-CI pipeline validates that zone trips, escalation, and recovery work deterministicare 
+CI pipeline validates that zone trips, escalation, and recovery work deterministicare
 ---
 
 ## How the Safety Controller Works (Breaker-Style State Machine)
