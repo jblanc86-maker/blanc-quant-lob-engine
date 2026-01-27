@@ -1,11 +1,17 @@
 # CMake/build
 /build/
+/build-*/
+/build-mac/
+/build-v2/
 /CMakeFiles/
 /CMakeCache.txt
 /cmake_install.cmake
 /*.ninja
 /.ninja_*
 /compile_commands.json
+
+# Third-party sources pulled by build systems (e.g., benchmark _deps)
+**/_deps/
 
 # Repo artifacts
 /artifacts/*
