@@ -1,8 +1,50 @@
+
+## Blanc Quant LOB Engine (BQL Engine)
+
+<!-- DO NOT REMOVE: Visitors badge for repo analytics -->
+
+[![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
+[![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
+[![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
+[![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
+[![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
+[![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
+[![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
+[![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
+[![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
+[![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
+[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
+[![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
+[![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://hub.docker.com/)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)      
+
+### Performance: Current State vs. Future Targets
+
+| Metric Tier                                                | Current (Jan 2026)                          | Target (vNext)                                       | Status                  |
+| ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- | ----------------------- |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs | ✅ **EXCEEDS TARGET**   |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms         | 🎯 Planned              |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms    | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms           | 🚧 Optimization Phase 2 |
+| **Throughput**                                             | 1M events/sec                               | 1–5M ops/sec                                         | ✅ Baseline Established |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)       | ✅ Enhanced with SCM                                 | ✅ Production Ready     |
+
+**Key Differentiator:** Most competitors publish match-only numbers without determinism guarantees. Blanc LOB Engine provides all three tiers with byte-for-byte deterministic replay and Selective Coordination Mode (SCM) enforcement.
+
+UPDATE
 # Selective Coordination Mode (SCM): Smarter, Deterministic Protection
 
 Selective Coordination Mode brings the “smallest breaker trips first” principle from power systems into trading engines.
-Instead of halting everything when there’s a slowdown, the engine disables or sheds only the affected subsystem—keeping
-the rest running and making incident boundaries clean and replayable.
+Instead of halting everything when there’s a slowdown, the engine disables or sheds only the affected subsystem—keeping.
+The rest is running and making incident boundaries clean and replayable.
 
 ### How It Works
 
@@ -32,7 +74,7 @@ See [`config/coordination_zones.yaml`](config/coordination_zones.yaml) for full 
 - **Per-zone recovery criteria:** Independent recovery logic with digest validation
 - **Coordination curves:** Exponential backoff, adaptive threshold, and sustained breach detection
 - **Hysteresis protection:** Recovery multiplier (1.25x) prevents oscillation
-- **Priority-based escalation:** Zones 1-7 with "smallest breaker trips first" principle
+- **Priority-based escalation:** Zones 1-7 with the "smallest breaker trips first" principle
 - **Deterministic replay:** Event index matching + digest chain enforcement
 
 **Documentation:**
@@ -51,8 +93,7 @@ python3 scripts/ci_test_coordination.py
 python3 scripts/visualize_coordination.py config/coordination_zones.yaml
 ```
 
-CI pipeline validates that zone trips, escalation, and recovery work deterministically and are fully auditable through Gate Decision Journal (GDJ).
-
+CI pipeline validates that zone trips, escalation, and recovery work deterministicare 
 ---
 
 ## How the Safety Controller Works (Breaker-Style State Machine)
@@ -96,34 +137,6 @@ State transitions are triggered by:
 - Recovery to a lower-severity state (e.g., DEGRADED → WARN, WARN → NORMAL) requires K consecutive “good” windows (i.e., no breaches) before transitioning.
   This design ensures robust, predictable control over the engine’s behavior under stress, while preserving deterministic replay and auditability.
 
-## Blanc Quant LOB Engine (BQL Engine)
-
-<!-- DO NOT REMOVE: Visitors badge for repo analytics -->
-
-[![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
-[![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
-[![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
-[![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
-[![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
-[![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
-[![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
-[![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
-[![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
-[![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
-[![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
-[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
-[![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
-[![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
-[![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
-[![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
-[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://hub.docker.com/)
-[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
-
 ## Normalized Latency Metrics: Apples-to-Apples Comparison
 
 Latency claims in the trading engine space are often not directly comparable. Many engines report only a single,
@@ -134,18 +147,6 @@ metrics:
 - **Match-only latency:** Time for a single match operation inside the engine’s core loop (no I/O, no telemetry, no replay logic).
 - **In-process wire-to-wire latency:** Time from API call to match to response, excluding network but including all in-process steps (parsing, matching, response generation).
 - **Replay pipeline latency:** Time from event ingestion through application, digest calculation, and telemetry/artifact generation (full replay with determinism proofs).
-
-### Performance: Current State vs. Future Targets
-
-| Metric Tier                                                | Current (Jan 2026)                          | Target (vNext)                                       | Status                  |
-| ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- | ----------------------- |
-| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs | ✅ **EXCEEDS TARGET**   |
-| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms         | 🎯 Planned              |
-| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms    | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms           | 🚧 Optimization Phase 2 |
-| **Throughput**                                             | 1M events/sec                               | 1–5M ops/sec                                         | ✅ Baseline Established |
-| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)       | ✅ Enhanced with SCM                                 | ✅ Production Ready     |
-
-**Key Differentiator:** Most competitors publish match-only numbers without determinism guarantees. Blanc LOB Engine provides all three tiers with byte-for-byte deterministic replay and Selective Coordination Mode (SCM) enforcement.
 
 **Roadmap Timeline:**
 
