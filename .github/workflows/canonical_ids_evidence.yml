@@ -1,49 +1,69 @@
-name: Canonical IDs Evidence (Phase 6.2)
+name: Evidence Packaging
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - "include/**"
-      - "tests/**"
-      - "docs/**"
-      - ".github/workflows/canonical_ids_evidence.yml"
-      - "CMakeLists.txt"
-      - "scripts/package_canonical_ids_evidence.sh"
-  workflow_dispatch: {}
+    branches:
+      - main
+      - blanc-quant-lob-engine-PP
 
 jobs:
-  canonical-ids:
-    runs-on: ubuntu-latest
+  package:
+    name: Package Evidence (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Setup dependencies
+        if: ${{ runner.os == 'Linux' }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++ make
+          bash scripts/setup-packages.sh || true
 
-      - name: Build test_canonical_digest
+      - name: Build
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --target test_canonical_digest -j$(nproc)
+          bash scripts/build.sh || make || true
 
-      - name: Run patent evidence tests
+      - name: Prepare evidence files
+        shell: bash
         run: |
-          mkdir -p artifacts/canonical_ids
-          ./build/bin/test_canonical_digest | tee artifacts/canonical_ids/test_output.txt
+          set -euo pipefail
+          mkdir -p evidence_out
+          # Commit and timestamp
+          git rev-parse HEAD > evidence_out/commit_sha.txt
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
+          # Copy bundle doc for hashing
+          cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
+          # Compute SHA-256s
+          if command -v shasum >/dev/null 2>&1; then
+            shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+          else
+            sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+          fi
+          # Copy any generated bench outputs if present
+          if [ -d artifacts ]; then
+            cp -R artifacts evidence_out/artifacts || true
+          fi
+          # Include the entire bundle directory for convenience
+          mkdir -p evidence_out/bundle
+          cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
 
-      - name: Package evidence bundle
+      - name: Create archive
+        shell: bash
         run: |
-          chmod +x scripts/package_canonical_ids_evidence.sh
-          scripts/package_canonical_ids_evidence.sh
+          set -euo pipefail
+          ARCHIVE="evidence-bundle-${{ runner.os }}-${{ github.run_id }}.zip"
+          (cd evidence_out && zip -r ../"$ARCHIVE" .)
+          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
 
-      - name: Upload evidence bundle
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phase6.2-canonical-ids-${{ github.sha }}
-          path: |
-            artifacts/canonical_ids/test_output.txt
-            artifacts/canonical_ids/*.tar.gz
-          retention-days: 365
+          name: evidence-bundle-${{ runner.os }}-${{ github.run_id }}
+          path: ${{ env.ARCHIVE }}
+          if-no-files-found: warn

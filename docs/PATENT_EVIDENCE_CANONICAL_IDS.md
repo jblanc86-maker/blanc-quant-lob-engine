@@ -25,7 +25,7 @@ This document provides comprehensive evidence for a novel method, system, and ap
 
 ### 1.1 Prior Art Limitations
 
-**Existing Approach 1: Raw Symbol String Sorting**
+#### Existing Approach 1: Raw Symbol String Sorting
 
 ```cpp
 // Prior art: sort by raw symbol bytes
@@ -43,7 +43,7 @@ std::map<std::string, OrderBook> books_;  // Locale-dependent, padding-sensitive
 - Encoding-sensitive (UTF-8 vs ASCII)
 - Not stable across different implementations
 
-**Existing Approach 2: Insertion Order Tracking**
+#### Existing Approach 2: Insertion Order Tracking
 
 ```cpp
 // Track insertion order explicitly
@@ -89,7 +89,7 @@ Result: ❌ Digests don't match (compliance failure)
 
 ### 2.1 Core Patent Claims
 
-**CLAIM 1 (Independent): Method for Deterministic Multi-Symbol Aggregate Verification**
+#### CLAIM 1 (Independent): Method for Deterministic Multi-Symbol Aggregate Verification
 
 A method for computing a deterministic aggregate verification digest for a multi-symbol trading system, comprising:
 
@@ -310,6 +310,18 @@ Digest equality must match across platforms; discrepancies trigger investigation
 - Compiler: Homebrew clang 21.1.5
 - CI run ID / link: N/A (local evidence); to be added when CI job executes
 
+Cross-platform CI runs (main):
+
+- [Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21385555311)
+  - Created: 2026-01-27T05:19:40Z, Updated: 2026-01-27T05:20:47Z, Conclusion: success
+  - Artifacts (SHA-256):
+    - determinism-artifacts-21385555311.zip: sha256:58868b9451ef08c1df9e97e83fdeda4f943d6bf767c5de07331f0da82404f1ea (8004888 bytes)
+- [CI (Ubuntu + macOS matrix)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21385601573)
+  - Created: 2026-01-27T05:21:53Z, Updated: 2026-01-27T05:23:38Z, Conclusion: success
+  - Artifacts (SHA-256):
+    - bench-and-bundle-ubuntu-latest-21385601573.zip: sha256:a635e1c65c62887ea57597db21074039a866c8e5922f13cad6cb29ad2fffc5f4 (21268 bytes)
+    - bench-and-bundle-macos-latest-21385601573.zip: sha256:7b67fef99aa89b6691ed4a05194652e12e6c4e76aa4c53705e6bdf7647b01d3d (14940 bytes)
+
 **Bundle Artifact Hashes (local computation):**
 
 ```text
@@ -319,6 +331,7 @@ SHA-256  docs/evidence/canonical_ids_v1/timestamp.txt     = ebc2ff0440501c614249
 ```
 
 Note: CI job will recompute and archive hashes for cross-platform runs; links to artifacts will be added post‑execution.
+
 - Optional witness: sign/date PDF print of evidence bundle
 
 ---
@@ -855,7 +868,7 @@ private:
 
 ### 7.1 Independent Method Claim
 
-**CLAIM 1:**
+#### CLAIM 1
 
 A method for computing a deterministic aggregate verification digest for a multi-symbol financial trading system, the method comprising:
 
@@ -905,7 +918,7 @@ whereby the aggregate verification digest is independent of the number of order 
 
 ### 7.3 Independent Apparatus Claim
 
-**CLAIM 14:**
+#### CLAIM 14
 
 An order book matching engine apparatus comprising:
 

@@ -136,10 +136,6 @@ inline CanonicalSymbolID compute_canonical_id(const Symbol& symbol) {
 
     // Hash all 8 bytes of symbol (including trailing spaces)
     for (size_t i = 0; i < 8; ++i) {
-        hash ^= static_cast<uint8_t>(symbol[i]);
-        hash *= FNV1A_PRIME;
-    }
-
     return hash;
 }
 
@@ -149,9 +145,6 @@ inline uint64_t compute_canonical_aggregate_digest(
     const std::map<CanonicalSymbolID, uint64_t>& id_to_digest)
 {
     constexpr uint64_t FNV1A_OFFSET = 14695981039346656037ULL;
-    constexpr uint64_t FNV1A_PRIME = 1099511628211ULL;
-
-    uint64_t hash = FNV1A_OFFSET;
 
     // Iterate in sorted canonical ID order (std::map guarantees this)
     for (const auto& [id, digest] : id_to_digest) {
@@ -161,9 +154,6 @@ inline uint64_t compute_canonical_aggregate_digest(
             hash *= FNV1A_PRIME;
         }
 
-        // Mix in per-symbol digest (8 bytes)
-        for (int i = 0; i < 8; ++i) {
-            hash ^= static_cast<uint8_t>(digest >> (i * 8));
             hash *= FNV1A_PRIME;
         }
     }
@@ -175,14 +165,13 @@ inline uint64_t compute_canonical_aggregate_digest(
 **File:** [include/multi_book_engine_v2.hpp](../include/multi_book_engine_v2.hpp)
 
 ```cpp
-// PATENT CLAIM: Multi-Symbol Trading System with Canonical IDs
 class MultiBookEngineV2 {
 public:
-    // Get order book for symbol (uses canonical ID internally)
-    OrderBookV2& get_book(const Symbol& symbol) {
-        CanonicalSymbolID id = registry_.register_symbol(symbol);
-        return books_[id];  // KEY: Keyed by canonical ID, not raw symbol
-    }
+// Get order book for symbol (uses canonical ID internally)
+OrderBookV2& get*book(const Symbol& symbol) {
+CanonicalSymbolID id = registry*.register*symbol(symbol);
+return books*[id]; // KEY: Keyed by canonical ID, not raw symbol
+}
 
     // PATENT CLAIM: Canonical Aggregate Digest
     // Result is independent of symbol processing order and shard count
@@ -199,11 +188,13 @@ public:
     }
 
 private:
-    CanonicalSymbolRegistry registry_;
-    std::map<CanonicalSymbolID, OrderBookV2> books_;  // Sorted by canonical ID
-    std::unordered_map<uint64_t, CanonicalSymbolID> order_to_symbol_id_;
+CanonicalSymbolRegistry registry*;
+std::map<CanonicalSymbolID, OrderBookV2> books*; // Sorted by canonical ID
+std::unordered*map<uint64_t, CanonicalSymbolID> order_to_symbol_id*;
 };
 ```
+
+````
 
 ---
 
@@ -234,14 +225,16 @@ Verify that all three scenarios produce the same aggregate digest.
 
 **Test Output:**
 
-```
+```text
+
 === Test 1: Symbol Processing Order Independence ===
 Scenario 1 [AAPL, GOOG, MSFT]: 0x3e88522b8e2a4427
 Scenario 2 [MSFT, AAPL, GOOG]: 0x3e88522b8e2a4427
 Scenario 3 [GOOG, MSFT, AAPL]: 0x3e88522b8e2a4427
 ✅ PASS: Digest is independent of processing order
-   PATENT EVIDENCE: Claim verified
-```
+PATENT EVIDENCE: Claim verified
+
+````
 
 **Analysis:**
 
@@ -260,12 +253,14 @@ Generate 100 distinct symbols and compute their canonical IDs. Verify that all 1
 
 **Test Output:**
 
-```
+```text
+
 === Test 2: Canonical ID Collision Resistance ===
 Symbols: 100
 Unique IDs: 100
 ✅ PASS: No collisions detected (100 symbols → 100 unique IDs)
-   PATENT EVIDENCE: Hash function has good distribution
+PATENT EVIDENCE: Hash function has good distribution
+
 ```
 
 **Analysis:**
@@ -290,13 +285,15 @@ Verify that both scenarios produce the same aggregate digest.
 
 **Test Output:**
 
-```
+```text
+
 === Test 3: Shard Count Independence ===
 Single-shard digest: 0x89e42bdbf5a4bf49
-Multi-shard digest:  0x89e42bdbf5a4bf49
+Multi-shard digest: 0x89e42bdbf5a4bf49
 Symbols per shard: [2, 3, 3, 4]
 ✅ PASS: Digest is independent of shard count
-   PATENT EVIDENCE: 1 shard vs 4 shards → same digest
+PATENT EVIDENCE: 1 shard vs 4 shards → same digest
+
 ```
 
 **Analysis:**
@@ -321,7 +318,8 @@ Compute canonical IDs for AAPL and GOOG three times each. Verify that each symbo
 
 **Test Output:**
 
-```
+```text
+
 === Test 4: Canonical ID Stability ===
 AAPL ID (run 1): 0xe6277f8d5fc5493b
 AAPL ID (run 2): 0xe6277f8d5fc5493b
@@ -330,7 +328,8 @@ GOOG ID (run 1): 0xd78df04d9b949801
 GOOG ID (run 2): 0xd78df04d9b949801
 GOOG ID (run 3): 0xd78df04d9b949801
 ✅ PASS: Canonical IDs are stable across multiple computations
-   PATENT EVIDENCE: Deterministic hash function
+PATENT EVIDENCE: Deterministic hash function
+
 ```
 
 **Analysis:**
@@ -358,12 +357,14 @@ GOOG ID (run 3): 0xd78df04d9b949801
 
 **Test Output (excerpt):**
 
-```
+```text
+
 === Test 5: Symbol Set Growth Determinism ===
-Digest(S={AAPL,GOOG})           = 0x3e88522b8e2a4427
-Digest(S'={AAPL,GOOG,MSFT})     = 0x89e42bdbf5a4bf49
-Digest(S re-ordered/sharded)    = 0x3e88522b8e2a4427  ← SAME
+Digest(S={AAPL,GOOG}) = 0x3e88522b8e2a4427
+Digest(S'={AAPL,GOOG,MSFT}) = 0x89e42bdbf5a4bf49
+Digest(S re-ordered/sharded) = 0x3e88522b8e2a4427 ← SAME
 ✅ PASS: Base subset digest invariance; expanded set digest deterministic
+
 ```
 
 **Evidence Files:**
@@ -387,12 +388,14 @@ Digest(S re-ordered/sharded)    = 0x3e88522b8e2a4427  ← SAME
 **Test Output (excerpt):**
 
 ```
+
 === Test 6: Collision Tiebreak Determinism ===
 Collision bucket id=0x0000beef:
-    symbols: [SYM_A, SYM_B] → ordered by (id, raw bytes)
+symbols: [SYM_A, SYM_B] → ordered by (id, raw bytes)
 Aggregate digest (order 1) = 0x4a2c...
-Aggregate digest (order 2) = 0x4a2c...  ← SAME
+Aggregate digest (order 2) = 0x4a2c... ← SAME
 ✅ PASS: Deterministic ordering within collision bucket
+
 ```
 
 **Evidence Files:**
@@ -731,13 +734,13 @@ Preliminary / Not Exhaustive (to be verified):
 
 ### 8.3 Non-Patent Prior Art
 
-**Academic Paper: "Deterministic State Machines for Finance" (2019)**
+#### Academic Paper: "Deterministic State Machines for Finance" (2019)
 
 - **Teaching:** Deterministic processing for regulatory compliance
 - **Limitation:** Assumes single-threaded, single-shard architecture
 - **Distinction:** Our invention scales to multi-shard with deterministic verification
 
-**Open Source: FIX Engine Libraries**
+#### Open Source: FIX Engine Libraries
 
 - **Teaching:** Parsing FIX protocol messages deterministically
 - **Limitation:** Protocol-specific, does not address multi-symbol aggregate verification
@@ -796,19 +799,19 @@ Preliminary / Not Exhaustive (to be verified):
 
 ### 10.1 Target Licensees
 
-**Tier 1: Financial Exchanges**
+#### Tier 1: Financial Exchanges
 
 - NASDAQ, NYSE, CME Group, ICE
 - Use case: Multi-symbol matching engines with elastic scaling
 - License value: $500K - $5M/year per deployment
 
-**Tier 2: High-Frequency Trading Firms**
+#### Tier 2: High-Frequency Trading Firms
 
 - Citadel Securities, Jane Street, Jump Trading
 - Use case: Cross-datacenter order book replication
 - License value: $100K - $1M/year per firm
 
-**Tier 3: Trading Platform Vendors**
+#### Tier 3: Trading Platform Vendors
 
 - Refinitiv, Bloomberg, QuantConnect
 - Use case: Deterministic backtesting and simulation platforms
@@ -816,17 +819,17 @@ Preliminary / Not Exhaustive (to be verified):
 
 ### 10.2 Licensing Models
 
-**Model 1: Per-Shard Licensing**
+#### Model 1: Per-Shard Licensing
 
 - Fee based on number of computational shards deployed
 - Incentive: Pay more as you scale (fair allocation)
 
-**Model 2: Per-Datacenter Licensing**
+#### Model 2: Per-Datacenter Licensing
 
 - Flat fee per datacenter deployment
 - Incentive: Unlimited shards within datacenter (encourages adoption)
 
-**Model 3: Royalty on Trades**
+#### Model 3: Royalty on Trades
 
 - Small royalty (e.g., $0.001 per 1000 trades) processed using patented method
 - Incentive: Pay based on actual usage (fair for small deployments)
@@ -1038,7 +1041,16 @@ Evidence logs: capture stdout/stderr and store SHA-256 of files.
 - Timestamp (UTC): 2026-01-25 19:47:46 UTC
 - Machine: Darwin Mac 25.2.0 (arm64)
 - Compiler: Homebrew clang 21.1.5
-- CI run ID / link: N/A
+- CI runs (main):
+  - [Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21385555311)
+    - Created: 2026-01-27T05:19:40Z, Updated: 2026-01-27T05:20:47Z, Conclusion: success
+      - Artifacts (SHA-256):
+        - determinism-artifacts-21385555311.zip: sha256:58868b9451ef08c1df9e97e83fdeda4f943d6bf767c5de07331f0da82404f1ea (8004888 bytes)
+  - [CI (Ubuntu + macOS matrix)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21385601573)
+    - Created: 2026-01-27T05:21:53Z, Updated: 2026-01-27T05:23:38Z, Conclusion: success
+      - Artifacts (SHA-256):
+        - bench-and-bundle-ubuntu-latest-21385601573.zip: sha256:a635e1c65c62887ea57597db21074039a866c8e5922f13cad6cb29ad2fffc5f4 (21268 bytes)
+        - bench-and-bundle-macos-latest-21385601573.zip: sha256:7b67fef99aa89b6691ed4a05194652e12e6c4e76aa4c53705e6bdf7647b01d3d (14940 bytes)
 
 **Bundle Artifact Hashes (local computation):**
 
