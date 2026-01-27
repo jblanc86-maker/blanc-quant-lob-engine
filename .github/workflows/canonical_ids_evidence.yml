@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - blanc-quant-lob-engine-PP
+    tags:
+      - 'v*'
 
 jobs:
   package:
@@ -66,4 +68,52 @@ jobs:
         with:
           name: evidence-bundle-${{ runner.os }}-${{ github.run_id }}
           path: ${{ env.ARCHIVE }}
+          if-no-files-found: warn
+
+  package-arm64:
+    name: Package Evidence (ARM64 Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run on ARM64 Linux (aarch64)
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: aarch64
+          distro: ubuntu22.04
+          install: |
+            apt-get update
+            apt-get install -y git cmake g++ make zip
+          run: |
+            set -euo pipefail
+            echo "[ARM64] Build" >&2
+            bash scripts/build.sh || make || true
+
+            echo "[ARM64] Prepare evidence files" >&2
+            mkdir -p evidence_out
+            git rev-parse HEAD > evidence_out/commit_sha.txt
+            date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
+            cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
+            if command -v sha256sum >/dev/null 2>&1; then
+              sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+            else
+              shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+            fi
+            if [ -d artifacts ]; then
+              cp -R artifacts evidence_out/artifacts || true
+            fi
+            mkdir -p evidence_out/bundle
+            cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
+
+            echo "[ARM64] Create archive" >&2
+            ARCHIVE="evidence-bundle-Linux-arm64-${GITHUB_RUN_ID}.zip"
+            (cd evidence_out && zip -r ../"$ARCHIVE" .)
+            mv "$ARCHIVE" /workspace || true
+
+      - name: Upload artifact (ARM64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-Linux-arm64-${{ github.run_id }}
+          path: evidence-bundle-Linux-arm64-${{ github.run_id }}.zip
           if-no-files-found: warn
