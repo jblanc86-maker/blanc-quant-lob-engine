@@ -23,7 +23,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - name: Run markdownlint
+      - name: Run markdownlint (repo config)
         uses: DavidAnson/markdownlint-cli2-action@36d420e7cfa025fd9fd6b3f1b2d6ad91f4a8b7eb
         with:
           config: .markdownlint.yml
+      - name: Run markdownlint (README strict MD013)
+        uses: DavidAnson/markdownlint-cli2-action@36d420e7cfa025fd9fd6b3f1b2d6ad91f4a8b7eb
+        with:
+          config: .markdownlint.readme.yml
+          globs: |
+            README.md
+            apps/README.md
+            examples/README.md

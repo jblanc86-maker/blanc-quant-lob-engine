@@ -1,0 +1,19 @@
+# Strict markdownlint settings for README files only
+# Enforces MD013 with sane defaults while keeping global config permissive
+
+default: true
+
+# Line length for prose in READMEs
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+  headings: false
+  headers: false
+  strict: false
+
+# Keep these relaxations consistent with repo-wide policy
+MD022: false  # allow headings without surrounding blank lines in some spots
+MD028: false  # allow blank lines inside blockquotes
+MD032: false  # allow lists to touch surrounding text when needed
+MD033: false  # allow inline HTML when necessary
