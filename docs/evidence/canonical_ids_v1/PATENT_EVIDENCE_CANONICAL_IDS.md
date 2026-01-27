@@ -25,16 +25,16 @@ This document provides comprehensive evidence for a novel method, system, and ap
 
 ### 1.1 Prior Art Limitations
 
-**Existing Approach 1: Raw Symbol String Sorting**
+#### Existing Approach 1: Raw Symbol String Sorting
 
-````cpp
+```cpp
 // Prior art: sort by raw symbol bytes
 std::map<std::string, OrderBook> books_;  // Locale-dependent, padding-sensitive
 
 // Problem: "AAPL" vs "AAPL    " → different sort order
 // Problem: UTF-8 vs ASCII → different sort order
 // Problem: Case sensitivity → different sort order
-
+```
 
 **Issues:**
 
@@ -43,7 +43,7 @@ std::map<std::string, OrderBook> books_;  // Locale-dependent, padding-sensitive
 - Encoding-sensitive (UTF-8 vs ASCII)
 - Not stable across different implementations
 
-**Existing Approach 2: Insertion Order Tracking**
+#### Existing Approach 2: Insertion Order Tracking
 
 ```cpp
 // Track insertion order explicitly
@@ -51,7 +51,7 @@ std::vector<std::pair<Symbol, OrderBook>> books_in_order_;
 
 // Problem: Different insertion order → different digest
 // Problem: Shard count change → different insertion order → different digest
-````
+```
 
 **Issues:**
 
@@ -89,7 +89,7 @@ Result: ❌ Digests don't match (compliance failure)
 
 ### 2.1 Core Patent Claims
 
-**CLAIM 1 (Independent): Method for Deterministic Multi-Symbol Aggregate Verification**
+#### CLAIM 1 (Independent): Method for Deterministic Multi-Symbol Aggregate Verification
 
 A method for computing a deterministic aggregate verification digest for a multi-symbol trading system, comprising:
 
@@ -136,6 +136,10 @@ inline CanonicalSymbolID compute_canonical_id(const Symbol& symbol) {
 
     // Hash all 8 bytes of symbol (including trailing spaces)
     for (size_t i = 0; i < 8; ++i) {
+        hash ^= static_cast<uint8_t>(symbol[i]);
+        hash *= FNV1A_PRIME;
+    }
+
     return hash;
 }
 
@@ -145,6 +149,9 @@ inline uint64_t compute_canonical_aggregate_digest(
     const std::map<CanonicalSymbolID, uint64_t>& id_to_digest)
 {
     constexpr uint64_t FNV1A_OFFSET = 14695981039346656037ULL;
+    constexpr uint64_t FNV1A_PRIME = 1099511628211ULL;
+
+    uint64_t hash = FNV1A_OFFSET;
 
     // Iterate in sorted canonical ID order (std::map guarantees this)
     for (const auto& [id, digest] : id_to_digest) {
@@ -154,6 +161,9 @@ inline uint64_t compute_canonical_aggregate_digest(
             hash *= FNV1A_PRIME;
         }
 
+        // Mix in per-symbol digest (8 bytes)
+        for (int i = 0; i < 8; ++i) {
+            hash ^= static_cast<uint8_t>(digest >> (i * 8));
             hash *= FNV1A_PRIME;
         }
     }
@@ -165,13 +175,14 @@ inline uint64_t compute_canonical_aggregate_digest(
 **File:** [include/multi_book_engine_v2.hpp](../include/multi_book_engine_v2.hpp)
 
 ```cpp
+// PATENT CLAIM: Multi-Symbol Trading System with Canonical IDs
 class MultiBookEngineV2 {
 public:
-// Get order book for symbol (uses canonical ID internally)
-OrderBookV2& get*book(const Symbol& symbol) {
-CanonicalSymbolID id = registry*.register*symbol(symbol);
-return books*[id]; // KEY: Keyed by canonical ID, not raw symbol
-}
+    // Get order book for symbol (uses canonical ID internally)
+    OrderBookV2& get_book(const Symbol& symbol) {
+        CanonicalSymbolID id = registry_.register_symbol(symbol);
+        return books_[id];  // KEY: Keyed by canonical ID, not raw symbol
+    }
 
     // PATENT CLAIM: Canonical Aggregate Digest
     // Result is independent of symbol processing order and shard count
@@ -188,9 +199,9 @@ return books*[id]; // KEY: Keyed by canonical ID, not raw symbol
     }
 
 private:
-CanonicalSymbolRegistry registry*;
-std::map<CanonicalSymbolID, OrderBookV2> books*; // Sorted by canonical ID
-std::unordered*map<uint64_t, CanonicalSymbolID> order_to_symbol_id*;
+    CanonicalSymbolRegistry registry_;
+    std::map<CanonicalSymbolID, OrderBookV2> books_;  // Sorted by canonical ID
+    std::unordered_map<uint64_t, CanonicalSymbolID> order_to_symbol_id_;
 };
 ```
 
@@ -387,7 +398,7 @@ Digest(S re-ordered/sharded) = 0x3e88522b8e2a4427 ← SAME
 
 **Test Output (excerpt):**
 
-```
+```text
 
 === Test 6: Collision Tiebreak Determinism ===
 Collision bucket id=0x0000beef:

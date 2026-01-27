@@ -334,6 +334,14 @@ Note: CI job will recompute and archive hashes for cross-platform runs; links to
 
 - Optional witness: sign/date PDF print of evidence bundle
 
+Packaging workflow run (branch blanc-quant-lob-engine-PP):
+
+- [Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21399501923)
+  - Created: 2026-01-27T13:42:59Z, Updated: 2026-01-27T13:43:31Z, Conclusion: success
+  - Artifacts (SHA-256):
+    - evidence-bundle-Linux-21399501923.zip: sha256:58772852d85665827c434ab20e31df65653e9eb37ff4c7cef7d5a8e02d55f33d (14880 bytes)
+    - evidence-bundle-macOS-21399501923.zip: sha256:f62d76c992822f7ebed37512d71f069306ed66472cdd4e12d450274c567a9f9b (14875 bytes)
+
 ---
 
 ## 7. Provisional-Ready Upgrade Checklist
