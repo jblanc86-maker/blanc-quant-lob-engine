@@ -77,45 +77,51 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run on ARM64 Linux (aarch64)
-        uses: uraimo/run-on-arch-action@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
         with:
-          arch: aarch64
-          distro: ubuntu22.04
-          dockerRunArgs: |
-            --volume "${{ github.workspace }}:/workspace"
-            --workdir /workspace
-          env: |
-            GITHUB_SHA=${{ github.sha }}
-            GITHUB_RUN_ID=${{ github.run_id }}
-          install: |
-            apt-get update
-            apt-get install -y git cmake g++ make zip
-          run: |
-            set -euo pipefail
-            cd /workspace || true
-            echo "[ARM64] Build" >&2
-            bash scripts/build.sh || make || true
+          platforms: arm64
 
-            echo "[ARM64] Prepare evidence files" >&2
-            mkdir -p evidence_out
-            echo "${GITHUB_SHA:-unknown}" > evidence_out/commit_sha.txt
-            date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
-            cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
-            if command -v sha256sum >/dev/null 2>&1; then
-              sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
-            else
-              shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
-            fi
-            if [ -d artifacts ]; then
-              cp -R artifacts evidence_out/artifacts || true
-            fi
-            mkdir -p evidence_out/bundle
-            cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-            echo "[ARM64] Create archive" >&2
-            ARCHIVE="evidence-bundle-Linux-arm64-${GITHUB_RUN_ID}.zip"
-            (cd evidence_out && zip -r ../"$ARCHIVE" .)
+      - name: Run ARM64 container to build and package evidence
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          echo "[ARM64] Starting arm64 build container" >&2
+          docker run --rm --platform linux/arm64 \
+            -e GITHUB_SHA -e GITHUB_RUN_ID \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            ubuntu:22.04 bash -lc '
+              set -euo pipefail
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update && apt-get install -y git cmake g++ make zip ninja-build
+              echo "[ARM64] Build" >&2
+              bash scripts/build.sh || make || true
+              echo "[ARM64] Prepare evidence files" >&2
+              mkdir -p evidence_out
+              echo "${GITHUB_SHA:-unknown}" > evidence_out/commit_sha.txt
+              date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
+              cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
+              if command -v sha256sum >/dev/null 2>&1; then
+                sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk "{print \$1}" > evidence_out/evidence_doc_sha256.txt
+              else
+                shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk "{print \$1}" > evidence_out/evidence_doc_sha256.txt
+              fi
+              if [ -d artifacts ]; then
+                cp -R artifacts evidence_out/artifacts || true
+              fi
+              mkdir -p evidence_out/bundle
+              cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
+              echo "[ARM64] Create archive" >&2
+              ARCHIVE="evidence-bundle-Linux-arm64-${GITHUB_RUN_ID}.zip"
+              (cd evidence_out && zip -r ../"$ARCHIVE" .)
+            '
 
       - name: Upload artifact (ARM64)
         uses: actions/upload-artifact@v4
