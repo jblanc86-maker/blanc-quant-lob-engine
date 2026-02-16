@@ -1081,6 +1081,26 @@ Packaging workflow run (branch blanc-quant-lob-engine-PP):
     - evidence-bundle-Linux-21399501923.zip: sha256:58772852d85665827c434ab20e31df65653e9eb37ff4c7cef7d5a8e02d55f33d (14880 bytes)
     - evidence-bundle-macOS-21399501923.zip: sha256:f62d76c992822f7ebed37512d71f069306ed66472cdd4e12d450274c567a9f9b (14875 bytes)
 
+- [Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21400030927)
+  - Conclusion: success
+  - Artifacts (SHA-256):
+    - evidence-bundle-Linux-21400030927.zip: sha256:fc6b56a0c2789761e64fc10b79b7fc2d01edc68f6ea42b8a760693cebcd5dae6 (14.7 KB)
+    - evidence-bundle-macOS-21400030927.zip: sha256:a14182115881594b79db969471de6ed53ccb333f09ab455b93abb94ddf435489 (14.7 KB)
+
+- [Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21401188375)
+  - Conclusion: failure (ARM64 Linux job failed; Linux/macOS succeeded)
+  - Artifacts (SHA-256):
+    - evidence-bundle-Linux-21401188375.zip: sha256:4ef986489df609d36410e8fd68a4a3e7854c8cbc3d28676dfb6003e96f1bdc9b (14.8 KB)
+    - evidence-bundle-macOS-21401188375.zip: sha256:8c3d9cd0147036b5fc0ca6926dd799193cc7c9fbcf83345045d87f8cdb71a059 (14.8 KB)
+  - ARM64 notes: Job error from run-on-arch-action (exit code 128); no ARM64 artifact produced in this run.
+
+- [Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/runs/21402149065)
+  - Conclusion: failure (ARM64 Linux job failed; Linux/macOS succeeded)
+  - Artifacts (SHA-256):
+    - evidence-bundle-Linux-21402149065.zip: sha256:3f8961c281afa5e030823d803059d8c6363585a5770527a34df2594be8e8417c (14.7 KB)
+    - evidence-bundle-macOS-21402149065.zip: sha256:b1b187be4e5bc9de065d19e4758b13c81689e764620f67569c2a336efa2bf942 (14.8 KB)
+  - ARM64 notes: Job error from run-on-arch-action (exit code 128); no ARM64 artifact produced in this run.
+
 ## 19. Prior Art Notes (Preliminary / Not Exhaustive)
 
 This section will be updated with verified identifiers and links. Placeholder patent numbers have been removed pending search verification.
