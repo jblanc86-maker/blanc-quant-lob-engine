@@ -1,0 +1,1 @@
+/home/runner/work/blanc-quant-lob-engine/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -pie -Wl,--dependency-file=CMakeFiles/test_gate_transitions.dir/link.d CMakeFiles/test_gate_transitions.dir/tests/test_gate_transitions.cpp.o CMakeFiles/test_gate_transitions.dir/src/breaker.cpp.o -o bin/test_gate_transitions

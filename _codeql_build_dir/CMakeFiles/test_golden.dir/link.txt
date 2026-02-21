@@ -1,0 +1,1 @@
+/home/runner/work/blanc-quant-lob-engine/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -pie -Wl,--dependency-file=CMakeFiles/test_golden.dir/link.d CMakeFiles/test_golden.dir/tests/test_golden.cpp.o -o bin/test_golden

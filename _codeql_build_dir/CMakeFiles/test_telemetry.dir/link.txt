@@ -1,0 +1,1 @@
+/home/runner/work/blanc-quant-lob-engine/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -pie -Wl,--dependency-file=CMakeFiles/test_telemetry.dir/link.d CMakeFiles/test_telemetry.dir/tests/test_telemetry.cpp.o CMakeFiles/test_telemetry.dir/src/telemetry.cpp.o CMakeFiles/test_telemetry.dir/src/breaker.cpp.o -o bin/test_telemetry

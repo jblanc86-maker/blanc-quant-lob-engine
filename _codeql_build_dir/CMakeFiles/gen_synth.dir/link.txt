@@ -1,0 +1,1 @@
+/home/runner/work/blanc-quant-lob-engine/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -pie -Wl,--dependency-file=CMakeFiles/gen_synth.dir/link.d CMakeFiles/gen_synth.dir/tools/gen_synth.cpp.o -o bin/gen_synth
