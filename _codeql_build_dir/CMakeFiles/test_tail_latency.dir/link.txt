@@ -1,1 +1,0 @@
-/home/runner/work/blanc-quant-lob-engine/.codeql-scratch/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -pie -Wl,--dependency-file=CMakeFiles/test_tail_latency.dir/link.d CMakeFiles/test_tail_latency.dir/tests/test_tail_latency.cpp.o -o bin/test_tail_latency
