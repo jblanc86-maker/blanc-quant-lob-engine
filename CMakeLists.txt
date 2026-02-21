@@ -145,6 +145,19 @@ if (BUILD_TESTING)
   else()
     message(STATUS "Skipping tail_latency_purity: tests/test_tail_latency.cpp not present")
   endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_gate_transitions.cpp)
+    add_executable(test_gate_transitions
+      tests/test_gate_transitions.cpp
+      src/breaker.cpp
+    )
+    target_include_directories(test_gate_transitions PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_compile_options(test_gate_transitions PRIVATE -O2)
+    add_test(NAME gate_transition_determinism COMMAND test_gate_transitions)
+    message(STATUS "test_gate_transitions: index_determinism + log_replay + fault_injection + sub1us latency")
+  else()
+    message(STATUS "Skipping gate_transition_determinism: tests/test_gate_transitions.cpp not present")
+  endif()
 endif()
 
 # Note: The test_breaker.cpp file is proprietary and not included in this repository.
