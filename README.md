@@ -591,6 +591,20 @@ CPU_PIN=3 make bench
 
 Pinning reduces tail variance on some hosts; measure on your hardware.
 
+**Why core 3 and not core 0?**
+Core 0 is the conventional target for OS interrupt affinity on Linux (`/proc/irq/*/smp_affinity`).
+The kernel routes timer interrupts, NIC softirqs, and RCU callbacks to core 0 by default on most
+distributions. Pinning the replay engine to core 0 would therefore share a physical core with the
+OS interrupt handler, injecting unpredictable latency spikes directly into the hot loop.
+Core 3 is chosen as the first general-purpose core that is (a) far enough from core 0 to avoid
+interrupt coalescing on hyperthreaded die layouts, and (b) not the last core, which some kernels
+also use for deferred work. On NUMA machines, verify that core 3 is on the same socket as the
+NIC receive queue to avoid cross-socket memory traffic (see `docs/CPU_PINNING_RATIONALE.md`).
+
+**NUMA topology:** Single-socket pinning is the current validated configuration.
+Multi-socket NUMA affinity (`numactl`) is documented in `docs/CPU_PINNING_RATIONALE.md`
+and `docs/DETERMINISM_ABSOLUTISM.md`; production NUMA validation is planned for the next release.
+
 ## Repository layout
 
 ```text
