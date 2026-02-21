@@ -17,6 +17,11 @@ int main()
   t.p50_ms = 1.1;
   t.p95_ms = 2.2;
   t.p99_ms = 3.3;
+  t.p999_ms = 4.4;
+  t.p9999_ms = 5.5;
+  t.sample_count = 123;
+  t.p999_valid = true;
+  t.p9999_valid = true;
   t.cpu_pin = 0;
   t.readings.gap_rate = 0.1;
   t.breaker = BreakerState::Fuse;
@@ -58,6 +63,11 @@ int main()
     std::cerr << "actual digest not found in json" << std::endl;
     return 4;
   }
+  if (contents.find("\"samples\":123") == std::string::npos)
+  {
+    std::cerr << "sample count not found in json" << std::endl;
+    return 4;
+  }
 
   std::ifstream fprom(prom_file);
   if (!fprom)
@@ -69,6 +79,11 @@ int main()
   if (prom_contents.find("lob_cpu_pin 0") == std::string::npos)
   {
     std::cerr << "lob_cpu_pin not found in prom file" << std::endl;
+    return 6;
+  }
+  if (prom_contents.find("lob_samples 123") == std::string::npos)
+  {
+    std::cerr << "lob_samples not found in prom file" << std::endl;
     return 6;
   }
 

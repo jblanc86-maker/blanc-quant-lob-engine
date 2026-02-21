@@ -289,11 +289,14 @@ int main(int argc, char **argv)
   t.readings = det.readings();
   t.breaker = st;
   t.publish_allowed = br.publish_allowed();
+  t.sample_count = static_cast<uint64_t>(event_latencies_ms.size());
   t.p50_ms   = percentile(event_latencies_ms, 50.0);
   t.p95_ms   = percentile(event_latencies_ms, 95.0);
   t.p99_ms   = percentile(event_latencies_ms, 99.0);
-  t.p999_ms  = percentile(event_latencies_ms, 99.9);
-  t.p9999_ms = percentile(event_latencies_ms, 99.99);
+  t.p999_valid = t.sample_count >= 1000;   // p99.9 requires ≥1k samples
+  t.p9999_valid = t.sample_count >= 10000; // p99.99 requires ≥10k samples
+  t.p999_ms  = t.p999_valid ? percentile(event_latencies_ms, 99.9) : 0.0;
+  t.p9999_ms = t.p9999_valid ? percentile(event_latencies_ms, 99.99) : 0.0;
   write_jsonl(out_dir + "/bench.jsonl", t);
   write_prom(out_dir + "/metrics.prom", t);
 
@@ -303,10 +306,13 @@ int main(int argc, char **argv)
             << " breaker=" << Breaker::to_string(st)
             << " publish=" << (br.publish_allowed() ? "YES" : "NO")
             << " elapsed_ms=" << std::dec << elapsed_ms
+            << " samples=" << t.sample_count
             << " p50=" << t.p50_ms << "ms"
             << " p99=" << t.p99_ms << "ms"
             << " p99.9=" << t.p999_ms << "ms"
             << " p99.99=" << t.p9999_ms << "ms"
+            << " p99.9_valid=" << (t.p999_valid ? "true" : "false")
+            << " p99.99_valid=" << (t.p9999_valid ? "true" : "false")
             << std::endl;
   return 0;
 }

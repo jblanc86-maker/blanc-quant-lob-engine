@@ -39,9 +39,11 @@
 | **Throughput**                                             | 1M events/sec                                                               | 1–5M ops/sec                                                                       | ✅ Baseline Established |
 | **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ Enhanced with SCM                                                               | ✅ Production Ready     |
 
-> **Tail Latency Purity** — p99.9 and p99.99 are now measured on every run (≥10k events required for stable p99.99;
-> 1M synthetic events = ~15,625 64-byte chunks). p99.9 is gated at ≤ 3× the p99 budget; p99.99 is reported
-> as an advisory metric. Gate tail-delta is independently validated by `tests/test_tail_latency.cpp`.
+> **Tail Latency Purity** — p99.9 and p99.99 are now measured on every run (≥1k samples for p99.9 and ≥10k
+> samples for stable p99.99; 1M synthetic events = ~15,625 64-byte chunks). Runs emit `samples`,
+> `p999_valid`, and `p9999_valid` to prevent under-sampled tails from being misinterpreted. p99.9 is
+> gated at ≤ 3× the p99 budget; p99.99 is reported as an advisory metric. Gate tail-delta is
+> independently validated by `tests/test_tail_latency.cpp`.
 
 > Update
 

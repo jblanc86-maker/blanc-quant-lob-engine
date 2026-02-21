@@ -41,6 +41,9 @@ Release checks (inputs typically produced by benchmark jobs):
 
 - `digest_fnv` must match golden
 - `p99_ms` ≤ budget (e.g., `0.50 × baseline + epsilon`)
+- Tail truthfulness: require `samples ≥ 1000` for p99.9 and `samples ≥ 10000` for p99.99.
+  The JSONL fields `p999_valid` / `p9999_valid` must be true, and `lob_samples`
+  must be present in `metrics.prom`.
 - Artifacts present and schema‑checked: `bench.jsonl`, `metrics.prom`
 - Long-horizon stability evidence present: `artifacts/stability/stability_summary.jsonl`
   (see `docs/LONG_HORIZON_STABILITY.md`)
