@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "label": "p99 ms",
-  "message": "n/a",
-  "color": "lightgrey"
+  "message": "64.05",
+  "color": "green",
+  "namedLogo": "github"
 }
