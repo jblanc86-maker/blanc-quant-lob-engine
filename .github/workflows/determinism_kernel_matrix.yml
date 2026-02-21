@@ -1,0 +1,135 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# Determinism — Kernel Matrix Replay
+# Validates digest invariance across multiple Ubuntu kernel images.
+
+name: Determinism — Kernel Matrix Replay
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 2'
+  push:
+    branches: [main, blanc-quant-lob-engine-PP]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_kernel_matrix.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_kernel_matrix.yml'
+
+jobs:
+  kernel-matrix:
+    name: "Replay on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Normalize environment
+        run: |
+          echo "TZ=UTC"       >> $GITHUB_ENV
+          echo "LANG=C.UTF-8"  >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Build replay
+        run: |
+          set -euxo pipefail
+          rm -rf build
+          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
+            -DBUILD_BENCHMARKS=OFF \
+            -DCMAKE_CXX_STANDARD=20
+          cmake --build build -j$(nproc) --target replay gen_synth
+
+      - name: Generate golden input
+        run: |
+          set -euxo pipefail
+          mkdir -p data/golden
+          ./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+
+      - name: Run replay and capture digest
+        run: |
+          set -euxo pipefail
+          mkdir -p evidence_kernel
+          uname -a > evidence_kernel/uname_full.txt
+          uname -r > evidence_kernel/kernel_version.txt
+          ./build/bin/replay --input data/golden/itch_1m.bin | tee evidence_kernel/run.txt
+          DIGEST=$(grep -m1 -oE 'digest_fnv=0x[0-9a-f]+' evidence_kernel/run.txt | cut -d= -f2 || true)
+          echo "$DIGEST" > evidence_kernel/digest.txt
+          echo "::notice title=Kernel digest (${{ matrix.os }})::$DIGEST"
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: kernel-evidence-${{ matrix.os }}-${{ github.run_id }}
+          path: evidence_kernel/
+
+  assert-kernel-equality:
+    name: "Assert digest equality across kernels"
+    runs-on: ubuntu-latest
+    needs: kernel-matrix
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Download all kernel evidence
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
+        with:
+          path: kernel_evidence
+
+      - name: Compare digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          declare -A DIGESTS
+          for f in kernel_evidence/kernel-evidence-*/digest.txt; do
+            os=$(basename $(dirname "$f") | sed 's/kernel-evidence-//')
+            digest=$(cat "$f" | tr -d '\n')
+            DIGESTS["$os"]="$digest"
+          done
+
+          unique=()
+          for os in "${!DIGESTS[@]}"; do
+            found=0
+            for u in "${unique[@]}"; do [[ "$u" == "${DIGESTS[$os]}" ]] && found=1; done
+            if (( found == 0 )); then unique+=("${DIGESTS[$os]}"); fi
+          done
+
+          if (( ${#unique[@]} != 1 )); then
+            echo "FAIL: kernel matrix produced non-identical digests" >&2
+            for os in "${!DIGESTS[@]}"; do echo "  $os = ${DIGESTS[$os]}" >&2; done
+            exit 1
+          fi
+
+          CANON="${unique[0]}"
+          {
+            echo "## Kernel Matrix Replay"
+            echo ""
+            echo "| OS | Digest |"
+            echo "| --- | --- |"
+            for os in ubuntu-20.04 ubuntu-22.04 ubuntu-24.04; do
+              echo "| \`$os\` | \`${DIGESTS[$os]:-unknown}\` |"
+            done
+            echo ""
+            echo "**Canonical digest:** \`$CANON\`"
+          } >> "$GITHUB_STEP_SUMMARY"

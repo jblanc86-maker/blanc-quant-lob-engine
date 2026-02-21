@@ -50,6 +50,11 @@ REQUIRED_METRICS = {
     "lob_p50_ms",
     "lob_p95_ms",
     "lob_p99_ms",
+    "lob_p999_ms",    # p99.9  — required for DSEF Tail Latency Purity
+    "lob_p9999_ms",   # p99.99 — required for DSEF Tail Latency Purity
+    "lob_samples",
+    "lob_p999_valid",
+    "lob_p9999_valid",
     "lob_publish_allowed",
 }
 
@@ -57,8 +62,13 @@ REQUIRED_METRICS = {
 @dataclass
 class BenchResult:
     p99_ms: float
-    digest: Optional[str]
-    determinism: Optional[bool]
+    p999_ms: float = 0.0   # p99.9
+    p9999_ms: float = 0.0  # p99.99
+    sample_count: int = 0
+    p999_valid: bool = False
+    p9999_valid: bool = False
+    digest: Optional[str] = None
+    determinism: Optional[bool] = None
 
 
 def _optional_float(value: Any) -> Optional[float]:
@@ -112,6 +122,11 @@ def export_metrics_bundle(
         },
         "bench": {
             "p99_ms": bench.p99_ms,
+            "p999_ms": bench.p999_ms,
+            "p9999_ms": bench.p9999_ms,
+            "sample_count": bench.sample_count,
+            "p999_valid": bench.p999_valid,
+            "p9999_valid": bench.p9999_valid,
             "digest": bench.digest,
             "determinism": bench.determinism,
         },
@@ -150,9 +165,23 @@ def parse_bench(path: Path) -> BenchResult:
         except (TypeError, ValueError) as exc:
             raise SystemExit(f"✖ bench '{key}' not a float: {exc}")
 
+    def _require_int(key: str) -> int:
+        value = payload.get(key)
+        if value is None:
+            raise SystemExit(f"✖ bench payload missing '{key}'")
+        try:
+            return int(value)
+        except (TypeError, ValueError) as exc:
+            raise SystemExit(f"✖ bench '{key}' not an int: {exc}")
+
     digest = payload.get("digest_fnv") or payload.get("actual")
     return BenchResult(
         p99_ms=_require_float("p99_ms"),
+        p999_ms=float(payload.get("p999_ms") or 0.0),
+        p9999_ms=float(payload.get("p9999_ms") or 0.0),
+        sample_count=_require_int("samples"),
+        p999_valid=bool(payload.get("p999_valid", False)),
+        p9999_valid=bool(payload.get("p9999_valid", False)),
         digest=digest,
         determinism=payload.get("determinism"),
     )
@@ -314,8 +343,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     decision_lines = [
         f"runner: {runner_id}",
         f"profile: {args.profile} ({profile_cfg['description']})",
-        f"measured_p99_ms: {bench.p99_ms:.4f}",
-        f"allowed_p99_ms: {allowed_ms:.4f}",
+        f"measured_p99_ms:    {bench.p99_ms:.4f}",
+        f"measured_p999_ms:   {bench.p999_ms:.4f}",
+        f"measured_p9999_ms:  {bench.p9999_ms:.4f}",
+        f"sample_count:       {bench.sample_count}",
+        f"p999_valid:         {bench.p999_valid}",
+        f"p9999_valid:        {bench.p9999_valid}",
+        f"allowed_p99_ms:     {allowed_ms:.4f}",
         f"median_p99_ms: {baseline['median_p99_ms']}",
         f"mad_p99_ms: {baseline['mad_p99_ms']}",
         f"p99_multiplier: {profile_cfg['p99_multiplier']}",
@@ -340,6 +374,39 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         status = "FAIL"
     if require_digest and expected_digest and not digest_ok:
         status = "FAIL"
+
+    # Tail-latency truthfulness: require minimum sample counts.
+    if bench.sample_count < 1000:
+        status = "FAIL"
+        decision_lines.append("samples_gate: FAIL (need ≥1000 samples for p99.9)")
+    if bench.sample_count < 10000:
+        status = "FAIL"
+        decision_lines.append("samples_gate: FAIL (need ≥10000 samples for p99.99)")
+
+    if not bench.p999_valid:
+        status = "FAIL"
+        decision_lines.append("p999_valid: FAIL (insufficient samples)")
+    if not bench.p9999_valid:
+        status = "FAIL"
+        decision_lines.append("p9999_valid: FAIL (insufficient samples)")
+
+    # p99.9 gate: must be ≤ 3× allowed_ms (i.e. 3× the p99 budget)
+    allowed_p999_ms = allowed_ms * 3.0
+    if bench.p999_ms > 0.0 and bench.p999_ms > allowed_p999_ms + 1e-9:
+        status = "FAIL"
+        decision_lines.append(
+            f"p999_gate: FAIL ({bench.p999_ms:.4f} ms > {allowed_p999_ms:.4f} ms)"
+        )
+    elif bench.p999_ms > 0.0:
+        decision_lines.append(
+            f"p999_gate: PASS ({bench.p999_ms:.4f} ms ≤ {allowed_p999_ms:.4f} ms)"
+        )
+
+    # p99.99 advisory: warn only (not a hard gate) — observable but not blocking
+    if bench.p9999_ms > 0.0:
+        decision_lines.append(
+            f"p9999_advisory: {bench.p9999_ms:.4f} ms (informational)"
+        )
 
     print("verdict:", status)
     for line in decision_lines:

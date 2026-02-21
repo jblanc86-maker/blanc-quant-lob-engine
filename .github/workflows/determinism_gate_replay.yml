@@ -1,0 +1,149 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+#
+# Determinism — Gate Transition Replay
+#
+# DSEF SCM/Coordination Curves gap closure:
+#   "deterministic replay of gate transitions is asserted but not independently
+#    verified with a fault-injection harness that fires mid-burst"
+#
+# This workflow:
+#   1. Builds test_gate_transitions (index_determinism + log_replay_equality +
+#      mid_burst_fault_injection + step_latency_sub1us).
+#   2. Runs the binary TWICE independently and captures its stdout.
+#   3. Diffs the two outputs — they must be byte-identical (same transition
+#      indices, same rule ids, same latency classification).
+#   4. Uploads the two run logs as evidence artifacts.
+#   5. Publishes the step_latency_sub1us result to the Job Summary.
+
+name: Determinism — Gate Transition Replay
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, blanc-quant-lob-engine-PP]
+    paths:
+      - 'src/breaker.cpp'
+      - 'include/breaker.hpp'
+      - 'include/detectors.hpp'
+      - 'tests/test_gate_transitions.cpp'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_gate_replay.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/breaker.cpp'
+      - 'include/breaker.hpp'
+      - 'include/detectors.hpp'
+      - 'tests/test_gate_transitions.cpp'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_gate_replay.yml'
+  schedule:
+    - cron: '0 9 * * 3'   # weekly Wednesday 09:00 UTC
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual trigger reason'
+        required: false
+        default: 'manual'
+
+jobs:
+  gate-replay:
+    name: "Gate transition fault-injection & replay determinism"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Normalize environment
+        run: |
+          echo "TZ=UTC"        >> $GITHUB_ENV
+          echo "LANG=C.UTF-8"  >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Build test_gate_transitions
+        run: |
+          set -euxo pipefail
+          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
+            -DBUILD_BENCHMARKS=OFF \
+            -DCMAKE_CXX_STANDARD=20 \
+            -DCMAKE_CXX_FLAGS="-O2"
+          cmake --build build -j$(nproc) --target test_gate_transitions gen_synth
+
+      - name: Generate golden input
+        run: |
+          mkdir -p data/golden
+          ./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+
+      - name: Run 1 — gate transition harness
+        run: |
+          set -euxo pipefail
+          mkdir -p evidence_gate
+          ./build/bin/test_gate_transitions | tee evidence_gate/run1.txt
+          echo "Run 1 exit: $?"
+
+      - name: Run 2 — gate transition harness (independent re-run)
+        run: |
+          set -euxo pipefail
+          ./build/bin/test_gate_transitions | tee evidence_gate/run2.txt
+          echo "Run 2 exit: $?"
+
+      - name: Assert outputs are byte-identical
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Strip the step_latency timing values (they include wall-clock ns
+          # which vary between runs) — only the PASS/FAIL line and the
+          # determinism-relevant lines must match.
+          grep -v "step_latency_sub1us" evidence_gate/run1.txt > evidence_gate/run1_det.txt || true
+          grep -v "step_latency_sub1us" evidence_gate/run2.txt > evidence_gate/run2_det.txt || true
+
+          if ! diff -u evidence_gate/run1_det.txt evidence_gate/run2_det.txt; then
+            echo "FAIL: gate transition outputs differ between runs!" >&2
+            exit 1
+          fi
+          echo "PASS: deterministic gate transition outputs are byte-identical"
+
+      - name: Extract latency result
+        id: latency
+        run: |
+          LINE=$(grep "step_latency_sub1us" evidence_gate/run1.txt || echo "not found")
+          echo "latency_line=$LINE" >> $GITHUB_OUTPUT
+          echo "::notice title=Gate step latency::$LINE"
+
+      - name: Extract transition log
+        run: |
+          {
+            echo "## Gate Transition Determinism"
+            echo ""
+            echo "### Transition log (run 1)"
+            echo "\`\`\`"
+            cat evidence_gate/run1.txt
+            echo "\`\`\`"
+            echo ""
+            echo "### Byte-identical comparison"
+            if diff -q evidence_gate/run1_det.txt evidence_gate/run2_det.txt >/dev/null 2>&1; then
+              echo "✅ run1 == run2 (deterministic, index-based)"
+            else
+              echo "❌ run1 != run2 (non-determinism detected)"
+            fi
+            echo ""
+            echo "### Gate step latency"
+            echo "\`${{ steps.latency.outputs.latency_line }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload gate evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gate-transition-evidence-${{ github.run_id }}
+          path: evidence_gate/

@@ -14,6 +14,8 @@ Core capabilities
 - Per-run observability: bench.jsonl (per-run JSONL), metrics.prom (Prometheus textfile), PR/CI bench outputs.
 - Breaker gates: runtime safety gates (Fuse/Local/Feeder/Main/Kill) with telemetry & publish flag.
 - CPU pin support for reproducible latency measurements (Linux only; no-op on macOS).
+  Core 0 is deliberately avoided (OS interrupt affinity default); core 3 is the
+  documented default. See `docs/CPU_PINNING_RATIONALE.md` for full rationale.
 
 Representative metrics (local lab runs)
 

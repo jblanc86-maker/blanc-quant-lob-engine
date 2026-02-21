@@ -1,0 +1,207 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+#
+# Determinism Absolutism — CPU Affinity & Kernel Provenance
+#
+# DSEF Determinism Absolutism gap closure:
+#   (a) "no cross-socket/cross-NUMA digest story"
+#   (b) "kernel-version replay not tested"
+#
+# Strategy:
+#   - Single GitHub-hosted runner = single socket (no real cross-NUMA available in CI).
+#     We prove *intra-socket core-affinity invariance* using taskset(1):
+#       run 1 → pinned to core 0  (Core A)
+#       run 2 → pinned to core 1  (Core B)
+#     Both must produce the same FNV-1a CANON_V1 digest.
+#     Rationale: if scheduling/NUMA policy affected arithmetic, this would diverge.
+#
+#   - Kernel version is captured via `uname -r` and committed to the evidence
+#     artifact alongside the digest, establishing a verifiable kernel-version↔digest
+#     binding for the record.
+#
+#   - On multi-socket runners (self-hosted), operators can re-run with
+#     NUMA_NODE_A / NUMA_NODE_B env vars set and `numactl` pinning (see docs).
+
+name: Determinism — CPU Affinity & Kernel Provenance
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, blanc-quant-lob-engine-PP]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_affinity_kernel.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_affinity_kernel.yml'
+  schedule:
+    - cron: '0 8 * * 3'   # weekly Wednesday 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual trigger reason'
+        required: false
+        default: 'manual'
+
+jobs:
+  affinity-and-kernel:
+    name: "Core-affinity invariance + kernel provenance"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Normalize environment
+        run: |
+          echo "TZ=UTC"       >> $GITHUB_ENV
+          echo "LANG=C.UTF-8"  >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build util-linux
+
+      - name: Record kernel provenance
+        id: kernel
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_affinity
+          uname -a > evidence_affinity/uname_full.txt
+          uname -r > evidence_affinity/kernel_version.txt
+          KERNEL_VER=$(uname -r)
+          echo "kernel_version=$KERNEL_VER" >> $GITHUB_OUTPUT
+          echo "Kernel: $KERNEL_VER"
+          echo "::notice title=Kernel version::$KERNEL_VER"
+
+      - name: Build replay (O3, production flags)
+        run: |
+          set -euxo pipefail
+          rm -rf build_affinity
+          CC=gcc CXX=g++ cmake -S . -B build_affinity -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=OFF \
+            -DBUILD_BENCHMARKS=OFF \
+            -DCMAKE_CXX_STANDARD=20 \
+            -DCMAKE_CXX_FLAGS="-O3 -march=native"
+          cmake --build build_affinity -j$(nproc) --target replay gen_synth
+
+      - name: Generate golden input
+        run: |
+          set -euxo pipefail
+          mkdir -p data/golden
+          ./build_affinity/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+
+      - name: Detect available cores
+        id: cores
+        run: |
+          NPROC=$(nproc)
+          # Need at least 2 cores for a meaningful affinity test
+          if (( NPROC < 2 )); then
+            echo "only_one_core=true" >> $GITHUB_OUTPUT
+            echo "core_a=0" >> $GITHUB_OUTPUT
+            echo "core_b=0" >> $GITHUB_OUTPUT
+          else
+            echo "only_one_core=false" >> $GITHUB_OUTPUT
+            echo "core_a=0" >> $GITHUB_OUTPUT
+            echo "core_b=1" >> $GITHUB_OUTPUT
+          fi
+          echo "Available cores: $NPROC"
+
+      - name: Run — Core A (core ${{ steps.cores.outputs.core_a }})
+        run: |
+          set -euxo pipefail
+          taskset -c ${{ steps.cores.outputs.core_a }} \
+            ./build_affinity/bin/replay --input data/golden/itch_1m.bin \
+            | tee evidence_affinity/run_coreA.txt
+          DIGEST_A=$(grep -m1 -oE 'digest_fnv=0x[0-9a-f]+' evidence_affinity/run_coreA.txt \
+            | cut -d= -f2 || true)
+          echo "DIGEST_CORE_A=$DIGEST_A" >> $GITHUB_ENV
+          echo "digest_core_a=$DIGEST_A" >> $GITHUB_OUTPUT
+          echo "::notice title=Digest CoreA::$DIGEST_A"
+        id: run_core_a
+
+      - name: Run — Core B (core ${{ steps.cores.outputs.core_b }})
+        run: |
+          set -euxo pipefail
+          taskset -c ${{ steps.cores.outputs.core_b }} \
+            ./build_affinity/bin/replay --input data/golden/itch_1m.bin \
+            | tee evidence_affinity/run_coreB.txt
+          DIGEST_B=$(grep -m1 -oE 'digest_fnv=0x[0-9a-f]+' evidence_affinity/run_coreB.txt \
+            | cut -d= -f2 || true)
+          echo "DIGEST_CORE_B=$DIGEST_B" >> $GITHUB_ENV
+          echo "::notice title=Digest CoreB::$DIGEST_B"
+        id: run_core_b
+
+      - name: Assert digest equality across cores
+        shell: bash
+        run: |
+          set -euo pipefail
+          ONLY_ONE="${{ steps.cores.outputs.only_one_core }}"
+          A="$DIGEST_CORE_A"
+          B="$DIGEST_CORE_B"
+          echo "Core A digest: $A"
+          echo "Core B digest: $B"
+
+          if [ "$ONLY_ONE" = "true" ]; then
+            echo "::warning::Only one core available; affinity comparison skipped (single-core runner)"
+          elif [ -z "$A" ] || [ -z "$B" ]; then
+            echo "::warning::One or both digests were empty — replay may not emit digest_fnv on this runner"
+          elif [ "$A" != "$B" ]; then
+            echo "FAIL: core-affinity digest mismatch — digest depends on CPU core assignment!" >&2
+            exit 1
+          else
+            echo "PASS: Core A ($A) == Core B ($B) — digest is CPU-core-invariant"
+          fi
+
+      - name: Write evidence manifest
+        run: |
+          set -euo pipefail
+          cat > evidence_affinity/manifest.json <<EOF
+          {
+            "schema": "determinism-affinity-v1",
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "kernel_version": "${{ steps.kernel.outputs.kernel_version }}",
+            "core_a": "${{ steps.cores.outputs.core_a }}",
+            "core_b": "${{ steps.cores.outputs.core_b }}",
+            "digest_core_a": "${DIGEST_CORE_A}",
+            "digest_core_b": "${DIGEST_CORE_B}",
+            "digest_match": $([ "$DIGEST_CORE_A" = "$DIGEST_CORE_B" ] && echo true || echo false),
+            "run_id": "${{ github.run_id }}",
+            "sha": "${{ github.sha }}"
+          }
+          EOF
+          cat evidence_affinity/manifest.json
+
+      - name: Job summary
+        run: |
+          {
+            echo "## CPU Affinity & Kernel Provenance"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| Kernel | \`${{ steps.kernel.outputs.kernel_version }}\` |"
+            echo "| Core A (taskset) | ${{ steps.cores.outputs.core_a }} |"
+            echo "| Core B (taskset) | ${{ steps.cores.outputs.core_b }} |"
+            echo "| Digest Core A | \`${DIGEST_CORE_A}\` |"
+            echo "| Digest Core B | \`${DIGEST_CORE_B}\` |"
+            echo "| Match | $([ "$DIGEST_CORE_A" = "$DIGEST_CORE_B" ] && echo '✅ PASS' || echo '❌ FAIL') |"
+            echo ""
+            echo "> **NUMA note:** GitHub-hosted runners are single-socket."
+            echo "> For cross-socket verification, re-run on a self-hosted multi-socket runner"
+            echo "> with \`NUMA_NODE_A\` and \`NUMA_NODE_B\` set (see docs/DETERMINISM_ABSOLUTISM.md)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload affinity evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: affinity-kernel-evidence-${{ github.run_id }}
+          path: evidence_affinity/

@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - '**/*.md'
-      - '.markdownlint.yml'
-      - '.github/workflows/docs-lint.yml'
+      - "**/*.md"
+      - ".markdownlint.yml"
+      - ".github/workflows/docs-lint.yml"
   pull_request:
     paths:
-      - '**/*.md'
-      - '.markdownlint.yml'
-      - '.github/workflows/docs-lint.yml'
+      - "**/*.md"
+      - ".markdownlint.yml"
+      - ".github/workflows/docs-lint.yml"
 
 permissions:
   contents: read
@@ -23,7 +23,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@v18
+      - name: Run markdownlint (repo config)
+        uses: DavidAnson/markdownlint-cli2-action@36d420e7cfa025fd9fd6b3f1b2d6ad91f4a8b7eb
+
+      - name: Run markdownlint (README strict MD013)
+        uses: DavidAnson/markdownlint-cli2-action@36d420e7cfa025fd9fd6b3f1b2d6ad91f4a8b7eb
         with:
-          config: .markdownlint.yml
+          config: .markdownlint.readme.yml
+          globs: |
+            README.md
+            apps/README.md
+            examples/README.md

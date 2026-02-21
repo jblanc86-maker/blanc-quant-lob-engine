@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 #include "breaker.hpp"
+#include <cstdint>
 #include <string>
 namespace lob
 {
@@ -9,6 +10,11 @@ namespace lob
     std::string input_path, golden_digest_hex, actual_digest_hex;
     bool determinism_pass{false};
     double p50_ms{0.0}, p95_ms{0.0}, p99_ms{0.0};
+    double p999_ms{0.0};   // p99.9  — tail beyond p99
+    double p9999_ms{0.0};  // p99.99 — extreme tail; measurable at ≥10k events
+    uint64_t sample_count{0};
+    bool p999_valid{false};
+    bool p9999_valid{false};
     int cpu_pin{-1};
     DetectorReadings readings{};
     BreakerState breaker{};

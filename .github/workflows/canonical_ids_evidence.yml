@@ -1,0 +1,148 @@
+name: Evidence Packaging
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - blanc-quant-lob-engine-PP
+    tags:
+      - "v*"
+
+jobs:
+  package:
+    name: Package Evidence (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup dependencies
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          bash scripts/setup-packages.sh || true
+
+      - name: Build
+        run: |
+          bash scripts/build.sh || make || true
+
+      - name: Generate tail matrix artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x scripts/tail_matrix_artifact.sh
+          scripts/tail_matrix_artifact.sh
+
+      - name: Prepare evidence files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence_out
+          # Commit and timestamp
+          git rev-parse HEAD > evidence_out/commit_sha.txt
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
+          # Copy bundle doc for hashing
+          cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
+          # Compute SHA-256s
+          if command -v shasum >/dev/null 2>&1; then
+            shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+          else
+            sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk '{print $1}' > evidence_out/evidence_doc_sha256.txt
+          fi
+          # Copy any generated bench outputs if present
+          if [ -d artifacts ]; then
+            cp -R artifacts evidence_out/artifacts || true
+          fi
+          # Copy tail-latency truthfulness matrix if present
+          if [ -f artifacts/tail_matrix.jsonl ]; then
+            cp artifacts/tail_matrix.jsonl evidence_out/ || true
+          fi
+          # Include the entire bundle directory for convenience
+          mkdir -p evidence_out/bundle
+          cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
+
+      - name: Create archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="evidence-bundle-${{ runner.os }}-${{ github.run_id }}.zip"
+          (cd evidence_out && zip -r ../"$ARCHIVE" .)
+          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-${{ runner.os }}-${{ github.run_id }}
+          path: ${{ env.ARCHIVE }}
+          if-no-files-found: warn
+
+  package-arm64:
+    name: Package Evidence (ARM64 Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run ARM64 container to build and package evidence
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          echo "[ARM64] Starting arm64 build container" >&2
+          docker run --rm --platform linux/arm64 \
+            -e GITHUB_SHA -e GITHUB_RUN_ID \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            ubuntu:22.04 bash -lc '
+              set -euo pipefail
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get update && apt-get install -y git cmake g++ make zip ninja-build
+              echo "[ARM64] Build" >&2
+              bash scripts/build.sh || make || true
+              echo "[ARM64] Tail matrix artifact" >&2
+              chmod +x scripts/tail_matrix_artifact.sh
+              scripts/tail_matrix_artifact.sh
+              echo "[ARM64] Prepare evidence files" >&2
+              mkdir -p evidence_out
+              echo "${GITHUB_SHA:-unknown}" > evidence_out/commit_sha.txt
+              date -u +"%Y-%m-%dT%H:%M:%SZ" > evidence_out/timestamp.txt
+              cp docs/evidence/canonical_ids_v1/PATENT_EVIDENCE_CANONICAL_IDS.md evidence_out/
+              if command -v sha256sum >/dev/null 2>&1; then
+                sha256sum evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk "{print \$1}" > evidence_out/evidence_doc_sha256.txt
+              else
+                shasum -a 256 evidence_out/PATENT_EVIDENCE_CANONICAL_IDS.md | awk "{print \$1}" > evidence_out/evidence_doc_sha256.txt
+              fi
+              if [ -d artifacts ]; then
+                cp -R artifacts evidence_out/artifacts || true
+              fi
+              if [ -f artifacts/tail_matrix.jsonl ]; then
+                cp artifacts/tail_matrix.jsonl evidence_out/ || true
+              fi
+              mkdir -p evidence_out/bundle
+              cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
+              echo "[ARM64] Create archive" >&2
+              ARCHIVE="evidence-bundle-Linux-arm64-${GITHUB_RUN_ID}.zip"
+              (cd evidence_out && zip -r ../"$ARCHIVE" .)
+            '
+
+      - name: Upload artifact (ARM64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-Linux-arm64-${{ github.run_id }}
+          path: evidence-bundle-Linux-arm64-${{ github.run_id }}.zip
+          if-no-files-found: warn

@@ -5,6 +5,15 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
 endif()
 
+# macOS toolchain hardening: clang-cl (MSVC emulation) is not supported.
+if(APPLE)
+  if(CMAKE_CXX_COMPILER MATCHES "clang-cl" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(FATAL_ERROR
+      "clang-cl detected on macOS. Use Apple clang via CMake presets: "
+      "cmake --preset macos-appleclang or -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/apple-clang.cmake")
+  endif()
+endif()
+
 # Option to build benchmarks
 option(BUILD_BENCHMARKS "Build microbenchmark suite" ON)
 
@@ -133,6 +142,31 @@ if (BUILD_TESTING)
   set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)
+    add_executable(test_tail_latency
+      tests/test_tail_latency.cpp
+    )
+    target_include_directories(test_tail_latency PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_compile_options(test_tail_latency PRIVATE -O2)
+    add_test(NAME tail_latency_purity COMMAND test_tail_latency)
+    message(STATUS "test_tail_latency: percentile_smoke + fault_injection + gate_tail_delta")
+  else()
+    message(STATUS "Skipping tail_latency_purity: tests/test_tail_latency.cpp not present")
+  endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_gate_transitions.cpp)
+    add_executable(test_gate_transitions
+      tests/test_gate_transitions.cpp
+      src/breaker.cpp
+    )
+    target_include_directories(test_gate_transitions PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_compile_options(test_gate_transitions PRIVATE -O2)
+    add_test(NAME gate_transition_determinism COMMAND test_gate_transitions)
+    message(STATUS "test_gate_transitions: index_determinism + log_replay + fault_injection + sub1us latency")
+  else()
+    message(STATUS "Skipping gate_transition_determinism: tests/test_gate_transitions.cpp not present")
+  endif()
 endif()
 
 # Note: The test_breaker.cpp file is proprietary and not included in this repository.
