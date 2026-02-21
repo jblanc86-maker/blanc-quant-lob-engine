@@ -40,7 +40,9 @@ namespace lob
       << "\"actual\":\"" << t.actual_digest_hex << "\","
       << "\"determinism\":" << (t.determinism_pass ? "true" : "false") << ","
       << "\"p50_ms\":" << t.p50_ms << ",\"p95_ms\":" << t.p95_ms
-      << ",\"p99_ms\":" << t.p99_ms << ","
+      << ",\"p99_ms\":" << t.p99_ms
+      << ",\"p999_ms\":" << t.p999_ms
+      << ",\"p9999_ms\":" << t.p9999_ms << ","
       << "\"gap_ppm\":" << t.readings.gap_rate << ","
       << "\"corrupt_ppm\":" << t.readings.corrupt_rate << ","
       << "\"skew_ppm\":" << t.readings.skew_ppm << ","
@@ -58,6 +60,8 @@ namespace lob
     f << "lob_p50_ms " << t.p50_ms << "\n"
       << "lob_p95_ms " << t.p95_ms << "\n"
       << "lob_p99_ms " << t.p99_ms << "\n"
+      << "lob_p999_ms " << t.p999_ms << "\n"
+      << "lob_p9999_ms " << t.p9999_ms << "\n"
       << "lob_gap_ppm " << t.readings.gap_rate << "\n"
       << "lob_corrupt_ppm " << t.readings.corrupt_rate << "\n"
       << "lob_skew_ppm " << t.readings.skew_ppm << "\n"

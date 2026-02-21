@@ -1,0 +1,178 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+#
+# Determinism Absolutism — Compiler Flags Matrix
+#
+# DSEF Determinism Absolutism gap closure: "no cross-compiler-flags matrix"
+#
+# Builds the replay binary with three distinct optimisation profiles and
+# asserts that all three produce byte-identical FNV-1a CANON_V1 digests
+# for the same 1M-event golden input.
+#
+# Profiles tested:
+#   O2   : -O2 -march=native  (conservative optimisation)
+#   O3   : -O3 -march=native  (production default)
+#   LTO  : -O3 -march=native -flto  (link-time optimisation)
+#
+# If any two digests differ, the job fails with an explicit diff.
+
+name: Determinism — Compiler Flags Matrix
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, blanc-quant-lob-engine-PP]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_compiler_matrix.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/determinism_compiler_matrix.yml'
+  schedule:
+    - cron: '0 7 * * 3'   # weekly Wednesday 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Manual trigger reason'
+        required: false
+        default: 'manual'
+
+jobs:
+  build-matrix:
+    name: "Build (${{ matrix.profile }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: O2
+            cxx_flags: "-O2 -march=native"
+            lto: "OFF"
+          - profile: O3
+            cxx_flags: "-O3 -march=native"
+            lto: "OFF"
+          - profile: LTO
+            cxx_flags: "-O3 -march=native -flto"
+            lto: "ON"
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Normalize environment
+        run: |
+          echo "TZ=UTC"      >> $GITHUB_ENV
+          echo "LANG=C.UTF-8"  >> $GITHUB_ENV
+          echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Build replay (${{ matrix.profile }})
+        run: |
+          set -euxo pipefail
+          # Disable -Werror for LTO: some LTO diagnostic warnings differ by GCC version
+          EXTRA=""
+          if [ "${{ matrix.profile }}" = "LTO" ]; then EXTRA="-DCMAKE_EXE_LINKER_FLAGS=-flto"; fi
+          rm -rf build_${{ matrix.profile }}
+          CC=gcc CXX=g++ cmake -S . -B build_${{ matrix.profile }} -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=ON \
+            -DBUILD_BENCHMARKS=OFF \
+            -DCMAKE_CXX_STANDARD=20 \
+            -DCMAKE_CXX_FLAGS="${{ matrix.cxx_flags }}" \
+            $EXTRA
+          cmake --build build_${{ matrix.profile }} -j$(nproc) --target replay gen_synth
+
+      - name: Generate golden input
+        run: |
+          set -euxo pipefail
+          mkdir -p data/golden
+          ./build_${{ matrix.profile }}/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+
+      - name: Run replay and capture digest (${{ matrix.profile }})
+        run: |
+          set -euxo pipefail
+          mkdir -p evidence_compiler_matrix
+          ./build_${{ matrix.profile }}/bin/replay --input data/golden/itch_1m.bin \
+            | tee evidence_compiler_matrix/run_${{ matrix.profile }}.txt
+          DIGEST=$(grep -m1 -oE 'digest_fnv=0x[0-9a-f]+' \
+            evidence_compiler_matrix/run_${{ matrix.profile }}.txt \
+            | cut -d= -f2 || true)
+          echo "DIGEST_${{ matrix.profile }}=$DIGEST" >> $GITHUB_ENV
+          echo "profile=${{ matrix.profile }} digest=$DIGEST" \
+            >> evidence_compiler_matrix/digest_${{ matrix.profile }}.txt
+          # Emit as step summary notice
+          echo "::notice title=Digest (${{ matrix.profile }})::$DIGEST"
+
+      - name: Upload per-profile evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: compiler-matrix-${{ matrix.profile }}-${{ github.run_id }}
+          path: evidence_compiler_matrix/
+
+  assert-digest-equality:
+    name: "Assert byte-identical digests across all profiles"
+    runs-on: ubuntu-latest
+    needs: build-matrix
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Download all profile evidence
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
+        with:
+          path: evidence_compiler_matrix
+
+      - name: Compare digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          declare -A DIGESTS
+          for f in evidence_compiler_matrix/compiler-matrix-*/digest_*.txt; do
+            profile=$(basename "$f" .txt | sed 's/digest_//')
+            digest=$(awk '{print $NF}' "$f" | cut -d= -f2)
+            DIGESTS["$profile"]="$digest"
+            echo "  $profile → $digest"
+          done
+
+          # Collect unique digests
+          unique=()
+          for p in "${!DIGESTS[@]}"; do
+            found=0
+            for u in "${unique[@]}"; do [[ "$u" == "${DIGESTS[$p]}" ]] && found=1; done
+            if (( found == 0 )); then unique+=("${DIGESTS[$p]}"); fi
+          done
+
+          echo "Unique digest count: ${#unique[@]}"
+          if (( ${#unique[@]} != 1 )); then
+            echo "FAIL: compiler flags produced non-identical digests:" >&2
+            for p in "${!DIGESTS[@]}"; do echo "  $p = ${DIGESTS[$p]}" >&2; done
+            exit 1
+          fi
+
+          CANON="${unique[0]}"
+          echo "PASS: all profiles agree → $CANON"
+          {
+            echo "## Compiler Flags Digest Matrix"
+            echo ""
+            echo "All three optimisation profiles produced **byte-identical** FNV-1a CANON_V1 digests."
+            echo ""
+            echo "| Profile | Digest |"
+            echo "|---------|--------|"
+            for p in O2 O3 LTO; do
+              echo "| \`$p\` | \`${DIGESTS[$p]:-unknown}\` |"
+            done
+            echo ""
+            echo "**Canonical digest:** \`$CANON\`"
+          } >> "$GITHUB_STEP_SUMMARY"

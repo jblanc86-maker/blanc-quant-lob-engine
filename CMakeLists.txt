@@ -133,6 +133,18 @@ if (BUILD_TESTING)
   set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)
+    add_executable(test_tail_latency
+      tests/test_tail_latency.cpp
+    )
+    target_include_directories(test_tail_latency PRIVATE ${CMAKE_SOURCE_DIR}/include)
+    target_compile_options(test_tail_latency PRIVATE -O2)
+    add_test(NAME tail_latency_purity COMMAND test_tail_latency)
+    message(STATUS "test_tail_latency: percentile_smoke + fault_injection + gate_tail_delta")
+  else()
+    message(STATUS "Skipping tail_latency_purity: tests/test_tail_latency.cpp not present")
+  endif()
 endif()
 
 # Note: The test_breaker.cpp file is proprietary and not included in this repository.

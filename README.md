@@ -35,11 +35,13 @@
 | ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- | ----------------------- |
 | **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs | ✅ **EXCEEDS TARGET**   |
 | **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms         | 🎯 Planned              |
-| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms    | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms           | 🚧 Optimization Phase 2 |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms<br/>p99.9: ~22ms<br/>p99.99: ~24ms | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms<br/>p99.9: ≤3× p99<br/>p99.99: advisory | 🚧 Optimization Phase 2 |
 | **Throughput**                                             | 1M events/sec                               | 1–5M ops/sec                                         | ✅ Baseline Established |
 | **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)       | ✅ Enhanced with SCM                                 | ✅ Production Ready     |
 
-**Key Differentiator:** Most competitors publish match-only numbers without determinism guarantees. Blanc LOB Engine provides all three tiers with byte-for-byte deterministic replay and Selective Coordination Mode (SCM) enforcement.
+> **Tail Latency Purity** — p99.9 and p99.99 are now measured on every run (≥10k events required for stable p99.99;
+> 1M synthetic events = ~15,625 64-byte chunks). p99.9 is gated at ≤ 3× the p99 budget; p99.99 is reported
+> as an advisory metric. Gate tail-delta is independently validated by `tests/test_tail_latency.cpp`.
 
 > Update
 

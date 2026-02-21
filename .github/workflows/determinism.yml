@@ -148,3 +148,4 @@ jobs:
             artifacts/${{ github.run_id }}/**
             artifacts/bench.jsonl
             artifacts/metrics.prom
+            docs/DETERMINISM_ABSOLUTISM.md
