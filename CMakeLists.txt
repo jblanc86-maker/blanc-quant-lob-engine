@@ -5,6 +5,15 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
 endif()
 
+# macOS toolchain hardening: clang-cl (MSVC emulation) is not supported.
+if(APPLE)
+  if(CMAKE_CXX_COMPILER MATCHES "clang-cl" OR CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(FATAL_ERROR
+      "clang-cl detected on macOS. Use Apple clang via CMake presets: "
+      "cmake --preset macos-appleclang or -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/apple-clang.cmake")
+  endif()
+endif()
+
 # Option to build benchmarks
 option(BUILD_BENCHMARKS "Build microbenchmark suite" ON)
 

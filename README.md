@@ -31,13 +31,13 @@
 
 ### Performance: Current State vs. Future Targets
 
-| Metric Tier                                                | Current (Jan 2026)                          | Target (vNext)                                       | Status                  |
-| ---------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------- | ----------------------- |
-| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs | ✅ **EXCEEDS TARGET**   |
-| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms         | 🎯 Planned              |
+| Metric Tier                                                | Current (Jan 2026)                                                          | Target (vNext)                                                                     | Status                  |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------- |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs                               | ✅ **EXCEEDS TARGET**   |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms                                       | 🎯 Planned              |
 | **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms<br/>p99.9: ~22ms<br/>p99.99: ~24ms | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms<br/>p99.9: ≤3× p99<br/>p99.99: advisory | 🚧 Optimization Phase 2 |
-| **Throughput**                                             | 1M events/sec                               | 1–5M ops/sec                                         | ✅ Baseline Established |
-| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)       | ✅ Enhanced with SCM                                 | ✅ Production Ready     |
+| **Throughput**                                             | 1M events/sec                                                               | 1–5M ops/sec                                                                       | ✅ Baseline Established |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ Enhanced with SCM                                                               | ✅ Production Ready     |
 
 > **Tail Latency Purity** — p99.9 and p99.99 are now measured on every run (≥10k events required for stable p99.99;
 > 1M synthetic events = ~15,625 64-byte chunks). p99.9 is gated at ≤ 3× the p99 budget; p99.99 is reported
@@ -419,6 +419,7 @@ Gate policy details live in `docs/gates.md`; CI wiring is under
   dashboards, and automated SLO checks.
 - Conformance + bench scripts are wired for cron / CI, not just local runs.
 - CI-ready: determinism, bench, and CodeQL workflows pinned to SHAs.
+- Docs Lint is treated as a **required** branch protection check for `main`.
 - Designed to slot into HFT / research pipelines as a replay + guardrail
   module rather than a one-off benchmark toy.
 
@@ -431,6 +432,13 @@ Prereqs: CMake ≥ 3.20, Ninja, modern C++20 compiler, Boost, and
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ls build/bin/replay
+```
+
+macOS (Apple clang hardening):
+
+```sh
+cmake --preset macos-appleclang
+cmake --build --preset macos-appleclang
 ```
 
 Notes:

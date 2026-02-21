@@ -42,6 +42,8 @@ Release checks (inputs typically produced by benchmark jobs):
 - `digest_fnv` must match golden
 - `p99_ms` ≤ budget (e.g., `0.50 × baseline + epsilon`)
 - Artifacts present and schema‑checked: `bench.jsonl`, `metrics.prom`
+- Long-horizon stability evidence present: `artifacts/stability/stability_summary.jsonl`
+  (see `docs/LONG_HORIZON_STABILITY.md`)
 
 ## Recommended defaults (practical)
 
