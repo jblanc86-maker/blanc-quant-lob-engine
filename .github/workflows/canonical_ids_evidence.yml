@@ -51,6 +51,10 @@ jobs:
           if [ -d artifacts ]; then
             cp -R artifacts evidence_out/artifacts || true
           fi
+          # Copy tail-latency truthfulness matrix if present
+          if [ -f artifacts/tail_matrix.jsonl ]; then
+            cp artifacts/tail_matrix.jsonl evidence_out/ || true
+          fi
           # Include the entire bundle directory for convenience
           mkdir -p evidence_out/bundle
           cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
@@ -115,6 +119,9 @@ jobs:
               fi
               if [ -d artifacts ]; then
                 cp -R artifacts evidence_out/artifacts || true
+              fi
+              if [ -f artifacts/tail_matrix.jsonl ]; then
+                cp artifacts/tail_matrix.jsonl evidence_out/ || true
               fi
               mkdir -p evidence_out/bundle
               cp -R docs/evidence/canonical_ids_v1 evidence_out/bundle/
