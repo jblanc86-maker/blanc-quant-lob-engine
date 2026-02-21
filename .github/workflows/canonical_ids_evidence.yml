@@ -31,6 +31,13 @@ jobs:
         run: |
           bash scripts/build.sh || make || true
 
+      - name: Generate tail matrix artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x scripts/tail_matrix_artifact.sh
+          scripts/tail_matrix_artifact.sh
+
       - name: Prepare evidence files
         shell: bash
         run: |
@@ -107,6 +114,9 @@ jobs:
               apt-get update && apt-get install -y git cmake g++ make zip ninja-build
               echo "[ARM64] Build" >&2
               bash scripts/build.sh || make || true
+              echo "[ARM64] Tail matrix artifact" >&2
+              chmod +x scripts/tail_matrix_artifact.sh
+              scripts/tail_matrix_artifact.sh
               echo "[ARM64] Prepare evidence files" >&2
               mkdir -p evidence_out
               echo "${GITHUB_SHA:-unknown}" > evidence_out/commit_sha.txt
