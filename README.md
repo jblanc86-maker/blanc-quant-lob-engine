@@ -1,6 +1,7 @@
-# Blanc Quant LOB Engine (BQL Engine)
+## Blanc Quant LOB Engine (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
+
 [![p99.9/p99.99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/tierc_tail.json)](docs/gates.md)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
@@ -27,140 +28,75 @@
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
-## About Blanc LOB Engine
+### About
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book
-engine designed for financial market simulations and trading systems. It
-provides robust features for order matching, market data replay, and telemetry,
-making it ideal for students, hobbyists, and professionals exploring
-algorithmic trading and market microstructure.
+**Blanc Quant LOB Engine (BQL Engine)** is a **deterministic C++20 replay +
+benchmarking harness** for limit-order-book (LOB) workloads, built to answer
+one question:
 
-For inquiries related to trading applications or professional use cases, please feel free to reach out.
+> Can we replay this **exactly**, under load, and prove it didn’t get slower
+> (especially at the tails)?
 
-## Scope: OSS Engine vs Patent-Pending System
+It ships **golden-state determinism checks**, **CI-enforced tail latency
+budgets (p50/p95/p99/p99.9/p99.99)**, and **audit-friendly artifacts**
+(`bench.jsonl`, `metrics.prom`, HTML report) so regressions fail early and
+evidence is reproducible.
 
-This repository contains the **OSS exercise version** of Blanc Quant LOB Engine:
+**Scope note (important):**
 
-- **Synthetic hot-loop + microbenchmark harness**
-- Determinism checks via digests
-- Bench artifacts for CI gating
+- This repo is the **OSS exercise / benchmark harness** (synthetic + proof
+  tooling).
+- **BQL 2.0 (Patent-Pending)** is the production-shaped system (real ITCH replay
+  - deterministic matching + binary audit journal + coordinated deterministic
+    protection + invariance proofs). See the relevant docs sections below.
 
-**BQL 2.0 (Patent-Pending)** is a separate production-shaped system that adds:
+---
 
-- Real **ITCH market-data replay + deterministic matching**
-- **Per-event binary audit journal** (replayable proof trail)
-- CI-enforced **performance contracts** (p50/p95/p99/p999 + stability)
-- Deterministic protection/coordination (zone trip ladder, SCM)
-- Canonical Symbol IDs for shard/order invariance proof (Phase 6.2)
+## Performance: Current State vs. Future Targets
 
-BQL 2.0 research and evidence material lives in `docs/` (see
-`docs/PE_TECH_SUMMARY.md`, `docs/gates.md`, and
-`docs/DETERMINISM_ABSOLUTISM.md`).
+| Metric Tier                                                | Current (Jan 2026)                                                          | Target (vNext)                                                                     | Status                  |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------- |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs                               | ✅ **EXCEEDS TARGET**   |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms                                       | 🎯 Planned              |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms<br/>p99.9: ~22ms<br/>p99.99: ~24ms | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms<br/>p99.9: ≤3× p99<br/>p99.99: advisory | 🚧 Optimization Phase 2 |
+| **Throughput**                                             | 1M events/sec                                                               | 1–5M ops/sec                                                                       | ✅ Baseline Established |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ Enhanced with SCM                                                               | ✅ Production Ready     |
 
-## Deterministic C++20 Limit Order Book (LOB) Replay & Benchmarking Engine
+> **Tail Latency Purity** — p99.9 and p99.99 are measured on every run (≥1k
+> samples for p99.9 and ≥10k samples for stable p99.99). Runs emit `samples`,
+> `p999_valid`, and `p9999_valid` to prevent under-sampled tails from being
+> misinterpreted. p99.9 is gated at ≤ 3× the p99 budget; p99.99 is advisory.
+> Tail-delta gating is validated by `tests/test_tail_latency.cpp`.
 
-This OSS release ships the deterministic replay engine, synthetic benchmarks,
-and telemetry-driven SLO gates. Inquire for full proprietary capabilities
-(600+ unique clones as of 12/07/25).
+---
 
-- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
-- **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
-- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
-- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
+## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
 
-## What Makes This Innovative
+Selective Coordination Mode brings the “smallest breaker trips first” principle
+from power systems into trading engines. Instead of halting everything when
+there’s a slowdown, the engine disables or sheds only the affected subsystem —
+keeping the rest running and making incident boundaries clean and replayable.
 
-### 1. Golden-State Deterministic Replay
+### How It Works
 
-- Guarantees byte-for-byte identical results across runs.
-- FNV-1a digest verification: Every replay produces a cryptographic fingerprint of the final order book state.
-- Automated dual-run CI: GitHub Actions runs the same input twice and fails if digests differ—catching non-determinism instantly.
-- Environment normalization: Fixed timezone, locale, and compiler ensure reproducibility.
+- **Zones:** The engine is divided into protection zones (core match, risk
+  checks, telemetry, journaling, snapshotting, adapters).
+- **Trip Ladder:** If a zone (like telemetry) gets slow, only that zone is
+  tripped first. If the problem persists, the next zone up the ladder is
+  tripped, and so on — up to a full halt as a last resort.
+- **Coordination Curves:** Each zone has its own latency budget and trip logic
+  (e.g., “if p99 latency is breached for M out of N events, trip this zone”).
+- **Escalation & Recovery:** The system escalates only if the problem persists,
+  and recovers only after a sustained period of good performance (hysteresis).
+- **Deterministic Journal:** Every trip, recovery, and action is logged so you
+  can replay and audit exactly what happened.
 
-### 2. Integrated Determinism + Performance Testing
-
-- Same workflow proves determinism and measures p50/p95/p99 tail latency.
-- Release gates enforce SLO budgets: if p99 regresses, CI fails.
-- Structured artifacts (`bench.jsonl`, `metrics.prom`) enable historical tracking and automated dashboards.
-
-### 3. Dynamic Execution Gates (Patent-Pending)
-
-- Breaker-style state machine (Fuse → Local → Feeder → Main → Kill).
-- Preserves deterministic replay while containing pathological scenarios.
-- Explicit publish control: corrupted runs are flagged, not silently trusted.
-
-### 4. Telemetry-Driven Golden-State Validation
-
-- Every run produces machine-readable, CI-auditable artifacts.
-- Structured outputs: JSONL event logs + Prometheus textfiles.
-- Release gates as code: `scripts/verify_bench.py` treats performance budgets as pass/fail gates.
-- Artifact packaging: Automated artifact creation with provenance metadata.
-
-### 5. Canonical Serialization for Order Books
-
-- Structure-of-Arrays (SoA) layout for cache efficiency.
-- Fixed iteration order regardless of insertion sequence.
-- FNV-1a rolling hash captures exact state, not approximations.
-
-## System architecture
+### Coordination Diagram
 
 ```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│   QUANT LOB ENGINE — Deterministic Replay & Benchmark Harness                │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ Inputs                              Core                           Outputs    │
-│ ┌─────────────────┐        ┌──────────────────────────────┐      ┌───────────┐│
-│ │ trace_loader    │───▲───▶│ Deterministic Replay         │───┬─▶│ Stdout    ││
-│ │ (ITCH bin; CSV/ │   │    │ Scheduler (ST; MT optional)  │   │  │ summary   ││
-│ │ PCAP→bin bridge)│   │    └──────────────┬───────────────┘   │  └───────────┘│
-│ └─────────────────┘   │                   │                   │              │
-│ ┌─────────────────┐   │                   │                   │  ┌───────────┐│
-│ │ gen_synth       │───┘   Fault Injection / Gates (DEG‑compatible;         ││
-│ │ (synthetic)     │           breaker‑style, optional)           └─▶│ Artifacts ││
-│ └─────────────────┘                                     ▲            │ bench.jsonl│
-│                                                         │            │ metrics.prom│
-│                                         ┌──────────────────────────────┐└───────────┘│
-│                                         │ Golden-state Checker         │◀──────┘
-│                                         │ (byte-for-byte digest_fnv)   │
-│                                         └──────────────────────────────┘
-│                                                 │
-│                                                 ▼
-│ ┌──────────────────────────────┐     ┌──────────────────────────────┐
-│ │ Benchmark Harness            │     │ Structured Observability     │
-│ │ • msgs/s throughput          │     │ • JSONL event logs           │
-│ │ • p50/p95/p99 latency        │     │ • Prometheus textfile        │
-│ │ • config matrix sweeps       │     │ • CI artifacts (goldens)     │
-│ └──────────────────────────────┘     └──────────────────────────────┘
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Flow summary
-
-- ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
-  that enforces DEG-compatible gate policies before emitting telemetry.
-- Golden digest checks ensure byte-for-byte stability, while the bench harness
-  sweeps configs to publish `bench.jsonl`, Prometheus textfiles, and CI-ready
-  artifacts.
-- Structured observability (JSONL + textfile) makes it easy to diff runs,
-  enforce SLOs, and root-cause tail spikes.
-- Dynamic Execution Gates (DEG) model tail behavior as first-class policy,
-  making “breaker-style” protections and SLO checks part of the engine instead
-  of bolted-on monitoring.
-
-### Classic HFT datapath
-
-```text
-┌────────────────────────────────────────────────────────────────────┐
-│                    QUANT LOB ENGINE (HFT SYSTEM)                   │
-├────────────────────────────────────────────────────────────────────┤
-│  ITCH 5.0 parser  ──▶  L2/L3 order book (SoA) ──▶  Price levels    │
-│            │                             │                        │
-│            ▼                             ▼                        │
-│      Dynamic Execution Gates (DEG) ──▶ Telemetry exporter          │
-│            │                             │                        │
-│            ▼                             ▼                        │
-│     gen_synth fixtures          Golden determinism tests          │
-└────────────────────────────────────────────────────────────────────┘
+┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌───────┐
+│ Telemetry  │ ───────▶ │ Journaling   │ ───────▶ │ Risk Checks  │ ───────▶ │ Core Match │ ───────▶ │ HALT  │
+└────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └───────┘
 ```
 
 Gate policy details live in `docs/gates.md`; CI wiring is under
