@@ -1,4 +1,4 @@
-## Blanc Quant LOB Engine (BQL Engine)
+## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
 
