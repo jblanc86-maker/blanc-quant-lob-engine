@@ -9,6 +9,7 @@ The CodeQL/CMake job failed in PR #29 (copilot/update-codeql-workflow-setup) dur
 The failing workflow (ref: d69d2fbdc18e6997bd7ddd364db24deb3599462c) had three critical issues:
 
 ### 1. Invalid Package Names
+
 ```yaml
 sudo apt-get install -y \
   libpcre++-dev \      # ❌ Package doesn't exist in Ubuntu repos
@@ -19,16 +20,19 @@ sudo apt-get install -y \
 These packages don't exist in Ubuntu repositories. The `|| true` allowed the script to continue, but cmake wasn't installed successfully.
 
 ### 2. Hardcoded CMake Path
+
 ```bash
 /usr/bin/cmake -S . -B build ...  # ❌ cmake is at /usr/local/bin/cmake
 ```
 
 After `apt-get install cmake`, the binary is located at `/usr/local/bin/cmake`, not `/usr/bin/cmake`. This caused the error:
-```
+
+```text
 /usr/bin/cmake: No such file or directory
 ```
 
 ### 3. Over-Specified Compiler Paths
+
 ```bash
 export CC=/usr/bin/gcc-13
 export CXX=/usr/bin/g++-13
@@ -68,7 +72,7 @@ The **main branch already has the correct configuration** in `.github/workflows/
 
 All tests pass successfully:
 
-```
+```text
 Test project /home/runner/work/blanc-quant-lob-engine/blanc-quant-lob-engine/build
     Start 1: telemetry_io
 1/5 Test #1: telemetry_io .....................   Passed    0.00 sec
@@ -93,6 +97,7 @@ Test project /home/runner/work/blanc-quant-lob-engine/blanc-quant-lob-engine/bui
 ## CMake Configuration Details
 
 The project uses CMake 3.20+ with the following key features:
+
 - C++20 standard
 - Ninja build system
 - Optional benchmarks and tests

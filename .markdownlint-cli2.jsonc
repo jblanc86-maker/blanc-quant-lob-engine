@@ -1,0 +1,11 @@
+{
+  "config": ".markdownlint.yml",
+  "globs": ["**/*.md"],
+  "ignores": [
+    "**/.venv/**",
+    "**/artifacts/**",
+    "**/build/**",
+    "**/build-mac/**",
+    "**/build-v2/**"
+  ]
+}

@@ -25,8 +25,8 @@ Each metric is tagged with `repo:<owner>/<repo>`, `workflow:<display name>`, and
    - `DATADOG_API_KEY`: Datadog API key with Metrics ingestion permissions.
    - `DATADOG_APP_KEY`: Datadog application key allowed to submit metrics.
    - `DATADOG_SITE` (optional): Datadog site suffix, e.g. `datadoghq.eu`. Defaults to `datadoghq.com` when unset.
-2. The workflow already declares these secrets under the `workflow_call` trigger, which keeps the schema checker happy and allows other workflows to call it.
-3. Once the secrets are present, the step automatically publishes metrics on every scheduled or manually triggered run. Missing secrets simply result in a friendly skip notice.
+1. The workflow already declares these secrets under the `workflow_call` trigger, which keeps the schema checker happy and allows other workflows to call it.
+1. Once the secrets are present, the step automatically publishes metrics on every scheduled or manually triggered run. Missing secrets simply result in a friendly skip notice.
 
 ### Dashboarding ideas
 
@@ -40,7 +40,7 @@ Each metric is tagged with `repo:<owner>/<repo>`, `workflow:<display name>`, and
 If your analytics platform ingests files (e.g., Looker, Sheets, BigQuery), you can reuse the same JSON artifact.
 
 1. Download the latest `workflow-usage-report` artifact from the workflow run summary.
-2. Parse the JSON (`reports/workflow-usage-report.json`) and load it into your warehouse. The top-level schema looks like:
+1. Parse the JSON (`reports/workflow-usage-report.json`) and load it into your warehouse. The top-level schema looks like:
 
 ```json
 {
@@ -61,7 +61,8 @@ If your analytics platform ingests files (e.g., Looker, Sheets, BigQuery), you c
   ]
 }
 ```
-3. In Looker, create an ETL that ingests the JSON into a table with the columns above plus `generated_at` and `window_days`. From there you can build Looks around reliability KPIs (success %, MTTR proxies, etc.).
+
+1. In Looker, create an ETL that ingests the JSON into a table with the columns above plus `generated_at` and `window_days`. From there you can build Looks around reliability KPIs (success %, MTTR proxies, etc.).
 
 ### Automating Looker / Power BI ingestion
 
@@ -70,6 +71,7 @@ artifact lives behind the GitHub Actions API, so set up a tiny sync job and aim
 your BI tool at the staged files.
 
 1. **Schedule an artifact sync** (GitHub → object storage):
+
    ```bash
    #!/usr/bin/env bash
    set -euo pipefail
@@ -79,12 +81,14 @@ your BI tool at the staged files.
    aws s3 cp /tmp/usage-report/reports/workflow-usage-report.json \
      s3://observability-lake/workflow-usage/${ts}.json
    ```
+
    - Run via GitHub Actions cron, Airflow, or any scheduler shortly after the
      weekly workflow (07:00 UTC Monday) to minimize lag.
    - If you prefer Azure/GCP, swap the `aws s3` copy for `az storage` or
      `gcloud storage`.
-2. **Looker**:
+1. **Looker**:
    - Point a derived table at the S3/GCS bucket. Example SQL (Presto/Athena):
+
      ```sql
      SELECT json_extract_scalar(t.json, '$.generatedAt') AS generated_at,
             json_extract_scalar(w, '$.workflow')        AS workflow,
@@ -94,16 +98,17 @@ your BI tool at the staged files.
      FROM usage_reports t
      CROSS JOIN UNNEST(cast(json_extract(t.json, '$.workflows') AS array(json))) w;
      ```
+
    - Reuse the visualization ideas from the Datadog section (success-rate trend,
      failure toplist, duration heatmap) with Looks or Dashboards.
-3. **Power BI**:
-   - Create a `Power Query` dataflow using the REST endpoint that serves the
-     staged JSON (e.g., Azure Blob public SAS URL) or call the GitHub API
-     directly with an access token header.
-   - Use `Json.Document(Web.Contents(...))` to expand the `workflows` array and
-     build visuals mirroring the Datadog/Looker widgets (gauge for success rate,
-     clustered bar for failures, line chart for duration).
-   - Schedule refresh (daily or weekly) to line up with the artifact sync.
+1. **Power BI**:
+    - Create a `Power Query` dataflow using the REST endpoint that serves the
+      staged JSON (e.g., Azure Blob public SAS URL) or call the GitHub API
+      directly with an access token header.
+    - Use `Json.Document(Web.Contents(...))` to expand the `workflows` array and
+      build visuals mirroring the Datadog/Looker widgets (gauge for success rate,
+      clustered bar for failures, line chart for duration).
+    - Schedule refresh (daily or weekly) to line up with the artifact sync.
 
 > Tip: keep a lightweight Markdown summary (`reports/summary.md`) as a backup
 > data source—Power BI can ingest it as a table if JSON ingestion fails.
@@ -138,8 +143,8 @@ feedback loop actionable:
 Implementation tips:
 
 1. Add runbook links back to this repository (e.g., `docs/workflow-usage-dashboard.md`).
-2. Tag monitors with `team:platform` (or similar) so ownership stays obvious.
-3. Use composite monitors (`A AND NOT B`) to suppress noise during scheduled maintenance windows.
+1. Tag monitors with `team:platform` (or similar) so ownership stays obvious.
+1. Use composite monitors (`A AND NOT B`) to suppress noise during scheduled maintenance windows.
 
 ## Operational tips
 

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 ## Blanc Quant LOB Engine (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
