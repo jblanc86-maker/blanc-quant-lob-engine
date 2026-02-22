@@ -8,6 +8,7 @@
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![Docs Lint](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml)
 [![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
 [![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
@@ -28,20 +29,44 @@
 
 ## About Blanc LOB Engine
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure.
+The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book
+engine designed for financial market simulations and trading systems. It
+provides robust features for order matching, market data replay, and telemetry,
+making it ideal for students, hobbyists, and professionals exploring
+algorithmic trading and market microstructure.
 
 For inquiries related to trading applications or professional use cases, please feel free to reach out.
 
+## Scope: OSS Engine vs Patent-Pending System
+
+This repository contains the **OSS exercise version** of Blanc Quant LOB Engine:
+
+- **Synthetic hot-loop + microbenchmark harness**
+- Determinism checks via digests
+- Bench artifacts for CI gating
+
+**BQL 2.0 (Patent-Pending)** is a separate production-shaped system that adds:
+
+- Real **ITCH market-data replay + deterministic matching**
+- **Per-event binary audit journal** (replayable proof trail)
+- CI-enforced **performance contracts** (p50/p95/p99/p999 + stability)
+- Deterministic protection/coordination (zone trip ladder, SCM)
+- Canonical Symbol IDs for shard/order invariance proof (Phase 6.2)
+
+BQL 2.0 research and evidence material lives in `docs/` (see
+`docs/PE_TECH_SUMMARY.md`, `docs/gates.md`, and
+`docs/DETERMINISM_ABSOLUTISM.md`).
+
 ## Deterministic C++20 Limit Order Book (LOB) Replay & Benchmarking Engine
 
-The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry, making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure. Inquire for FULL proprietary features (600+ unique clones as of 12/07/25).
+This OSS release ships the deterministic replay engine, synthetic benchmarks,
+and telemetry-driven SLO gates. Inquire for full proprietary capabilities
+(600+ unique clones as of 12/07/25).
 
 - **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
 - **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
 - **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
 - **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
-
-If you care about *“can we replay this exactly, under load, and prove it didn’t get slower or weirder at the tails?”*—this engine is the answer.
 
 ## What Makes This Innovative
 
@@ -309,7 +334,10 @@ deployment should follow the terms in `COMMERCIAL_LICENSE.md`.
 
 ## Release Information
 
-This release includes the prebuilt binaries and necessary artifacts for version 1.00 of the Blanc LOB Engine. If you are interested in accessing the full source code, please reach out directly for further details. The project is fully open and available for students and hobbyists to explore and use.
+This release includes the prebuilt binaries and necessary artifacts for version
+1.00 of the Blanc LOB Engine. If you are interested in accessing the full source
+code, please reach out directly for further details. The project is fully open
+and available for students and hobbyists to explore and use.
 
 ## Analytics Report Output
 
