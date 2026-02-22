@@ -1,0 +1,39 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "macos-appleclang",
+      "displayName": "macOS Apple Clang",
+      "description": "Use Xcode toolchain clang/clang++ on macOS.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-appleclang",
+      "configurePreset": "macos-appleclang"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "macos-appleclang",
+      "configurePreset": "macos-appleclang"
+    }
+  ]
+}
