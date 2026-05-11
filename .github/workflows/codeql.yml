@@ -49,7 +49,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
         with:
-          languages: cpp
+          languages: c-cpp
 
       - name: Install build deps (explicit compilers + regex dev)
         run: |
