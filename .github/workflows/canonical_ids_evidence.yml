@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup dependencies
         if: ${{ runner.os == 'Linux' }}
         run: |
           bash scripts/setup-packages.sh || true
@@ -77,6 +79,8 @@ jobs:
 
       - name: Upload artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: evidence-bundle-${{ runner.os }}-${{ github.run_id }}
           path: ${{ env.ARCHIVE }}
           if-no-files-found: warn
 
