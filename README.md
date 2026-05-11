@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 ## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
@@ -339,7 +341,7 @@ evidence is reproducible.
 
 ---
 
-## Performance: Current State vs. Future Targets
+## Performance Benchmarks: Current State vs. Future Targets
 
 | Metric Tier                                                | Current (Jan 2026)                                                          | Target (vNext)                                                                     | Status                  |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------- |
@@ -357,14 +359,14 @@ evidence is reproducible.
 
 ---
 
-## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
+## SCM Architecture: DEG Safety Controller and Gate Policies
 
 Selective Coordination Mode brings the “smallest breaker trips first” principle
 from power systems into trading engines. Instead of halting everything when
 there’s a slowdown, the engine disables or sheds only the affected subsystem —
 keeping the rest running and making incident boundaries clean and replayable.
 
-### How It Works
+### SCM Architecture Details
 
 - ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
   that enforces DEG-compatible gate policies before emitting telemetry.
@@ -377,7 +379,7 @@ keeping the rest running and making incident boundaries clean and replayable.
   making "breaker-style" protections and SLO checks part of engine instead
   of bolted-on monitoring.
 
-### Coordination Diagram
+### Trip Ladder Diagram
 
 ```text
 ┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌───────┐
@@ -685,7 +687,8 @@ Other/Unmeasured:  52.3 ms (7.8%)   - OS scheduling, overhead
 | **Synchronous Flushes** | 100      | 0             | **Eliminated**   |
 | **Throughput**          | 2.1 MB/s | 153 MB/s      | **73x increase** |
 
-**Root Cause Fixed:** Removed `file_.flush()` from hot path, increased buffer to 100k records
+**Root Cause Fixed:** Removed `file_.flush()` from hot path;
+increased buffer to 100k records
 
 ### Phase 5: Performance Contract (CI-Enforced) ✅
 
@@ -716,7 +719,8 @@ python3 scripts/validate_budgets.py \
 
 **Documentation:**
 
-- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md) - CI gates + budgets ✅
+- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md)
+  — CI gates + budgets ✅
 - [Phase 4 Complete](docs/PHASE4_COMPLETE.md) - Batch I/O optimization
 - [Phase 3 Complete](docs/PHASE3_COMPLETE.md) - Bottleneck identification
 - [Phase 2 Results](docs/PHASE2_RESULTS.md) - Binary journal implementation
