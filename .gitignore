@@ -36,4 +36,7 @@ __pycache__/
 .DS_Store
 .Trash/
 
+# Workflow backups (created by pin_actions_by_shas.sh, not for commit)
+.github/workflow-backups/
+
 # Legacy duplicate entry consolidated above

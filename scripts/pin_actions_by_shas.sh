@@ -28,7 +28,7 @@ done
 
 BASEDIR="$(cd "$(dirname "$0")/.." && pwd)"
 WORKFLOWS_DIR="$BASEDIR/.github/workflows"
-BACKUP_DIR="$WORKFLOWS_DIR/.backup_$(date -u +%Y%m%d%H%M%S)"
+BACKUP_DIR="$BASEDIR/.github/workflow-backups/$(date -u +%Y%m%d%H%M%S)"
 
 if [[ $NO_BACKUP -ne 1 && $DRY_RUN -eq 0 ]]; then
   mkdir -p "$BACKUP_DIR"
@@ -45,7 +45,7 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
   cp "$file" "$tmpfile"
   updated=0
   while IFS= read -r line; do
-    if [[ $line =~ uses:[[:space:]]*([^@[:space:]]+)@([^[:space:]#]+) ]]; then
+    if [[ $line =~ ^[[:space:]]*uses:[[:space:]]*([^@[:space:]]+)@([^[:space:]#]+) ]]; then
       full_repo=${BASH_REMATCH[1]}
       # repo is always owner/repo; sometimes the action uses an extra path (e.g. 'owner/repo/path')
       # Extract owner/repo only
