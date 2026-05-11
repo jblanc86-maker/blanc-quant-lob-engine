@@ -25,10 +25,9 @@ jobs:
         uses: jwlawson/actions-setup-cmake@d06b37b47cfd043ec794ffa3e40e0b6b5858a7ec # v1.14.2
       - name: Build app
         run: |
-          mkdir -p build && cd build
-          cmake ..
-          make app_main test_app bench_app
+          cmake -S apps -B apps/build
+          cmake --build apps/build --target app_main test_app bench_app
       - name: Run test
-        run: ./build/apps/test_app
+        run: ./apps/build/test_app
       - name: Run benchmark
-        run: ./build/apps/bench_app
+        run: ./apps/build/bench_app

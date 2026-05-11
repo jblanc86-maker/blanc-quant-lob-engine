@@ -9,6 +9,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
 jobs:
   package:
     name: Package Evidence (${{ matrix.os }})
@@ -20,9 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup dependencies
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         if: ${{ runner.os == 'Linux' }}
         run: |
           bash scripts/setup-packages.sh || true
@@ -75,9 +76,7 @@ jobs:
           echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-bundle-${{ runner.os }}-${{ github.run_id }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
           path: ${{ env.ARCHIVE }}
           if-no-files-found: warn
 
@@ -86,15 +85,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
         with:
           platforms: arm64
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Run ARM64 container to build and package evidence
         shell: bash
@@ -141,7 +140,7 @@ jobs:
             '
 
       - name: Upload artifact (ARM64)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: evidence-bundle-Linux-arm64-${{ github.run_id }}
           path: evidence-bundle-Linux-arm64-${{ github.run_id }}.zip
