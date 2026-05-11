@@ -1,5 +1,10 @@
+# CodeQL build artifacts
+/_codeql_build_dir/
+/_codeql_detected_source_root
+
 # CMake/build
 /build/
+/build-*/
 /build-mac/
 /build-v2/
 /CMakeFiles/
@@ -8,6 +13,9 @@
 /*.ninja
 /.ninja_*
 /compile_commands.json
+
+# Third-party sources pulled by build systems (e.g., benchmark _deps)
+**/_deps/
 
 # Repo artifacts
 /artifacts/*
