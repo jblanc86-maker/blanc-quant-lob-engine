@@ -67,7 +67,7 @@ jobs:
           set -euo pipefail
           rm -rf build
           # Force the compilers explicitly to avoid ambiguous detection
-          CC=gcc CXX=g++ cmake -S . -B build -G Ninja \
+          CC=gcc-13 CXX=g++-13 cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=OFF \
             -DBUILD_BENCHMARKS=OFF
