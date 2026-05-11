@@ -9,6 +9,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
 jobs:
   package:
     name: Package Evidence (${{ matrix.os }})
