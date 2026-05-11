@@ -1,6 +1,7 @@
 default: true
-MD013: false  # allow long legal/license paragraphs without reflowing
-MD022: false  # allow headings without surrounding blank lines in policy docs
-MD028: false  # allow blank lines inside blockquotes
-MD032: false  # allow lists to touch surrounding text when needed
+MD013: false # allow long legal/license paragraphs without reflowing
+MD022: false # allow headings without surrounding blank lines in policy docs
+MD028: false # allow blank lines inside blockquotes
+MD032: false # allow lists to touch surrounding text when needed
 MD033: false
+MD060: false # allow table column spacing variants

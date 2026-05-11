@@ -124,7 +124,7 @@ git push origin v1.0.0
 
 ---
 
-# v1.0.0 – Full Release Notes (2025-12-07)
+## v1.0.0 – Full Release Notes (2025-12-07)
 
 ## Major Changes Since Last Release
 

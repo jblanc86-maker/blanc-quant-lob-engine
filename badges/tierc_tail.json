@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "label": "Tier C p99.9/p99.99",
+  "message": "~22/~24 ms",
+  "color": "blue"
+}

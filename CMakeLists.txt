@@ -1,4 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
+
+# Prefer Apple clang on macOS to avoid clang-cl toolchain mismatches.
+if(APPLE)
+  if(NOT DEFINED CMAKE_C_COMPILER)
+    set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE FILEPATH "" FORCE)
+  endif()
+  if(NOT DEFINED CMAKE_CXX_COMPILER)
+    set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE FILEPATH "" FORCE)
+  endif()
+endif()
+
 project(blanc_lob_engine VERSION 1.00 LANGUAGES CXX)
 
 if(POLICY CMP0167)
