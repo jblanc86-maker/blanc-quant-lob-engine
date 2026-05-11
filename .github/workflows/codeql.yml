@@ -1,8 +1,5 @@
 name: "CodeQL Analysis"
 
-permissions:
-  security-events: write
-
 on:
   push:
     branches: [main]
@@ -14,12 +11,17 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: cpp
+          languages: c-cpp
       - name: Autobuild
         uses: github/codeql-action/autobuild@v4
       - name: Perform CodeQL Analysis
