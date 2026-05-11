@@ -12,8 +12,7 @@ sg targets --min-score 80 --limit 5
 
 The CSV columns line up with the canonical ingestion schema (role id, title, company, location, persona tag, headcount spike flag, mutual count, age). Extend the file or drop your own CSVs alongside it to test new scoring weights.
 
-Run the demo script
--------------------
+### Run the demo script
 
 We've added a tiny Python demo runner that loads `qa_demo.csv` and prints a short summary. It's useful as a starter example for newcomers.
 

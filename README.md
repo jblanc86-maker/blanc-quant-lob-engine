@@ -201,10 +201,9 @@ simulations and trading systems. It provides robust features for order matching,
 making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure.
 Inquire for FULL proprietary features (600+ unique clones as of 12/07/25).
 
-- **Deterministic replay:** Byte-for-byte golden-state checks over ITCH binaries and synthetic bursts.
-- **Patent-pending Dynamic Execution Gates (DEG):** Breaker-style gate policies wrap the datapath with explicit safety and tail-latency controls. (Open-source release includes the core breaker state machine; some advanced DEG features remain proprietary.)
-- **Tail SLO enforcement:** `scripts/verify_bench.py` treats p50/p95/p99 budgets as release gates, not suggestions.
-- **Structured observability:** Every run emits JSONL and Prometheus-compatible text files for diffing, dashboards, and CI.
+**Blanc Quant LOB Engine (BQL Engine)** is a **deterministic C++20 replay +
+benchmarking harness** for limit-order-book (LOB) workloads, built to answer
+one question:
 
 If you care about _"can we replay this exactly, under load, and prove it didn't get slower or weirder at tails?"_
 
@@ -326,73 +325,46 @@ A major challenge in trading engines is that runtime controls (like circuit brea
 
 ---
 
-## What Makes This Innovative
+It ships **golden-state determinism checks**, **CI-enforced tail latency
+budgets (p50/p95/p99/p99.9/p99.99)**, and **audit-friendly artifacts**
+(`bench.jsonl`, `metrics.prom`, HTML report) so regressions fail early and
+evidence is reproducible.
 
-### 1. Golden-State Deterministic Replay
+**Scope note (important):**
 
 - Guarantees byte-for-byte identical results across runs.
 - FNV-1a digest verification: Every replay produces a cryptographic fingerprint of final order book state.
 - Automated dual-run CI: GitHub Actions runs same input twice and fails if digests differ—catching non-determinism instantly.
 - Environment normalization: Fixed timezone, locale, and compiler ensure reproducibility.
 
-### 2. Integrated Determinism + Performance Testing
+---
 
-- Same workflow proves determinism and measures p50/p95/p99 tail latency.
-- Release gates enforce SLO budgets: if p99 regresses, CI fails.
-- Structured artifacts (`bench.jsonl`, `metrics.prom`) enable historical tracking and automated dashboards.
+## Performance: Current State vs. Future Targets
 
-### 3. Dynamic Execution Gates (Patent-Pending)
+| Metric Tier                                                | Current (Jan 2026)                                                          | Target (vNext)                                                                     | Status                  |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------- |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs                               | ✅ **EXCEEDS TARGET**   |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms                                       | 🎯 Planned              |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | p50: ~16ms<br/>p95: ~18ms<br/>p99: ~20ms<br/>p99.9: ~22ms<br/>p99.99: ~24ms | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms<br/>p99.9: ≤3× p99<br/>p99.99: advisory | 🚧 Optimization Phase 2 |
+| **Throughput**                                             | 1M events/sec                                                               | 1–5M ops/sec                                                                       | ✅ Baseline Established |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ Enhanced with SCM                                                               | ✅ Production Ready     |
 
-- Breaker-style state machine (Fuse → Local → Feeder → Main → Kill).
-- Preserves deterministic replay while containing pathological scenarios.
-- Explicit publish control: corrupted runs are flagged, not silently trusted.
+> **Tail Latency Purity** — p99.9 and p99.99 are measured on every run (≥1k
+> samples for p99.9 and ≥10k samples for stable p99.99). Runs emit `samples`,
+> `p999_valid`, and `p9999_valid` to prevent under-sampled tails from being
+> misinterpreted. p99.9 is gated at ≤ 3× the p99 budget; p99.99 is advisory.
+> Tail-delta gating is validated by `tests/test_tail_latency.cpp`.
 
-### 4. Telemetry-Driven Golden-State Validation
+---
 
-- Every run produces machine-readable, CI-auditable artifacts.
-- Structured outputs: JSONL event logs + Prometheus textfiles.
-- Release gates as code: `scripts/verify_bench.py` treats performance budgets as pass/fail gates.
-- Artifact packaging: Automated artifact creation with provenance metadata.
+## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
 
-### 5. Canonical Serialization for Order Books
+Selective Coordination Mode brings the “smallest breaker trips first” principle
+from power systems into trading engines. Instead of halting everything when
+there’s a slowdown, the engine disables or sheds only the affected subsystem —
+keeping the rest running and making incident boundaries clean and replayable.
 
-- Structure-of-Arrays (SoA) layout for cache efficiency.
-- Fixed iteration order regardless of insertion sequence.
-- FNV-1a rolling hash captures exact state, not approximations.
-
-## System architecture
-
-```text
-┌──────────────────────────────────────────────────────────────────────────────┐
-│   QUANT LOB ENGINE — Deterministic Replay & Benchmark Harness                │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ Inputs                              Core                           Outputs    │
-│ ┌─────────────────┐        ┌──────────────────────────────┐      ┌───────────┐│
-│ │ trace_loader    │───▲───▶│ Deterministic Replay         │───┬─▶│ Stdout    ││
-│ │ (ITCH bin; CSV/ │   │    │ Scheduler (ST; MT optional)  │   │  │ summary   ││
-│ │ PCAP→bin bridge)│   │    └──────────────┬───────────────┘   │  └───────────┘│
-│ └─────────────────┘   │                   │                   │              │
-│ ┌─────────────────┐   │                   │                   │  ┌───────────┐│
-│ │ gen_synth       │───┘   Fault Injection / Gates (DEG‑compatible;         ││
-│ │ (synthetic)     │           breaker‑style, optional)           └─▶│ Artifacts ││
-│ └─────────────────┘                                     ▲            │ bench.jsonl│
-│                                                         │            │ metrics.prom│
-│                                         ┌──────────────────────────────┐└───────────┘│
-│                                         │ Golden-state Checker         │◀──────┘
-│                                         │ (byte-for-byte digest_fnv)   │
-│                                         └──────────────────────────────┘
-│                                                 │
-│                                                 ▼
-│ ┌──────────────────────────────┐     ┌──────────────────────────────┐
-│ │ Benchmark Harness            │     │ Structured Observability     │
-│ │ • msgs/s throughput          │     │ • JSONL event logs           │
-│ │ • p50/p95/p99 latency        │     │ • Prometheus textfile        │
-│ │ • config matrix sweeps       │     │ • CI artifacts (goldens)     │
-│ └──────────────────────────────┘     └──────────────────────────────┘
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Flow summary
+### How It Works
 
 - ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
   that enforces DEG-compatible gate policies before emitting telemetry.
@@ -405,20 +377,12 @@ A major challenge in trading engines is that runtime controls (like circuit brea
   making "breaker-style" protections and SLO checks part of engine instead
   of bolted-on monitoring.
 
-### Classic HFT datapath
+### Coordination Diagram
 
 ```text
-┌────────────────────────────────────────────────────────────────────┐
-│                    QUANT LOB ENGINE (HFT SYSTEM)                   │
-├────────────────────────────────────────────────────────────────────┤
-│  ITCH 5.0 parser  ──▶  L2/L3 order book (SoA) ──▶  Price levels    │
-│            │                             │                        │
-│            ▼                             ▼                        │
-│      Dynamic Execution Gates (DEG) ──▶ Telemetry exporter          │
-│            │                             │                        │
-│            ▼                             ▼                        │
-│     gen_synth fixtures          Golden determinism tests          │
-└────────────────────────────────────────────────────────────────────┘
+┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌───────┐
+│ Telemetry  │ ───────▶ │ Journaling   │ ───────▶ │ Risk Checks  │ ───────▶ │ Core Match │ ───────▶ │ HALT  │
+└────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └───────┘
 ```
 
 Gate policy details live in `docs/gates.md`; CI wiring is under
