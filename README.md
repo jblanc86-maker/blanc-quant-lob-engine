@@ -341,7 +341,7 @@ evidence is reproducible.
 
 ---
 
-## Performance Benchmarks: Current State vs. Future Targets
+## Performance: Current State vs. Future Targets
 
 | Metric Tier                                                | Current (Jan 2026)                                                          | Target (vNext)                                                                     | Status                  |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------- |
@@ -359,14 +359,14 @@ evidence is reproducible.
 
 ---
 
-## SCM Architecture: DEG Safety Controller and Gate Policies
+## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
 
 Selective Coordination Mode brings the “smallest breaker trips first” principle
 from power systems into trading engines. Instead of halting everything when
 there’s a slowdown, the engine disables or sheds only the affected subsystem —
 keeping the rest running and making incident boundaries clean and replayable.
 
-### SCM Architecture Details
+### How It Works
 
 - ITCH binaries and synthetic `gen_synth` bursts feed a deterministic scheduler
   that enforces DEG-compatible gate policies before emitting telemetry.
@@ -379,7 +379,7 @@ keeping the rest running and making incident boundaries clean and replayable.
   making "breaker-style" protections and SLO checks part of engine instead
   of bolted-on monitoring.
 
-### Trip Ladder Diagram
+### Coordination Diagram
 
 ```text
 ┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌───────┐
