@@ -28,11 +28,6 @@ endif()
 # Option to build benchmarks
 option(BUILD_BENCHMARKS "Build microbenchmark suite" ON)
 
-# Add bench subdirectory if enabled
-if (BUILD_BENCHMARKS)
-  add_subdirectory(bench)
-endif()
-
 set(CMAKE_CXX_STANDARD 20)
 
 # Good for tooling
@@ -47,6 +42,14 @@ endif()
 if (DEFINED ENV{CI})
   add_compile_options(-Werror)
 endif()
+
+# Add bench subdirectory if enabled
+if (BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
+
+# Add apps subdirectory
+add_subdirectory(apps)
 
 # Linux-only hardening (Release)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_BUILD_TYPE MATCHES "Rel")
