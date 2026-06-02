@@ -28,23 +28,35 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    if: >-
+      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
+          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     permissions:
-      security-events: write
-      actions: read
-      contents: read
-      packages: read
+      actions: read           # Allow reading workflow run details
+      contents: read          # Allow reading repository contents
+      security-events: write  # Allow writing security alerts
+      pull-requests: read     # Allow reading PR metadata (for PR context)
+      checks: read            # Allow reading check run status
+      statuses: read          # Allow reading commit statuses
+      issues: read            # Allow reading issues (for context)
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Initialize CodeQL
         uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e
         with:
           languages: c-cpp
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_BENCHMARKS=OFF -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e
         with:
-          category: "/language:cpp"
+          category: "/language:c-cpp"
     env:
       CODEQL_ACTION_DEBUG: true
       CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false
