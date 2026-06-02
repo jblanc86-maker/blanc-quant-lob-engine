@@ -112,6 +112,7 @@ Before tagging:
 - [ ] Manually dispatch **CI** and **Determinism** workflows and confirm green runs with expected artifacts.
 - [ ] Verify the **Security** tab shows the latest SARIF results from the Container Scan workflow.
 - [ ] Run **Pin Check** and confirm there are no unpinned actions.
+- [ ] Branch protection: **Docs Lint** is required for `main` and release branches.
 - [ ] Execute release packaging scripts and confirm bundles match expected layout.
 
 Once all checks are green, tag:
