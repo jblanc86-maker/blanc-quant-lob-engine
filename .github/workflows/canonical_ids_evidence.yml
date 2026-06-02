@@ -114,7 +114,7 @@ jobs:
             ubuntu:22.04 bash -lc '
               set -euo pipefail
               export DEBIAN_FRONTEND=noninteractive
-              apt-get update && apt-get install -y git cmake g++ make zip ninja-build
+              apt-get update && apt-get install -y git cmake g++ make zip ninja-build python3
               echo "[ARM64] Build" >&2
               bash scripts/build.sh || make || true
               echo "[ARM64] Tail matrix artifact" >&2
