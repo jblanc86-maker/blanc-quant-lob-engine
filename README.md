@@ -1,18 +1,19 @@
-## Blanc Quant LOB Engine (BQL Engine)
+<!-- markdownlint-disable MD041 -->
+
+## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
 
 ### Status Badges
 
+[![p99.9/p99.99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/tierc_tail.json)](docs/gates.md)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![Determinism Compiler Matrix](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_compiler_matrix.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_compiler_matrix.yml)
-[![Determinism Kernel Matrix](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml)
 [![Determinism Affinity + Kernel](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_affinity_kernel.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_affinity_kernel.yml)
 [![Gate Replay Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_gate_replay.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_gate_replay.yml)
-[![Long-Horizon Stability](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/long_horizon_stability.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/long_horizon_stability.yml)
 [![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Docs Lint](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml)
@@ -22,6 +23,11 @@
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
 [![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
+[![App CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/app-ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/app-ci.yml)
+[![Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/canonical_ids_evidence.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/canonical_ids_evidence.yml)
+[![Reproducibility Check](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/repro.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/repro.yml)
+[![Pin Check](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/pin-check.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/pin-check.yml)
+[![Release](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/release-draft.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/release-draft.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
 [![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
@@ -681,7 +687,8 @@ Other/Unmeasured:  52.3 ms (7.8%)   - OS scheduling, overhead
 | **Synchronous Flushes** | 100      | 0             | **Eliminated**   |
 | **Throughput**          | 2.1 MB/s | 153 MB/s      | **73x increase** |
 
-**Root Cause Fixed:** Removed `file_.flush()` from hot path, increased buffer to 100k records
+**Root Cause Fixed:** Removed `file_.flush()` from hot path;
+increased buffer to 100k records
 
 ### Phase 5: Performance Contract (CI-Enforced) ✅
 
@@ -712,7 +719,8 @@ python3 scripts/validate_budgets.py \
 
 **Documentation:**
 
-- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md) - CI gates + budgets ✅
+- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md)
+  — CI gates + budgets ✅
 - [Phase 4 Complete](docs/PHASE4_COMPLETE.md) - Batch I/O optimization
 - [Phase 3 Complete](docs/PHASE3_COMPLETE.md) - Bottleneck identification
 - [Phase 2 Results](docs/PHASE2_RESULTS.md) - Binary journal implementation

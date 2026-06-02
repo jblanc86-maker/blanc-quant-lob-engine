@@ -24,20 +24,11 @@ permissions:
 
 jobs:
   pin:
-    # permissions block already present, removed duplicate
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-  schedule:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      contents: read
-      pull-requests: read
-      checks: read
-      statuses: read
-      issues: read
+      contents: write
+      pull-requests: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true

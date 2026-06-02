@@ -1,3 +1,7 @@
+# CodeQL build artifacts
+/_codeql_build_dir/
+/_codeql_detected_source_root
+
 # CMake/build
 /build/
 /build-*/
@@ -39,5 +43,8 @@ __pycache__/
 # Misc
 .DS_Store
 .Trash/
+
+# Pin-actions backup snapshots (created by scripts/pin_actions_by_shas.sh)
+.github/workflows/.backup_*/
 
 # Legacy duplicate entry consolidated above
