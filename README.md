@@ -619,12 +619,27 @@ changes.
 
 ## License
 
-Distributed under Business Source License 1.1 (`LICENSE`). Research and
-non-commercial evaluation are permitted; production use requires a commercial
-license until change date defined in `COMMERCIAL_LICENSE.md`.
+Distributed under the **Business Source License 1.1**. Research and non-commercial
+evaluation are permitted today; production use requires a commercial license until
+the change date defined in the repository.
 
-Research users can clone and run engine today; commercial or production
-deployment should follow terms in `COMMERCIAL_LICENSE.md`.
+### Research & Evaluation — Open under BSL 1.1
+
+Clone and run the engine today for research and non-commercial evaluation.
+
+- Full source, apps, scripts, and golden fixtures
+- Reproduce benches and proof artifacts
+- Run canonical digest evidence checks
+- Non-commercial evaluation permitted
+
+### Production · BQL 2.0 — Commercial License
+
+Production deployment follows the terms in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
+BQL 2.0 is patent-pending.
+
+- Real ITCH replay & deterministic matching
+- Binary audit journal & canonical invariance proofs
+- DEG / DSC / RSC / CDP / DEC / DPL / DEM protection stack
 
 <!-- markdownlint-enable MD013 -->
 
