@@ -29,5 +29,9 @@ jobs:
         run: |
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git add badges/performance.json
-          git commit -m "perf: update performance badge JSON"
-          git push origin main
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "perf: update performance badge JSON"
+            git push origin main
+          fi
