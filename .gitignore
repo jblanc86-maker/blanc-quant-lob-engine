@@ -44,4 +44,7 @@ __pycache__/
 .DS_Store
 .Trash/
 
+# Pin-actions backup snapshots (created by scripts/pin_actions_by_shas.sh)
+.github/workflows/.backup_*/
+
 # Legacy duplicate entry consolidated above
