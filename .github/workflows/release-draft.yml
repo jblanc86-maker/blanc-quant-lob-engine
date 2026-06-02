@@ -19,12 +19,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build zip libboost-all-dev jq nlohmann-json3-dev
       - name: Build (Release) and package
+        shell: bash
         run: |
           set -euo pipefail
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
           cmake --build build -j
           scripts/release_package.sh
       - name: List release artifacts
+        shell: bash
         run: |
           set -euo pipefail
           if [[ -d artifacts/release ]]; then
@@ -35,6 +37,7 @@ jobs:
           fi
       - name: Read RELEASE.md
         id: notes
+        shell: bash
         run: |
           set -euo pipefail
           if [[ -f RELEASE.md ]]; then
@@ -47,9 +50,14 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Check release artifacts
         id: artifacts
+        shell: bash
         run: |
           set -euo pipefail
-          if [[ -d artifacts/release ]] && find artifacts/release -type f -print -quit | grep -q .; then
+          has_release_files=false
+          if [[ -d artifacts/release ]] && [[ -n "$(find artifacts/release -type f -print -quit)" ]]; then
+            has_release_files=true
+          fi
+          if [[ "$has_release_files" == "true" ]]; then
             echo "has_files=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_files=false" >> "$GITHUB_OUTPUT"
@@ -60,13 +68,12 @@ jobs:
         with:
           draft: false
           body: ${{ steps.notes.outputs.body }}
-          fail_on_unmatched_files: false
           files: |
             artifacts/release/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish release without artifacts
-        if: steps.artifacts.outputs.has_files != 'true'
+        if: steps.artifacts.outputs.has_files == 'false'
         uses: softprops/action-gh-release@6f1aa3a2d2ce9abfa3775106f1978a6d6d144ba2
         with:
           draft: false
