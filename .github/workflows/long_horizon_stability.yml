@@ -1,0 +1,55 @@
+---
+# SPDX-License-Identifier: Apache-2.0
+# Long-horizon stability run (tail + gate drift)
+# Requires self-hosted runner due to 24h runtime.
+
+name: Long-Horizon Stability
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      duration_hours:
+        description: "Run duration in hours (default 24)"
+        required: false
+        default: "24"
+      interval_sec:
+        description: "Sleep between runs in seconds (default 300)"
+        required: false
+        default: "300"
+
+jobs:
+  stability:
+    name: "24h stability (self-hosted)"
+    runs-on: [self-hosted]
+    timeout-minutes: 1500
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Build replay
+        run: |
+          set -euxo pipefail
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTING=OFF -DBUILD_BENCHMARKS=OFF
+          cmake --build build -j$(nproc) --target replay gen_synth
+          ./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+
+      - name: Long-horizon run
+        env:
+          DURATION_HOURS: ${{ inputs.duration_hours }}
+          INTERVAL_SEC: ${{ inputs.interval_sec }}
+        run: |
+          set -euxo pipefail
+          chmod +x scripts/long_horizon_stability.sh
+          REPLAY_BIN=build/bin/replay INPUT_BIN=data/golden/itch_1m.bin \
+            ./scripts/long_horizon_stability.sh
+
+      - name: Upload stability artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stability-${{ github.run_id }}
+          path: artifacts/stability/
+          if-no-files-found: warn
