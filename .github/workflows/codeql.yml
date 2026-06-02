@@ -48,6 +48,10 @@ jobs:
         uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
         with:
           languages: c-cpp
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev
       - name: Autobuild
         uses: github/codeql-action/autobuild@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
       - name: Prepare CodeQL trap cache directory
