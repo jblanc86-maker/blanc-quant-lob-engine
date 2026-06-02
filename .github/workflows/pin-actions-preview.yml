@@ -33,7 +33,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip-ci]') && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only'))"
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Run pin script (dry-run)
         run: |
@@ -41,7 +41,7 @@ jobs:
           ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposed.json || true
 
       - name: Upload proposals
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pin-proposals
           path: pin_proposed.json
@@ -91,7 +91,7 @@ jobs:
 
       - name: Checkout preview branch
         if: steps.eval.outputs.found == 'true'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ steps.create_preview_pr.outputs.pr_branch }}
 
@@ -106,7 +106,7 @@ jobs:
 
       - name: Upload bench artifacts
         if: steps.eval.outputs.found == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: preview-bench-${{ github.run_id }}
           path: |
