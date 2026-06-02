@@ -33,6 +33,9 @@ if (BUILD_BENCHMARKS)
   add_subdirectory(bench)
 endif()
 
+# Add apps subdirectory
+add_subdirectory(apps)
+
 set(CMAKE_CXX_STANDARD 20)
 
 # Good for tooling
