@@ -48,18 +48,10 @@ jobs:
         uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
         with:
           languages: cpp
-          build-mode: manual
-
-      - name: Configure
-        run: cmake -S . -B build -DBUILD_BENCHMARKS=OFF -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build --parallel
-
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e
-        with:
-          category: "/language:c-cpp"
+        uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
     env:
       CODEQL_ACTION_DEBUG: true
       CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false

@@ -63,7 +63,7 @@ jobs:
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
     # - name: Setup runtime (example)
-    #   uses a setup action pinned to a full commit SHA
+    #   (pin the action to a SHA before using it, e.g. actions/setup-node@<sha>)
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
