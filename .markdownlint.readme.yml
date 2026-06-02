@@ -9,7 +9,6 @@ MD013:
   code_blocks: false
   tables: false
   headings: false
-  headers: false
   strict: false
 
 # Keep these relaxations consistent with repo-wide policy
