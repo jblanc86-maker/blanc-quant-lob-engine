@@ -62,6 +62,8 @@ jobs:
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
+    # - name: Setup runtime (example)
+    #   uses a setup action pinned to a full commit SHA
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
