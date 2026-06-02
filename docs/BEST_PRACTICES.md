@@ -21,6 +21,22 @@ These tips capture the recurring setup and review habits that keep the engine de
 - Review `artifacts/bench.jsonl` and `artifacts/metrics.prom` outputs after runs to catch tail spikes early.
 - Avoid introducing non-deterministic constructs (unordered containers without stable iteration, random seeds without explicit values).
 
+## CPU pinning
+
+- **Do not pin to core 0.** Core 0 is the default target for OS interrupt affinity
+  (`/proc/irq/*/smp_affinity`), NIC softirqs, RCU callbacks, and timer wheel events.
+  Sharing it with the replay engine injects unpredictable latency spikes.
+- **Use `--cpu-pin 3`** (or the first non-sibling, non-interrupt core on your machine).
+  Core 3 avoids core 0 interrupts, avoids the SMT sibling of core 0 (typically core 1),
+  and is not the last core (often used for watchdog threads).
+- Verify your choice: `cat /proc/irq/*/smp_affinity_list | sort -u` to see where
+  interrupts land; `cat /sys/devices/system/cpu/cpu*/topology/thread_siblings_list`
+  to see SMT pairs.
+- The `cpu_pin` field is emitted in every JSONL and Prometheus artifact — a run with
+  `cpu_pin: 0` should be flagged as potentially noise-contaminated.
+- See `docs/CPU_PINNING_RATIONALE.md` for the full core-selection rationale and NUMA
+  topology guidance.
+
 ## Documentation and safety
 
 - Document new gate policies or replay behaviors in `docs/` so CI reviewers can trace intent.

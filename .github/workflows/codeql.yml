@@ -43,11 +43,9 @@ jobs:
       statuses: read          # Allow reading commit statuses
       issues: read            # Allow reading issues (for context)
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@fe4161a26a8629af62121b670040955b330f9af2
+        uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e
         with:
           languages: c-cpp
 
@@ -67,14 +65,18 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf build
-          # Force the compilers explicitly to avoid ambiguous detection
           CC=gcc-13 CXX=g++-13 cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=OFF \
             -DBUILD_BENCHMARKS=OFF
           cmake --build build --config Release -j "$(nproc)"
 
+      - name: Prepare CodeQL trap cache directory
+        run: mkdir -p "$RUNNER_TEMP/trapCaches/cpp/tarballs"
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@fe4161a26a8629af62121b670040955b330f9af2
+        uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e
         with:
           category: "/language:cpp"
+    env:
+      CODEQL_ACTION_DEBUG: true
+      CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false
