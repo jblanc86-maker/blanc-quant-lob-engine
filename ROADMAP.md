@@ -57,7 +57,7 @@ Enterprise BQL 2.0 adds the following on top of the public engine:
   support, integration consulting, and production-deployment guidance.
 
 > If you are interested in Enterprise BQL 2.0, open an issue with the label
-> `enterprise` or contact via the channel described in `COMMERCIAL_LICENSE.md`.
+> `enterprise` or contact us as described in `COMMERCIAL_LICENSE.md`.
 
 ---
 

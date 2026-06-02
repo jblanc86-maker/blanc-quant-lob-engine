@@ -665,10 +665,10 @@ dashboards, support, and commercial terms.
 |---|---|
 | Real ITCH/FIX ingestion adapters | Enterprise BQL 2.0 |
 | Prometheus/Grafana observability dashboards | Prometheus metrics today; Grafana dashboard package in Enterprise BQL 2.0 |
-| CI/CD integration templates for latency gates | CI-ready today; enterprise templates in BQL 2.0 |
+| CI/CD integration templates for latency gates | CI-ready today; enterprise templates in Enterprise BQL 2.0 |
 | Enterprise auth/SSO deployment layer | Enterprise BQL 2.0 |
-| Reproducible benchmark reports and artifact retention policies | Available today (public); extended retention + tamper-evident packaging in BQL 2.0 |
-| Legal/compliance evidence bundles with hashes and provenance | Available today (public); structured export and chain-of-custody in BQL 2.0 |
+| Reproducible benchmark reports and artifact retention policies | Available today (public); extended retention + tamper-evident packaging in Enterprise BQL 2.0 |
+| Legal/compliance evidence bundles with hashes and provenance | Available today (public); structured export and chain-of-custody in Enterprise BQL 2.0 |
 | Pilot support and reference deployment program | Pilot program available — open an issue with label `enterprise` |
 | Commercial license, support terms, and integration guidance | Available — see `COMMERCIAL_LICENSE.md` |
 
