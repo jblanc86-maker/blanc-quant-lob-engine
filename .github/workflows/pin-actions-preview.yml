@@ -67,8 +67,8 @@ jobs:
           git config --global user.name "github-actions"
           git checkout -b "$BRANCH"
           ./scripts/pin_actions_by_shas.sh --commit --no-backup || true
-          rm -rf .github/workflows/.backup_* || true
-          git add .github/workflows/*.yml .github/workflows/*.yaml || true
+          find .github/workflows -maxdepth 1 -type d -name '.backup_*' -exec rm -rf -- {} + || true
+          git add .github/workflows ':(exclude).github/workflows/.backup_*' || true
           if [[ -n $(git status --porcelain) ]]; then
             git commit -m "chore(ci): preview pin GitHub Actions by commit SHA (automated)" || true
             git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
