@@ -31,7 +31,7 @@ Commit each logical move individually if you want bisect-friendly history (for e
 ## 3. Wire up the new CLI entry point
 
 1. Update `pyproject.toml`/`setup.cfg` to expose `sg = "sg_cli:main"` (or the chosen module name) under `[project.scripts]`.
-2. Ensure `sg-cli` imports from `signalgrid.core` and `vortex.engine` instead of legacy modules.
+2. Ensure `sg-cli` imports from `core` and `vortex.engine` instead of legacy modules.
 3. Add integration tests that call `sg sitrep --dry-run` to guard future changes.
 
 ## 4. Fix imports and references
