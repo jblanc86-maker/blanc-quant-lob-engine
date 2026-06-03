@@ -15,13 +15,13 @@
 
 ### Status Badges
 
-[![p99.9/p99.99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/tierc_tail.json)](docs/gates.md)
-[![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
+[![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
 [![Golden-state Deterministic Replay](https://img.shields.io/badge/Golden--state%20Deterministic%20Replay-brightgreen.svg)](docs/gates.md)
 [![Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism.yml)
 [![Determinism Compiler Matrix](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_compiler_matrix.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_compiler_matrix.yml)
 [![Determinism Affinity + Kernel](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_affinity_kernel.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_affinity_kernel.yml)
+[![Determinism — Kernel Matrix Replay](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml)
 [![Gate Replay Determinism](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_gate_replay.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_gate_replay.yml)
 [![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
@@ -31,16 +31,18 @@
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
+[![Long-Horizon Stability](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/long_horizon_stability.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/long_horizon_stability.yml)
 [![Workflow Usage Report](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/workflow-usage-report.yml)
 [![App CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/app-ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/app-ci.yml)
 [![Evidence Packaging](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/canonical_ids_evidence.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/canonical_ids_evidence.yml)
 [![Reproducibility Check](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/repro.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/repro.yml)
 [![Pin Check](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/pin-check.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/pin-check.yml)
 [![Release](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/release-draft.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/release-draft.yml)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/commits/main)
-[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/pulls)
 [![CMake + Ninja](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-7952b3.svg)](https://ninja-build.org/)
+[![GitHub Release](https://img.shields.io/github/v/release/jblanc86-maker/blanc-quant-lob-engine?include_prereleases)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/releases)
+[![p99.9/p99.99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/tierc_tail.json)](docs/gates.md)
 [![Tail Matrix Evidence](https://img.shields.io/badge/Tail%20Matrix-100x%2F10x%2F10x-blue)](docs/gates.md)
 [![Code Size](https://img.shields.io/github/languages/code-size/jblanc86-maker/blanc-quant-lob-engine)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
 [![Top Language](https://img.shields.io/github/languages/top/jblanc86-maker/blanc-quant-lob-engine?logo=cplusplus)](https://github.com/jblanc86-maker/blanc-quant-lob-engine)
@@ -90,25 +92,31 @@ evidence artifacts live in separate systems.
 | **CI Latency Regression Gates** | A release gets slower and nobody catches it before production. | p50/p95/p99/p999 budget gates, pass/fail CI reporting, retained benchmark artifacts. | [Run the Harness](#build) |
 | **Deterministic Incident Replay** | An anomaly occurs and logs cannot reconstruct exact state. | Same input + same gate decisions, same digest, and a replayable evidence trail. | [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
 | **Canonical Digest Verification** | Symbol order or shard count changes verification results. | Canonical symbol IDs and aggregate digest verification across shard layouts. | [Read Methodology](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
-| **Compliance / Legal Evidence Packaging** | Performance claims need reviewable, retained proof. | `bench.jsonl`, `metrics.prom`, manifests, system/compiler info, and reproducible reports. | [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md) |
-| **Enterprise Market-Data Pilot** | A team needs validation against a representative workload. | Deterministic replay harness, latency profile, CI gate plan, evidence bundle, and executive readout. | [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md) |
+| **Compliance / Legal Evidence Packaging** | Performance claims need reviewable, retained proof. | `bench.jsonl`, `metrics.prom`, manifests, system/compiler info, and reproducible reports. | [Get Executive Brief](docs/PE_TECH_SUMMARY.md) |
+| **Enterprise Market-Data Pilot** | A team needs validation against a representative workload. | Deterministic replay harness, latency profile, CI gate plan, evidence bundle, and executive readout. | [Request Pilot Review](COMMERCIAL_LICENSE.md) |
 
 ## Proof Pipeline
 
 ```text
-INPUT STREAM
+gen_synth
     ↓
-DETERMINISTIC REPLAY
+deterministic byte stream in data/golden/itch_1m.bin
     ↓
-GATE DECISIONS JOURNALED
+replay
     ↓
-CANONICAL DIGEST VERIFIED
+digest_fnv emitted from replay output
     ↓
-EVIDENCE BUNDLE EMITTED
+CI compares digest against data/golden/itch_1m.fnv
+    ↓
+regression fails the gate and preserves the evidence bundle
 ```
 
 This is the core promise of BQL 2.0: same input and same gate decisions yield
 the same digest and a reviewable artifact set.
+
+In other words, the proof loop is closed end to end: `gen_synth` produces the
+same bytes, `replay` turns those bytes into a content-addressed digest, and the
+golden replay checks reject any run whose digest drifts from the pinned value.
 
 ## Evidence Bundle Preview
 
@@ -140,13 +148,13 @@ Representative artifacts:
 
 ### Performance: Current State vs. Future Targets
 
-| Metric Tier                                                | Phase 3 (Before)                                                            | **Phase 4 (Current — Jun 2026)**                                                   | Target (vNext)                                                                     | Status                     |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------- |
-| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | **1.96M events/sec**                                                               | p50: 100–300μs<br/>p95: 200–600μs<br/>p99: 300–900μs                               | ✅ **EXCEEDS TARGET**      |
-| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | **1.23M events/sec**                                                               | p50: 0.5–1.5ms<br/>p95: 1–3ms<br/>p99: 2–5ms                                       | ✅ **Measured**            |
-| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | runtime: 60–120s<br/>journal: 17.4s<br/>sync flushes: 100<br/>2.1 MB/s      | **runtime: 0.5–0.9s**<br/>**journal: 136ms**<br/>**sync flushes: 0**<br/>**153 MB/s** | p50: 2–6ms<br/>p95: 4–10ms<br/>p99: 6–15ms<br/>p99.9: ≤3× p99<br/>p99.99: advisory | ✅ **~100–200× faster**    |
-| **Throughput (all tiers)**                                 | 1M events/sec                                                               | **A: 1.96M / B: 1.23M / C: 1.20M**                                                | 1–5M ops/sec                                                                       | ✅ **Target Achieved**     |
-| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ **100% across all tiers**                                                       | ✅ Enhanced with SCM                                                               | ✅ **Production Ready**    |
+| Metric Tier                                                | Phase 3 (Before)                                                            | **Phase 4 (Current — Jun 2026)**                    | Future Target (Phase 5+)                               |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------ |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | **1.96M events/sec**<br/>p50: 0.61μs<br/>p95: 1.42μs<br/>p99: 2.38μs | p50: < 0.5μs<br/>p95: < 1.2μs<br/>p99: < 2.0μs         |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | **1.23M events/sec**<br/>p50: 0.98μs<br/>p95: 2.11μs<br/>p99: 3.77μs | p50: < 0.8μs<br/>p95: < 1.8μs<br/>p99: < 3.0μs         |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | runtime: 60–120s<br/>journal: 17.4s<br/>sync flushes: 100<br/>2.1 MB/s      | **runtime: 0.5–0.9s**<br/>**journal: 136ms**<br/>**0 flushes**<br/>**153 MB/s** | runtime: < 0.5s<br/>journal: < 100ms<br/>stable p999/p9999 |
+| **Throughput (all tiers)**                                 | 1M events/sec                                                               | **A: 1.96M / B: 1.23M / C: 1.20M**                  | A: 2.5M / B: 1.8M / C: 1.5M+                           |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ **100% across all tiers**                         | ✅ Maintain under compiler/kernel matrix                |
 
 > **Phase 4 Highlights** — Journal overhead reduced from 17.4s → 136ms (~128×); synchronous flushes
 > eliminated entirely (100 → 0); Tier C total runtime dropped from 60–120s to 0.5–0.9s (~100–200×);
@@ -180,9 +188,9 @@ path exactly.
 ### Coordination Diagram
 
 ```text
-┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌───────┐
-│ Telemetry  │ ───────▶ │ Journaling   │ ───────▶ │ Risk Checks  │ ───────▶ │ Core Match │ ───────▶ │ HALT  │
-└────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └───────┘
+┌────────────┐   trip   ┌──────────────┐   trip   ┌──────────────┐   trip   ┌────────────┐   trip   ┌──────┐
+│ Telemetry  │ ───────▶ │ Journaling   │ ───────▶ │ Risk Checks  │ ───────▶ │ Core Match │ ───────▶ │ HALT │
+└────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └──────┘
 ```
 
 Each zone is defined in `config/coordination_zones.yaml`. You can also render a visual escalation diagram from this
@@ -238,7 +246,7 @@ The engine uses a safety controller, similar to a circuit breaker, to keep thing
 
 ## Concrete Mechanisms: Breaker-Style State Machine (Core Controller)
 
-The Dynamic Execution Gates (DEG) are implemented as a canonical breaker-style state machine, a pattern widely recognized in high-reliability systems. This controller governs the engine’s operational mode in real time, based on observed latency and SLO compliance.
+The Dynamic Execution Gates (DEG) are implemented as a canonical breaker-style state machine, a pattern widely recognized in high-reliability systems. This controller governs the engine’s operation under latency or fault pressure.
 
 ### States
 
@@ -337,7 +345,7 @@ cmake --build build --target test_canonical_digest
 ./build/bin/test_canonical_digest
 ```
 
-Expected: All tests PASS and print digest/evidence lines suitable for filing. A CI workflow also packages an evidence bundle with provenance; see `.github/workflows/canonical_ids_evidence.yml` and `scripts/package_canonical_ids_evidence.sh`. Full attorney-facing write-up: `docs/PATENT_EVIDENCE_CANONICAL_IDS.md`.
+Expected: All tests PASS and print digest/evidence lines suitable for filing. A CI workflow also packages an evidence bundle with provenance; see `.github/workflows/canonical_ids_evidence.yml` and `scripts/package_canonical_ids_evidence.sh`.
 
 ### Architecture Overview (ASCII)
 
@@ -408,7 +416,7 @@ CI uploads these under the run’s artifacts; see the cross-platform workflow fo
 
 ## Deterministic Enforcement: How DEG Keeps Replay Exact
 
-A major challenge in trading engines is that runtime controls (like circuit breakers or latency gates) typically destroy determinism—timing and state can diverge across runs or hardware. The Blanc LOB Engine’s Dynamic Execution Gates (DEG) solve this via a two-layer principle:
+A major challenge in trading engines is that runtime controls (like circuit breakers or latency gates) typically destroy determinism—timing and state can diverge across runs or hardware. The Blanc LOB Engine addresses this by making all protection decisions deterministic, journaled, and replayable.
 
 ### A) Deterministic Outcome = (Event Stream + Gate Decisions)
 
@@ -428,7 +436,7 @@ A major challenge in trading engines is that runtime controls (like circuit brea
 
 ### Defensible Claim Language
 
-> "A method for deterministic enforcement in a limit order book engine, comprising: (a) recording, for each event, input, gate state, action taken, and resulting state digest; (b) replaying event stream with same gate decisions to guarantee byte-identical outcomes; and (c) providing auditable artifacts for each event to prove determinism and correctness."
+> "A method for deterministic enforcement in a limit order book engine, comprising: (a) recording, for each event, input, gate state, action taken, and resulting state digest; (b) replaying events while re-applying the recorded gate decisions at corresponding event indices; and (c) validating that the final state digest matches a reference digest, thereby proving that operational safeguards do not alter deterministic outcome."
 
 ---
 
@@ -494,6 +502,11 @@ Artifacts land in `artifacts/bench.jsonl`, `artifacts/metrics.prom`, and
 new HTML analytics dashboard at `artifacts/report/index.html`.
 Deterministic fixtures live under `data/golden/`; regenerate with `gen_synth`
 as needed.
+
+The determinism proof is a closed loop, not just a fixture generator:
+`build/bin/gen_synth` writes the byte stream, `build/bin/replay` emits
+`digest_fnv`, and CI/tests compare that digest to the pinned golden value in
+`data/golden/itch_1m.fnv`.
 
 ## Local applications and tools
 
@@ -691,6 +704,8 @@ Clone and run the engine today for research and non-commercial evaluation.
 Production deployment follows the terms in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 BQL 2.0 is patent-pending.
 
+The repository's authoritative license file is the root-level [`LICENSE`](LICENSE).
+
 **Commercial license available for production deployment** — see
 [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md) for terms and contact details.
 
@@ -728,7 +743,7 @@ dashboards, support, and commercial terms.
 |---|---|
 | Real ITCH/FIX ingestion adapters | Enterprise BQL 2.0 |
 | Prometheus/Grafana observability dashboards | Prometheus metrics today; Grafana dashboard package in Enterprise BQL 2.0 |
-| CI/CD integration templates for latency gates | CI-ready today; enterprise templates in Enterprise BQL 2.0 |
+| CI/CD integration templates for latency gates | CI-ready today; enterprise templates in BQL 2.0 |
 | Enterprise auth/SSO deployment layer | Enterprise BQL 2.0 |
 | Reproducible benchmark reports and artifact retention policies | Available today (public); extended retention + tamper-evident packaging in Enterprise BQL 2.0 |
 | Legal/compliance evidence bundles with hashes and provenance | Available today (public); structured export and chain-of-custody in Enterprise BQL 2.0 |

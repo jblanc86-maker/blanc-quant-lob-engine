@@ -126,7 +126,7 @@ value.
 
 Kernel matrix replay proof:
 
-`.github/workflows/determinism_kernel_matrix.yml` (Ubuntu 20.04/22.04/24.04)
+`.github/workflows/determinism_kernel_matrix.yml` (Ubuntu 22.04/24.04)
 
 ### What Is Captured
 
@@ -144,7 +144,7 @@ establishing that the same source SHA produces the same digest regardless of
 kernel version (within the same ISA).
 
 The kernel matrix workflow further **compares digests across multiple kernel
-images** (Ubuntu 20.04/22.04/24.04) and fails if any digest diverges.
+images** (Ubuntu 22.04/24.04) and fails if any digest diverges.
 
 ### Kernel-Invariance Argument
 
