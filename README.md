@@ -41,6 +41,93 @@
 [![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](LICENSE)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=jblanc86-maker.blanc-quant-lob-engine)
 
+> **Replay it exactly. Prove it did not get slower.**
+>
+> BQL Engine 2.0 is deterministic C++20 replay, CI latency regression gates,
+> canonical symbol IDs, breaker-style protection logic, and audit-ready
+> evidence bundles for market-system workloads.
+
+**Primary paths**
+
+- [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
+- [Run the Harness](#build)
+- [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
+- [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md)
+
+**Quick nav**
+
+[Engine](#about-blanc-lob-engine) ·
+[Use Cases](#best-fit-use-cases) ·
+[Proof](#proof-pipeline) ·
+[Evidence](#evidence-bundle-preview) ·
+[Pilot](#enterprise-bql-20--roadmap) ·
+[Licensing](#license)
+
+## Why BQL Exists
+
+Low-latency teams usually do not fail because they lack benchmark scripts. They
+fail because replay state, latency budgets, runtime protection decisions, and
+evidence artifacts live in separate systems.
+
+> **Latency claims without deterministic replay are anecdotes.**
+>
+> **Same Input + Same Gate Decisions → Same Digest + Verifiable Evidence**
+
+## Best-Fit Use Cases
+
+| Use Case | Buyer Pain | BQL Output | CTA |
+| --- | --- | --- | --- |
+| **CI Latency Regression Gates** | A release gets slower and nobody catches it before production. | p50/p95/p99/p999 budget gates, pass/fail CI reporting, retained benchmark artifacts. | [Run the Harness](#build) |
+| **Deterministic Incident Replay** | An anomaly occurs and logs cannot reconstruct exact state. | Same input + same gate decisions, same digest, and a replayable evidence trail. | [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
+| **Canonical Digest Verification** | Symbol order or shard count changes verification results. | Canonical symbol IDs and aggregate digest verification across shard layouts. | [Read Methodology](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
+| **Compliance / Legal Evidence Packaging** | Performance claims need reviewable, retained proof. | `bench.jsonl`, `metrics.prom`, manifests, system/compiler info, and reproducible reports. | [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md) |
+| **Enterprise Market-Data Pilot** | A team needs validation against a representative workload. | Deterministic replay harness, latency profile, CI gate plan, evidence bundle, and executive readout. | [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md) |
+
+## Proof Pipeline
+
+```text
+INPUT STREAM
+    ↓
+DETERMINISTIC REPLAY
+    ↓
+GATE DECISIONS JOURNALED
+    ↓
+CANONICAL DIGEST VERIFIED
+    ↓
+EVIDENCE BUNDLE EMITTED
+```
+
+This is the core promise of BQL 2.0: same input and same gate decisions yield
+the same digest and a reviewable artifact set.
+
+## Evidence Bundle Preview
+
+```text
+PASS replay_digest = 0x722112ad4c431cb4
+PASS Tier A throughput established
+PASS Tier C proof pipeline completed
+PASS p99 / p999 latency gates
+PASS canonical aggregate digest
+PASS evidence bundle generated
+```
+
+Representative artifacts:
+
+- `bench.jsonl`
+- `metrics.prom`
+- `artifacts/report/index.html`
+- SHA-256 manifests and release packaging metadata
+
+## Performance Delta
+
+| Metric | Before | After | Improvement |
+| --- | ---: | ---: | ---: |
+| Tier C Runtime | ~60–120s | ~0.5–0.9s | **100–200× faster** |
+| Journal Path | 17.4s | 136ms | **128× faster** |
+| Throughput | 2.1 MB/s | 153 MB/s | **73× increase** |
+| Hot-Path Flushes | 100 | 0 | **Eliminated** |
+| Digest Consistency | — | Verified | **100%** |
+
 ### Performance: Current State vs. Future Targets
 
 | Metric Tier                                                | Phase 3 (Before)                                                            | **Phase 4 (Current — Jun 2026)**                                                   | Target (vNext)                                                                     | Status                     |
@@ -62,10 +149,15 @@
 > gated at ≤ 3× the p99 budget; p99.99 is reported as an advisory metric. Gate tail-delta is
 > independently validated by `tests/test_tail_latency.cpp`.
 
-## Selective Coordination Mode (SCM): Smarter, Deterministic Protection
+## Degrade Precisely. Preserve the Evidence.
 
-Selective Coordination Mode brings the “smallest breaker trips first” principle from power systems into trading engines.
-Instead of halting everything when there’s a slowdown, the engine disables or sheds only the affected subsystem—keeping the rest running and making incident boundaries clean and replayable.
+### Selective Coordination Mode (SCM)
+
+Selective Coordination Mode applies the “smallest breaker trips first”
+principle from power systems to market-system runtime protection. Instead of
+halting everything when there is a slowdown, the engine sheds the smallest
+affected zone first, preserves incident boundaries, and replays the decision
+path exactly.
 
 ### How It Works
 
@@ -599,6 +691,15 @@ Current production-ready capabilities:
 - DEG / DSC / RSC / CDP / DEC / DPL / DEM protection stack
 - CI/CD integration templates — CI-ready today; enterprise templates in BQL 2.0
 - Legal/compliance evidence bundles with hashes and provenance
+
+### Commercial Path
+
+| Stage | Output |
+| --- | --- |
+| **Review** | Run the public harness and inspect reproducible evidence artifacts. |
+| **Pilot** | Validate a representative workload with deterministic replay and latency gates. |
+| **Enterprise License** | Production-shaped adapters, dashboards, CI/CD templates, and support terms. |
+| **Support** | Deployment assistance, evidence-retention planning, and benchmark governance. |
 
 ---
 
