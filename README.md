@@ -15,7 +15,7 @@
 
 ### Status Badges
 
-[![Determinism — Kernel Matrix Replay](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/determinism_kernel_matrix.yml)
+
 [![p99.9/p99.99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/tierc_tail.json)](docs/gates.md)
 [![p50/p95/p99](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jblanc86-maker/blanc-quant-lob-engine/main/badges/performance_extra.json)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Reproducible](https://img.shields.io/badge/Reproducible-Builds-4caf50.svg)](docs/REPRO.md)
