@@ -2,6 +2,15 @@
 
 ## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
+> **BQL 2.0 enforces deterministic latency contracts: CI rejects any build whose `p99_ms` breaches the configured budget, and the current full proof pipeline runs in 0.5-0.9s at 1.20M events/sec.**
+
+### 30-Second Proof
+
+- [Benchmarks at a glance](BENCHMARKS.md)
+- [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
+- [Run the Harness](#build)
+- [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
+
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
 
 ### Status Badges
@@ -49,6 +58,7 @@
 
 ### Primary Paths
 
+- [Benchmarks at a Glance](BENCHMARKS.md)
 - [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
 - [Run the Harness](#build)
 - [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)

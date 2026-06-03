@@ -48,3 +48,6 @@ __pycache__/
 .github/workflows/.backup_*/
 
 # Legacy duplicate entry consolidated above
+
+# Local secret-scan artifact
+/current-scan.json
