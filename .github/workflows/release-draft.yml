@@ -102,7 +102,7 @@ jobs:
           fi
       - name: Publish release and upload artifacts
         if: steps.artifacts.outputs.has_files == 'true'
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           draft: false
           tag_name: ${{ steps.release_meta.outputs.tag_name }}
@@ -115,7 +115,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish release without artifacts
         if: steps.artifacts.outputs.has_files == 'false'
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           draft: false
           tag_name: ${{ steps.release_meta.outputs.tag_name }}
