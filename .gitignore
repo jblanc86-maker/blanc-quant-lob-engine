@@ -39,6 +39,7 @@ __pycache__/
 /**/*.dylib
 /**/*.bin
 /**/*.dSYM/
+/hot_loop
 
 # Misc
 .DS_Store

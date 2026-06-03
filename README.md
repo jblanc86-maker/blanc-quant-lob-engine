@@ -96,19 +96,25 @@ evidence artifacts live in separate systems.
 ## Proof Pipeline
 
 ```text
-INPUT STREAM
+gen_synth
     ↓
-DETERMINISTIC REPLAY
+deterministic byte stream in data/golden/itch_1m.bin
     ↓
-GATE DECISIONS JOURNALED
+replay
     ↓
-CANONICAL DIGEST VERIFIED
+digest_fnv emitted from replay output
     ↓
-EVIDENCE BUNDLE EMITTED
+CI compares digest against data/golden/itch_1m.fnv
+    ↓
+regression fails the gate and preserves the evidence bundle
 ```
 
 This is the core promise of BQL 2.0: same input and same gate decisions yield
 the same digest and a reviewable artifact set.
+
+In other words, the proof loop is closed end to end: `gen_synth` produces the
+same bytes, `replay` turns those bytes into a content-addressed digest, and the
+golden replay checks reject any run whose digest drifts from the pinned value.
 
 ## Evidence Bundle Preview
 
@@ -495,6 +501,11 @@ new HTML analytics dashboard at `artifacts/report/index.html`.
 Deterministic fixtures live under `data/golden/`; regenerate with `gen_synth`
 as needed.
 
+The determinism proof is a closed loop, not just a fixture generator:
+`build/bin/gen_synth` writes the byte stream, `build/bin/replay` emits
+`digest_fnv`, and CI/tests compare that digest to the pinned golden value in
+`data/golden/itch_1m.fnv`.
+
 ## Local applications and tools
 
 This repository includes small local applications and tools to help you exercise and validate the engine:
@@ -690,6 +701,8 @@ Clone and run the engine today for research and non-commercial evaluation.
 
 Production deployment follows the terms in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 BQL 2.0 is patent-pending.
+
+The repository's authoritative license file is the root-level [`LICENSE`](LICENSE).
 
 **Commercial license available for production deployment** — see
 [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md) for terms and contact details.
