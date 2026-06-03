@@ -5,6 +5,8 @@ set -euo pipefail
 TMPROOT=$(mktemp -d)
 cleanup(){ rm -rf "$TMPROOT"; }
 trap cleanup EXIT
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
 
 BUILD_DIR=$TMPROOT/build
 ART_DIR=$TMPROOT/artifacts
@@ -23,11 +25,12 @@ echo '{"sample":true}' > "$ART_DIR/bench.jsonl"
 echo '# HELP dummy metric' > "$ART_DIR/metrics.prom"
 
 GIT_SHA=testsha123
-PROJECT_VERSION=$(python3 - <<'PY'
+PROJECT_VERSION=$(python3 - "${REPO_ROOT}/CMakeLists.txt" <<'PY'
 import pathlib
 import re
+import sys
 
-text = pathlib.Path("CMakeLists.txt").read_text(encoding="utf-8")
+text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
 match = re.search(r"project\([^)]*VERSION\s+([0-9.]+)", text, re.IGNORECASE | re.DOTALL)
 print(match.group(1) if match else "")
 PY
