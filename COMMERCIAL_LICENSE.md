@@ -1,13 +1,22 @@
-# Commercial License Terms (Summary)
+# Commercial License Terms
 
-For production use in live trading or any other revenue-generating systems, a commercial license from the Licensor is required until the Change Date. The Business Source License 1.1 permits research and non‑commercial evaluation immediately and converts to Apache‑2.0 on the Change Date.
+For production use in live trading or any other revenue-generating system before the Change Date, a commercial license from the Licensor is required. The Business Source License 1.1 permits research and non-commercial evaluation immediately and converts to Apache-2.0 on the Change Date. See `LICENSE` for the authoritative BUSL-1.1 parameters.
 
-Key points (non‑exhaustive):
+## Commercial-use scope
 
-- Production includes: live trading, production order routing, market making, broker/exchange integrations, or deployment within revenue‑generating workflows.
-- Research and evaluation use are permitted without a commercial license prior to the Change Date.
-- On the Change Date (24 months after the first public release tag), the code converts to Apache‑2.0.
+- Production includes live trading, production order routing, market making, broker or exchange integrations, or deployment inside revenue-generating workflows.
+- Research, replay validation, and non-commercial evaluation remain permitted before the Change Date.
+- The Change Date is 24 months after the first public release tag.
 
-To inquire about commercial licensing, please open a private contact via GitHub (Issues with “Private” label, if enabled) or provide your preferred contact channel in an Issue template. Do not include sensitive details in public issues.
+## Commercial grant summary
 
-See `LICENSE` (BUSL‑1.1 parameters) for authoritative terms.
+- **Grant:** non-exclusive, non-transferable production-use license within the agreed scope.
+- **Includes:** source access under the commercial grant, updates for 12 months, limited integration support, and permission to publish benchmarks with methodology.
+- **Restrictions:** no resale, sublicense, public redistribution, or as-a-service offering without OEM terms.
+- **Support/SLA:** standard next-business-day support or priority same-day trading-hours ET support; reproducible artifacts are required for triage.
+- **Liability:** provided AS IS; indirect damages excluded; direct damages capped at 12 months of fees.
+- **Termination:** 30-day cure period; production use must cease on termination, while backups may be retained for compliance.
+
+## Contact
+
+To discuss production licensing, open a private contact channel via GitHub Issues or Discussions and share a preferred contact method without posting sensitive details publicly.

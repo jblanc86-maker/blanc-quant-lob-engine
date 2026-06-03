@@ -2,6 +2,15 @@
 
 ## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
+> **BQL 2.0 enforces deterministic latency contracts: CI rejects any build whose `p99_ms` breaches the configured budget, and the current full proof pipeline runs in 0.5-0.9s at 1.20M events/sec.**
+
+### 30-Second Proof
+
+- [Benchmarks at a glance](BENCHMARKS.md)
+- [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
+- [Run the Harness](#build)
+- [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
+
 <!-- DO NOT REMOVE: Visitors badge for repo analytics -->
 
 ### Status Badges
@@ -47,14 +56,15 @@
 > canonical symbol IDs, breaker-style protection logic, and audit-ready
 > evidence bundles for market-system workloads.
 
-**Primary paths**
+### Primary Paths
 
+- [Benchmarks at a Glance](BENCHMARKS.md)
 - [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
 - [Run the Harness](#build)
 - [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
 - [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md)
 
-**Quick nav**
+### Quick Nav
 
 [Engine](#about-blanc-lob-engine) ·
 [Use Cases](#best-fit-use-cases) ·
@@ -149,7 +159,7 @@ Representative artifacts:
 > gated at ≤ 3× the p99 budget; p99.99 is reported as an advisory metric. Gate tail-delta is
 > independently validated by `tests/test_tail_latency.cpp`.
 
-## Degrade Precisely. Preserve the Evidence.
+## Degrade Precisely, Preserve the Evidence
 
 ### Selective Coordination Mode (SCM)
 
