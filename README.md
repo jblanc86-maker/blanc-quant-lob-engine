@@ -513,7 +513,7 @@ as well as the lower-level proof tools:
   ```sh
   mkdir -p build && cd build
   cmake ..
-  make app_main test_app bench_app
+  cmake --build . --target app_main test_app bench_app
   ./apps/app_main
   ./apps/test_app
   ./apps/bench_app
