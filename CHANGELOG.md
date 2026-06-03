@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.0.0 – Phase 5: Async Proof Pipeline Release (2026-06-03)
+
+### Key changes
+
+- Asynchronous journal processing removed synchronous flushes from the proof pipeline.
+- Full deterministic replay now completes in under 1 second with 153 MB/s throughput.
+- Tiered performance now measures 1.96M / 1.23M / 1.20M events/sec across match-only, in-process, and full proof modes.
+- Release metadata and packaging were updated for BQL 2.00.
+
+### Notes
+
+- No public API changes.
+- Existing build, test, and release workflows remain compatible.
+
+---
+
 ## v0.6.0 – Phase 4: Async Journal + Throughput Breakthrough (2026-06-02)
 
 ### Performance

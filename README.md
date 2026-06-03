@@ -630,7 +630,7 @@ See [ROADMAP.md](ROADMAP.md) for the full OSS vs. Enterprise phase breakdown.
 
 ## Release Information
 
-This release includes prebuilt binaries and necessary artifacts for version 1.00
+This release includes prebuilt binaries and necessary artifacts for version 2.00
 of Blanc LOB Engine. If you are interested in accessing full source code, please
 reach out directly for further details. Project is fully open and available for
 students and hobbyists to explore and use.
