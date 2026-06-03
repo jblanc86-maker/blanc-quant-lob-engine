@@ -23,6 +23,22 @@ ART_DIR=artifacts
 OUT_DIR=${ART_DIR}/release
 GIT_SHA=""
 DO_SIGN=0
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
+PROJECT_VERSION=""
+
+if command -v python3 >/dev/null 2>&1 && [[ -f "${REPO_ROOT}/CMakeLists.txt" ]]; then
+  PROJECT_VERSION=$(python3 - "${REPO_ROOT}/CMakeLists.txt" <<'PY'
+import pathlib
+import re
+import sys
+
+text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+match = re.search(r"project\([^)]*VERSION\s+([0-9.]+)", text, re.IGNORECASE | re.DOTALL)
+print(match.group(1) if match else "")
+PY
+)
+fi
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,7 +54,13 @@ done
 
 mkdir -p "$OUT_DIR"
 
-archive_name="blanc-lob-engine-${GIT_SHA:-snapshot}.zip"
+if [[ -n "${PROJECT_VERSION}" ]]; then
+  archive_name="blanc_lob_engine_${PROJECT_VERSION}.zip"
+elif [[ -n "${GIT_SHA}" ]]; then
+  archive_name="blanc-lob-engine-${GIT_SHA}.zip"
+else
+  archive_name="blanc-lob-engine-snapshot.zip"
+fi
 archive_path="$OUT_DIR/$archive_name"
 
 tmpdir=$(mktemp -d)
@@ -78,6 +100,7 @@ echo -e '\n]}' >> "$manifest"
 rights_manifest="$OUT_DIR/rights_manifest.json"
 cat > "$rights_manifest" <<EOF
 {
+  "version": "${PROJECT_VERSION}",
   "git_sha": "${GIT_SHA}",
   "build_dir": "${BUILD_DIR}",
   "rights": "SBIR-RESTRICTED-TECHNOLOGY",
