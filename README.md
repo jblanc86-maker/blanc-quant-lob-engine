@@ -47,14 +47,14 @@
 > canonical symbol IDs, breaker-style protection logic, and audit-ready
 > evidence bundles for market-system workloads.
 
-**Primary paths**
+### Primary Paths
 
 - [Get Executive Proof Brief](docs/PE_TECH_SUMMARY.md)
 - [Run the Harness](#build)
 - [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
 - [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md)
 
-**Quick nav**
+### Quick Nav
 
 [Engine](#about-blanc-lob-engine) ·
 [Use Cases](#best-fit-use-cases) ·
@@ -149,7 +149,7 @@ Representative artifacts:
 > gated at ≤ 3× the p99 budget; p99.99 is reported as an advisory metric. Gate tail-delta is
 > independently validated by `tests/test_tail_latency.cpp`.
 
-## Degrade Precisely. Preserve the Evidence.
+## Degrade Precisely, Preserve the Evidence
 
 ### Selective Coordination Mode (SCM)
 
