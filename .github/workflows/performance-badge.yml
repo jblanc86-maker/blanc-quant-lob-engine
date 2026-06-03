@@ -66,6 +66,7 @@ jobs:
               '{schemaVersion:1,label:"p50/p95/p99",message:($p50+"/"+$p95+"/"+$p99+" ms"),color:$color}' > badges/performance_extra.json
           else
             jq -n '{schemaVersion:1,label:"p99 ms",message:"n/a",color:"lightgrey"}' > badges/performance.json
+            jq -n '{schemaVersion:1,label:"p50/p95/p99",message:"n/a",color:"lightgrey"}' > badges/performance_extra.json
           fi
       - name: Commit badge JSON
         env:
