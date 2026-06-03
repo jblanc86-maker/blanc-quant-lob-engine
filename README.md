@@ -701,6 +701,9 @@ Current production-ready capabilities:
 | **Enterprise License** | Production-shaped adapters, dashboards, CI/CD templates, and support terms. |
 | **Support** | Deployment assistance, evidence-retention planning, and benchmark governance. |
 
+Not ready for a pilot yet? Start with the
+[Executive Proof Brief](docs/PE_TECH_SUMMARY.md).
+
 ---
 
 ## Enterprise BQL 2.0 — Roadmap
@@ -719,7 +722,7 @@ dashboards, support, and commercial terms.
 | Enterprise auth/SSO deployment layer | Enterprise BQL 2.0 |
 | Reproducible benchmark reports and artifact retention policies | Available today (public); extended retention + tamper-evident packaging in Enterprise BQL 2.0 |
 | Legal/compliance evidence bundles with hashes and provenance | Available today (public); structured export and chain-of-custody in Enterprise BQL 2.0 |
-| Pilot support and reference deployment program | Pilot program available — open an issue with label `enterprise` |
+| Pilot support and reference deployment program | Request a 30-minute pilot review via `COMMERCIAL_LICENSE.md` or an issue labeled `enterprise` |
 | Commercial license, support terms, and integration guidance | Available — see `COMMERCIAL_LICENSE.md` |
 
 > For Enterprise BQL 2.0 inquiries, open an issue with the label `enterprise`
