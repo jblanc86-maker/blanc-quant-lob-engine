@@ -33,6 +33,7 @@ __pycache__/
 *.pyo
 
 # Binaries & artifacts
+/hot_loop
 /**/*.o
 /**/*.a
 /**/*.so

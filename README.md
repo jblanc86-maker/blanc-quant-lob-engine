@@ -2,7 +2,7 @@
 
 ## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
-> **BQL 2.0 enforces deterministic latency contracts: CI rejects any build whose `p99_ms` breaches the configured budget, and the current full proof pipeline runs in 0.5-0.9s at 1.20M events/sec.**
+> **BQL 2.0 closes the proof loop: `gen_synth` emits a deterministic byte stream, `replay` turns it into a content-addressed digest, and CI rejects any build whose pinned golden digest or `p99_ms` budget regresses.**
 
 ### 30-Second Proof
 
@@ -96,19 +96,22 @@ evidence artifacts live in separate systems.
 ## Proof Pipeline
 
 ```text
-INPUT STREAM
-    ↓
-DETERMINISTIC REPLAY
-    ↓
-GATE DECISIONS JOURNALED
-    ↓
-CANONICAL DIGEST VERIFIED
-    ↓
-EVIDENCE BUNDLE EMITTED
+gen_synth
+  └─ emits deterministic input bytes
+          ↓
+replay
+  └─ replays the stream, journals gate decisions, emits digest + artifacts
+          ↓
+golden check
+  └─ compares replay digest against pinned golden value
+          ↓
+CI gate
+  └─ fails on digest drift or latency-budget breach
 ```
 
-This is the core promise of BQL 2.0: same input and same gate decisions yield
-the same digest and a reviewable artifact set.
+This closed loop is the core promise of BQL 2.0: deterministic input,
+deterministic replay, a content-addressed digest, and a CI-enforced golden check
+that rejects regressions instead of merely reporting them.
 
 ## Evidence Bundle Preview
 
@@ -497,12 +500,13 @@ as needed.
 
 ## Local applications and tools
 
-This repository includes small local applications and tools to help you exercise and validate the engine:
+This repository includes supported evaluation entry points for first-run review
+as well as the lower-level proof tools:
 
 - Applications (see `apps/README.md` for details):
-  - `apps/app_main` — minimal config-driven app
-  - `apps/test_app` — unit-style test for `app_config`
-  - `apps/bench_app` — micro-benchmark for config loading
+  - `apps/app_main` — supported starter app for evaluating the local config path
+  - `apps/test_app` — supported validation entry point for the app module
+  - `apps/bench_app` — supported micro-benchmark entry point for app startup/config loading
 
   Quick build and run (from project root):
 
@@ -523,6 +527,23 @@ This repository includes small local applications and tools to help you exercise
   ```sh
   ./build/bin/gen_synth --count 200000 --symbols 20 --out data/golden/itch_200k_20sym.bin
   ```
+
+- Closed-loop proof check:
+  - `build/bin/gen_synth` generates deterministic fixture bytes
+  - `build/bin/replay` processes that fixture and emits the replay digest
+  - `scripts/verify_golden.sh` compares the emitted digest to the pinned golden value used by CI
+
+  Example:
+
+  ```sh
+  ./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
+  ./build/bin/replay --input data/golden/itch_1m.bin
+  ./scripts/verify_golden.sh
+  ```
+
+- Root-level reference microbenchmark:
+  - `hot_loop.cpp` is a tiny standalone latency-loop reference for local experiments.
+  - The compiled `hot_loop` binary is intentionally not tracked in git.
 
 - Offline replay and scaling proof (Phase 6.3–6.5):
   - `build/bin/offline_replay` — partitions by canonical ID % shard count, journals per-shard, and emits a `summary.json` with the canonical aggregate digest.
@@ -673,6 +694,10 @@ changes.
 Distributed under the **Business Source License 1.1**. Research and non-commercial
 evaluation are permitted today; production use requires a commercial license until
 the change date defined in the repository.
+
+The root-level [`LICENSE`](LICENSE) file is the single authoritative license for
+the repository. There are no source-subtree license overrides; production terms
+are summarized separately in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 
 ### Research & Evaluation — Open under BSL 1.1
 
