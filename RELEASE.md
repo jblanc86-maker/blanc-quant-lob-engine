@@ -1,6 +1,6 @@
 # Blanc Quant LOB Engine v1.0.0
 
-Release date: 2025-12-02
+Release date: 2025-12-07
 
 ## Highlights
 
