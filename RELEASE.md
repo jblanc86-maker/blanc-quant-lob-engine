@@ -1,4 +1,4 @@
-# Blanc LOB Engine BQL 2.00 Latest
+# Blanc LOB Engine BQL 2.00 Release
 
 Release date: 2026-06-03
 
