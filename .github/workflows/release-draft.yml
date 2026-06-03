@@ -60,7 +60,10 @@ jobs:
           text = pathlib.Path("CMakeLists.txt").read_text(encoding="utf-8")
           match = re.search(r"project\([^)]*VERSION\s+([0-9.]+)", text, re.IGNORECASE | re.DOTALL)
           if not match:
-              raise SystemExit("Unable to determine project version from CMakeLists.txt")
+              raise SystemExit(
+                  "Unable to determine project version from CMakeLists.txt; "
+                  "verify project(... VERSION x.y.z) is present."
+              )
           print(match.group(1))
           PY
           )

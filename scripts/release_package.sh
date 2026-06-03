@@ -57,9 +57,9 @@ mkdir -p "$OUT_DIR"
 if [[ -n "${PROJECT_VERSION}" ]]; then
   archive_name="blanc_lob_engine_${PROJECT_VERSION}.zip"
 elif [[ -n "${GIT_SHA}" ]]; then
-  archive_name="blanc-lob-engine-${GIT_SHA}.zip"
+  archive_name="blanc_lob_engine_${GIT_SHA}.zip"
 else
-  archive_name="blanc-lob-engine-snapshot.zip"
+  archive_name="blanc_lob_engine_snapshot.zip"
 fi
 archive_path="$OUT_DIR/$archive_name"
 
