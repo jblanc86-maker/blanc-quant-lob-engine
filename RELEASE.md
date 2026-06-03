@@ -1,43 +1,38 @@
-# Blanc Quant LOB Engine v2.0.0 (BQL 2.00)
+# Blanc LOB Engine BQL 1.00 Latest
 
 Release date: 2026-06-03
 
-## Highlights
+## Overview
 
-- Async journal and proof pipeline
-  - Journal processing is now asynchronous, eliminating synchronous flushes.
-  - Full deterministic proof pipeline completes in under 1 second.
-  - Throughput improved to 153 MB/s with end-to-end determinism preserved.
+- Prebuilt binaries and supporting release artifacts for Blanc LOB Engine 1.00.
+- Public package showcases core order matching, market data replay, and telemetry.
+- Suitable for students, hobbyists, and professionals evaluating market microstructure workflows.
 
-- Tiered performance
-  - Match-only tier: 1.96M events/sec.
-  - In-process wire-to-wire tier: 1.23M events/sec.
-  - Full proof pipeline tier: 1.20M events/sec.
+## Release Information
 
-- Release and packaging
-  - Release metadata updated for BQL 2.00.
-  - Prebuilt binaries and release artifacts remain packaged for reproducibility.
+This release is designed to show the functionality of Blanc LOB Engine while
+protecting the proprietary portions of the platform. It includes the latest
+public BQL 1.00 binaries and the supporting artifacts needed to evaluate the
+engine in a practical environment.
 
-## Key changes
+The open package is available for learning, experimentation, and general
+exploration. Selected enterprise modules, advanced integrations, and other
+proprietary functions remain private to protect intellectual property while
+still making the platform's core capabilities visible.
 
-- Async audit journaling now runs without blocking the proof pipeline.
-- Deterministic replay, digest chaining, and telemetry remain fully enabled.
-- Release packaging continues to include the binary, manifests, and benchmark artifacts.
-- Workflow hygiene and security posture remain unchanged and compatible.
+## Why this release model
 
-## Breaking changes
+- Demonstrates the engine's capabilities without exposing protected internals.
+- Preserves intellectual property tied to enterprise-only functionality.
+- Gives users a simple way to assess fit before requesting deeper access.
 
-- None.
+## Enterprise Access
 
-## Upgrade notes
+If you are interested in full enterprise source access, proprietary functions,
+or professional trading use cases, please reach out directly for more details.
 
-- No migration steps required.
-- Existing build, test, and release flows continue to work as before.
+## Included Artifacts
 
-## Checksums / Artifacts
-
-- CI and release packaging continue to generate manifests and artifacts for verification.
-
-## Acknowledgements
-
-Thanks to contributors and reviewers for the release hardening, performance work, and packaging updates.
+- Prebuilt binaries
+- Release manifests and packaging artifacts
+- Public documentation needed to evaluate the engine
