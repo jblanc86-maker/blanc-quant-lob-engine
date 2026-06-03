@@ -1,10 +1,10 @@
-# Blanc LOB Engine BQL 1.00 Latest
+# Blanc LOB Engine BQL 2.00 Latest
 
 Release date: 2026-06-03
 
 ## Overview
 
-- Prebuilt binaries and supporting release artifacts for Blanc LOB Engine 1.00.
+- Prebuilt binaries and supporting release artifacts for Blanc LOB Engine 2.00.
 - Public package showcases core order matching, market data replay, and telemetry.
 - Suitable for students, hobbyists, and professionals evaluating market microstructure workflows.
 
@@ -12,7 +12,7 @@ Release date: 2026-06-03
 
 This release is designed to show the functionality of Blanc LOB Engine while
 protecting the proprietary portions of the platform. It includes the latest
-public BQL 1.00 binaries and the supporting artifacts needed to evaluate the
+public BQL 2.00 binaries and the supporting artifacts needed to evaluate the
 engine in a practical environment.
 
 The open package is available for learning, experimentation, and general
