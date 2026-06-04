@@ -62,13 +62,27 @@ def _request(method: str, url: str, token: str | None, payload: dict | None = No
         return status, {"raw": raw.decode("utf-8", errors="replace")}
 
 
+def _format_api_error(method: str, url: str, status: int, data: object | None) -> str:
+    parts = [f"{method} {url} -> HTTP {status}"]
+    if isinstance(data, dict):
+        msg = data.get("message")
+        doc = data.get("documentation_url")
+        if msg:
+            parts.append(f"message: {msg}")
+        if doc:
+            parts.append(f"docs: {doc}")
+    parts.append(f"response: {data}")
+    return "\n".join(parts)
+
+
 def get_release_by_tag(api: str, owner: str, repo: str, tag: str, token: str | None) -> dict | None:
-    status, data = _request("GET", f"{api}/repos/{owner}/{repo}/releases/tags/{tag}", token)
+    url = f"{api}/repos/{owner}/{repo}/releases/tags/{tag}"
+    status, data = _request("GET", url, token)
     if status == 200 and isinstance(data, dict):
         return data
     if status == 404:
         return None
-    raise RuntimeError(f"GET release by tag failed (status {status}): {data}")
+    raise RuntimeError(_format_api_error("GET", url, status, data))
 
 
 def create_release(
@@ -96,9 +110,10 @@ def create_release(
     if make_latest is not None:
         payload["make_latest"] = make_latest
 
-    status, data = _request("POST", f"{api}/repos/{owner}/{repo}/releases", token, payload)
+    url = f"{api}/repos/{owner}/{repo}/releases"
+    status, data = _request("POST", url, token, payload)
     if status != 201 or not isinstance(data, dict):
-        raise RuntimeError(f"Create release failed (status {status}): {data}")
+        raise RuntimeError(_format_api_error("POST", url, status, data))
     return data
 
 
@@ -123,9 +138,10 @@ def update_release(
     if make_latest is not None:
         payload["make_latest"] = make_latest
 
-    status, data = _request("PATCH", f"{api}/repos/{owner}/{repo}/releases/{release_id}", token, payload)
+    url = f"{api}/repos/{owner}/{repo}/releases/{release_id}"
+    status, data = _request("PATCH", url, token, payload)
     if status != 200 or not isinstance(data, dict):
-        raise RuntimeError(f"Update release failed (status {status}): {data}")
+        raise RuntimeError(_format_api_error("PATCH", url, status, data))
     return data
 
 

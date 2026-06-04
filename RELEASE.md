@@ -13,6 +13,13 @@ Release date: 2026-06-03
 This release includes the latest BQL 2.00 binaries and supporting artifacts for
 evaluation and reproducibility checks.
 
+## Publishing notes (CI)
+
+- Release tags are **`v*`** (example: `v2.0.1`).
+- Manual release runs (workflow dispatch) require a **`v`-prefixed** tag name.
+- The release workflow syncs release metadata via GitHub's **versioned REST API**
+  using `X-GitHub-Api-Version: 2026-03-10`.
+
 The public repository contains the OSS replay and benchmarking harness source,
 tests, scripts, and evidence artifacts for learning, experimentation, and
 engineering evaluation. Enterprise BQL 2.0 packages production-focused
