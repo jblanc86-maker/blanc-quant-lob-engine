@@ -1,6 +1,6 @@
 name: Publish GitHub Release
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       tag_name:
@@ -51,14 +51,14 @@ jobs:
             publish_release=true
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "name=BQL $version" >> "$GITHUB_OUTPUT"
+          echo "name=Blanc LOB Engine $version" >> "$GITHUB_OUTPUT"
           echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
           echo "publish_release=$publish_release" >> "$GITHUB_OUTPUT"
       - name: Set up build deps
         if: steps.release_meta.outputs.publish_release == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build zip libboost-all-dev jq nlohmann-json3-dev
+          sudo apt-get install -y --no-install-recommends cmake ninja-build zip ca-certificates jq
       - name: Build (Release) and package
         if: steps.release_meta.outputs.publish_release == 'true'
         shell: bash
@@ -66,7 +66,11 @@ jobs:
           set -euo pipefail
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
           cmake --build build -j
-          scripts/release_package.sh
+          chmod +x scripts/release_package.sh
+          ./scripts/release_package.sh
+
+          # Fail fast: the workflow must produce a release archive.
+          test -n "$(ls -1 artifacts/release/*.zip 2>/dev/null | head -n 1)"
       - name: List release artifacts
         if: steps.release_meta.outputs.publish_release == 'true'
         shell: bash
@@ -113,7 +117,8 @@ jobs:
         with:
           draft: false
           tag_name: ${{ steps.release_meta.outputs.tag_name }}
-          target_commitish: ${{ github.sha }}
+          # Ensure the release points at the tag's commit (or the current SHA for manual dispatch).
+          target_commitish: ${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
           name: ${{ steps.release_meta.outputs.name }}
           body: ${{ steps.notes.outputs.body }}
           files: |
@@ -126,7 +131,7 @@ jobs:
         with:
           draft: false
           tag_name: ${{ steps.release_meta.outputs.tag_name }}
-          target_commitish: ${{ github.sha }}
+          target_commitish: ${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
           name: ${{ steps.release_meta.outputs.name }}
           body: ${{ steps.notes.outputs.body }}
         env:
