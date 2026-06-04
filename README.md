@@ -324,7 +324,7 @@ For inquiries related to trading applications or professional use cases, please 
 The Blanc LOB Engine (BQL) is a high-performance, open-source limit order book engine designed for financial market
 simulations and trading systems. It provides robust features for order matching, market data replay, and telemetry,
 making it ideal for students, hobbyists, and professionals exploring algorithmic trading and market microstructure.
-Inquire for FULL proprietary features (600+ unique clones as of 12/07/25).
+For production integrations, adapters, and commercial terms, see [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 
 **Blanc Quant LOB Engine (BQL Engine)** is a **deterministic C++20 replay +
 benchmarking harness** for limit-order-book (LOB) workloads, built to answer
@@ -712,20 +712,21 @@ Clone and run the engine today for research and non-commercial evaluation.
 ### Production · BQL 2.0 — Commercial License
 
 Production deployment follows the terms in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
-BQL 2.0 is patent-pending.
+"Patent-pending" claims apply only if a patent application has been filed; otherwise treat the public repository as
+patent-oriented evidence architecture and terminology.
 
 The repository's authoritative license file is the root-level [`LICENSE`](LICENSE).
 
 **Commercial license available for production deployment** — see
 [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md) for terms and contact details.
 
-Current production-ready capabilities:
+### Capability boundaries (public vs. commercial vs. enterprise)
 
-- Real ITCH replay & deterministic matching
-- Binary audit journal & canonical invariance proofs
-- DEG / DSC / RSC / CDP / DEC / DPL / DEM protection stack
-- CI/CD integration templates — CI-ready today; enterprise templates in BQL 2.0
-- Legal/compliance evidence bundles with hashes and provenance
+| Layer                         | What you get                                                                                                                | Notes                                                                         |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Public repo (this GitHub)** | Synthetic ITCH-like byte-stream replay harness, deterministic digests, CI latency gates, benchmark + evidence artifacts     | Intended for research, evaluation, reproducibility, and proof-of-methodology. |
+| **Commercial license**        | Permission to use permitted scopes in production before change date                                                         | See [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).                         |
+| **Enterprise BQL 2.0**        | Production-shaped market-data adapters (ITCH/FIX ingestion), dashboards, SSO, chain-of-custody exports, integration support | Separate deliverable track under commercial terms.                            |
 
 ### Commercial Path
 
@@ -769,13 +770,8 @@ See [ROADMAP.md](ROADMAP.md) for the full OSS vs. Enterprise phase breakdown.
 
 ## Release Information
 
-This release includes prebuilt binaries and necessary artifacts for version 2.00
-of Blanc LOB Engine. Project is fully open and available for students and
-hobbyists to explore and use.
-
-An Enterprise BQL 2.0 version is also available for production-focused
-integrations, deployment support, and commercial terms; see
-[`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
+Release artifacts are produced by `scripts/release_package.sh` and published via
+`.github/workflows/release-draft.yml` when a `v*` tag is pushed.
 
 ## Analytics Report Output
 

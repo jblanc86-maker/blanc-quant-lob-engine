@@ -19,4 +19,14 @@ For production use in live trading or any other revenue-generating system before
 
 ## Contact
 
-To discuss production licensing, open a private contact channel via GitHub Issues or Discussions and share a preferred contact method without posting sensitive details publicly.
+To discuss production licensing, email:
+
+- **[jeanblanc@blancquantsystems.com](mailto:jeanblanc@blancquantsystems.com)**
+
+If you must use GitHub to initiate contact, open a thread via Issues or Discussions and share a preferred contact method **without posting proprietary details publicly**.
+
+When reaching out, a helpful first message includes:
+
+- Your intended use case (evaluation vs. production)
+- Venue/data type (synthetic, ITCH replay, FIX, etc.)
+- Desired support level / timeline

@@ -1,17 +1,20 @@
-# Blanc LOB Engine BQL 2.00 Release
+# Blanc Quant LOB Engine v2.0.1 Release
 
-Release date: 2026-06-03
+Release published: 2026-06-04
 
 ## Overview
 
-- Prebuilt binaries and supporting release artifacts for Blanc LOB Engine 2.00.
+- Prebuilt binaries and supporting release artifacts for Blanc Quant LOB Engine v2.0.1.
 - Public package showcases core order matching, market data replay, and telemetry.
 - Suitable for students, hobbyists, and professionals evaluating market microstructure workflows.
 
 ## Release Information
 
-This release includes the latest BQL 2.00 binaries and supporting artifacts for
+This release includes the latest v2.0.1 binaries and supporting artifacts for
 evaluation and reproducibility checks.
+
+Note: the public package filename may use the **2.00 series branding** even when
+the Git tag is `v2.0.1`.
 
 ## Publishing notes (CI)
 
@@ -19,6 +22,8 @@ evaluation and reproducibility checks.
 - Manual release runs (workflow dispatch) require a **`v`-prefixed** tag name.
 - The release workflow syncs release metadata via GitHub's **versioned REST API**
   using `X-GitHub-Api-Version: 2026-03-10`.
+- Legacy non-`v` tags (for example `2.0.0`, `2.0.1`) may still exist historically,
+  but are **deprecated** and must not be treated as canonical releases.
 
 The public repository contains the OSS replay and benchmarking harness source,
 tests, scripts, and evidence artifacts for learning, experimentation, and

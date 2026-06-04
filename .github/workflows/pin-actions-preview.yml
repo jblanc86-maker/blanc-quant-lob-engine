@@ -3,15 +3,15 @@ name: Pin Actions Preview
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'README.md'
-      - 'docs/**'
+      - "README.md"
+      - "docs/**"
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'README.md'
-      - 'docs/**'
+      - "README.md"
+      - "docs/**"
 
 permissions:
   contents: read
@@ -26,7 +26,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      workflows: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -81,6 +80,7 @@ jobs:
         if: steps.eval.outputs.found == 'true'
         id: create_pr
         uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5
+        continue-on-error: true
         with:
           token: ${{ github.token }}
           title: "chore(ci): pin GitHub Actions by commit SHA (preview)"
@@ -115,6 +115,7 @@ jobs:
       - name: Parse bench summary and add PR comment
         if: steps.eval.outputs.found == 'true'
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410
+        continue-on-error: true
         with:
           github-token: ${{ github.token }}
           script: |
