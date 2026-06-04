@@ -2,7 +2,7 @@ Business Source License 1.1
 
 Parameters
 Licensor: Jean Blanc / Blanc Quant Systems
-Licensed Work: Blanc LOB Engine (quant-lob-engine repository contents)
+Licensed Work: Blanc LOB Engine (blanc-quant-lob-engine repository contents)
 Additional Use Grant: Research, benchmarking, and non-commercial evaluation are permitted. Production use in
   live or revenue-generating trading systems requires a commercial license from the Licensor. Publications must
   disclose commit hash, hardware, and methodology.

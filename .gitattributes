@@ -1,2 +1,15 @@
+* text=auto eol=lf
+
+# Windows scripts keep CRLF when present
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Common source/config formats as LF text
+*.{c,cc,cpp,cxx,h,hh,hpp,ipp} text eol=lf
+*.{cmake,txt,md,markdown,py,sh,yml,yaml,json,jsonc,toml} text eol=lf
+
+# Binary assets
+*.{png,jpg,jpeg,gif,ico,pdf,zip,gz,bz2,xz,7z,a,so,dylib,dll,bin} binary
+
 docs/** linguist-documentation
 scripts/** linguist-vendored

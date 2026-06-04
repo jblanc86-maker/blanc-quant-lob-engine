@@ -54,6 +54,7 @@ clean:
 .PHONY: build run bench clean
 
 # Extras from pre-existing Makefile
+.PHONY: golden verify release
 golden: build
 	./build/bin/gen_synth --count 1000000 --out data/golden/itch_1m.bin
 	shasum -a 256 data/golden/itch_1m.bin | awk '{print $$1}' > data/golden/itch_1m.digest
@@ -63,7 +64,7 @@ verify:
 
 release: build verify
 	@rm -rf artifacts/release && mkdir -p artifacts/release
-	@cp -r build/replay build/gen_synth data/golden scripts/verify_golden.sh artifacts/release/
+	@cp -r build/bin/replay build/bin/gen_synth data/golden scripts/verify_golden.sh artifacts/release/
 	@tar -C artifacts -czf artifacts/blanc-lob-engine-rc.tar.gz release
 	@echo "Release bundle at artifacts/blanc-lob-engine-rc.tar.gz"
 
@@ -72,7 +73,7 @@ release: build verify
 release-package: build
 	@echo "Creating release package..."
 	@mkdir -p $(ART_DIR)/release
-	@./scripts/release_package.sh --build-dir $(BUILD) --art-dir $(ART_DIR) --out-dir $(ART_DIR)/release --git-sha $(shell git rev-parse --short HEAD)
+	@./scripts/release_package.sh --build-dir $(BUILD) --art-dir $(ART_DIR) --out-dir $(ART_DIR)/release --git-sha $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 	@echo "Release package created under $(ART_DIR)/release"
 
 .PHONY: packaging-test

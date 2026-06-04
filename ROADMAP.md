@@ -100,6 +100,18 @@ Enterprise BQL 2.0 adds the following on top of the public engine:
 - Security & licensing: ensure third-party license audit, include `COMMERCIAL_LICENSE.md` & `LICENSE` usage guidance.
 - Benchmarks & runtime: standardize hardware reporting (CPU family, memory) in CI for apples-to-apples comparisons.
 
+### Local validation cadence (required)
+
+- Every code change: run build + CTest locally.
+- Every performance-sensitive change: regenerate benchmark artifacts and run `./run_local_checks.sh`.
+- Before release candidates: run deterministic golden validation and attach artifact evidence.
+
+### Security roadmap checkpoints
+
+- **Now (0-30 days):** keep vulnerability reporting path current, keep release-publish guards strict, and maintain pre-commit safety checks.
+- **Next (30-90 days):** add lightweight threat-model notes by subsystem and automate dependency/SBOM evidence in CI artifacts.
+- **Later (90+ days):** formalize enterprise hardening checklist and periodic replay-abuse security exercises.
+
 ---
 
 ## Owners & timelines

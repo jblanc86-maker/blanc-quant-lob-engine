@@ -3,8 +3,8 @@
 FROM ubuntu:24.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-        && apt-get install -y --no-install-recommends cmake ninja-build g++ ca-certificates make git \
-        && rm -rf /var/lib/apt/lists/*
+	&& apt-get install -y --no-install-recommends cmake ninja-build g++ ca-certificates \
+	&& rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY . .
 # Build (Release)
@@ -28,7 +28,6 @@ RUN useradd --system --home /app --shell /usr/sbin/nologin appuser \
 	&& chown -R appuser:appuser /app
 USER appuser
 
-# Copy in only what we need to run
 # Copy in only what we need to run
 # The CMake build links the executable to bin/replay under the build directory
 COPY --from=builder /src/build/bin/replay /app/replay

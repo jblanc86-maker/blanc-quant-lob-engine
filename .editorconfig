@@ -16,6 +16,11 @@ indent_style = space
 indent_size = 4
 max_line_length = 120
 
+[*.pyi]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
 # C/C++ files
 [*.{c,cpp,h,hpp}]
 indent_style = space
@@ -32,8 +37,16 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
+[*.jsonc]
+indent_style = space
+indent_size = 2
+
 # Markdown
 [*.md]
+trim_trailing_whitespace = false
+max_line_length = 0
+
+[*.markdown]
 trim_trailing_whitespace = false
 max_line_length = 0
 

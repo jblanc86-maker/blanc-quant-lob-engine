@@ -45,3 +45,17 @@ We will not pursue legal action for good‑faith security research that:
 - Gives us a reasonable time to remediate before public disclosure
 
 If you have any questions about this policy, open a minimal issue requesting clarification.
+
+## Security roadmap and local validation expectations
+
+To reduce exposure windows, this repository follows a practical security cadence:
+
+- **Now (0-30 days):** keep reporting channels current, enforce least-privilege workflow defaults, and preserve release publish guards.
+- **Next (30-90 days):** add subsystem threat-model notes, automate dependency/SBOM evidence, and expand parser/replay negative-path tests.
+- **Later (90+ days):** publish an enterprise hardening checklist and run periodic abuse/fault-injection security drills.
+
+Before pushing security-sensitive changes, run local validation:
+
+- Build + CTest.
+- Benchmark artifact checks via `./run_local_checks.sh` when perf or replay behavior changes.
+- Determinism/golden checks before release candidate tagging.
