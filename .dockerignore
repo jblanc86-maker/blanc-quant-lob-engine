@@ -5,10 +5,19 @@
 .vscode/
 .DS_Store
 
+# Python cache / virtualenv
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+
 # Build output
 build/
 cmake-build-*/
 docs/
+artifacts/
+badges/
 **/*.o
 **/*.obj
 **/*.a
@@ -16,6 +25,13 @@ docs/
 **/*.dll
 **/*.so
 **/*.dylib
-**/*.cmake
 **/CMakeCache.txt
 **/CMakeFiles/
+
+# Logs and local reports
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+.coverage

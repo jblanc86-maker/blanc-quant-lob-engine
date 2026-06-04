@@ -65,6 +65,7 @@
 - [Run the Harness](#build)
 - [Request 30-Minute Pilot Review](COMMERCIAL_LICENSE.md)
 - [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md)
+- [Competitive Positioning](docs/COMPETITIVE_POSITIONING.md)
 
 ### Quick Nav
 
@@ -87,13 +88,29 @@ evidence artifacts live in separate systems.
 
 ## Best-Fit Use Cases
 
-| Use Case | Buyer Pain | BQL Output | CTA |
-| --- | --- | --- | --- |
-| **CI Latency Regression Gates** | A release gets slower and nobody catches it before production. | p50/p95/p99/p999 budget gates, pass/fail CI reporting, retained benchmark artifacts. | [Run the Harness](#build) |
-| **Deterministic Incident Replay** | An anomaly occurs and logs cannot reconstruct exact state. | Same input + same gate decisions, same digest, and a replayable evidence trail. | [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
-| **Canonical Digest Verification** | Symbol order or shard count changes verification results. | Canonical symbol IDs and aggregate digest verification across shard layouts. | [Read Methodology](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
-| **Compliance / Legal Evidence Packaging** | Performance claims need reviewable, retained proof. | `bench.jsonl`, `metrics.prom`, manifests, system/compiler info, and reproducible reports. | [Get Executive Brief](docs/PE_TECH_SUMMARY.md) |
-| **Enterprise Market-Data Pilot** | A team needs validation against a representative workload. | Deterministic replay harness, latency profile, CI gate plan, evidence bundle, and executive readout. | [Request Pilot Review](COMMERCIAL_LICENSE.md) |
+| Use Case                                  | Buyer Pain                                                     | BQL Output                                                                                           | CTA                                                           |
+| ----------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **CI Latency Regression Gates**           | A release gets slower and nobody catches it before production. | p50/p95/p99/p999 budget gates, pass/fail CI reporting, retained benchmark artifacts.                 | [Run the Harness](#build)                                     |
+| **Deterministic Incident Replay**         | An anomaly occurs and logs cannot reconstruct exact state.     | Same input + same gate decisions, same digest, and a replayable evidence trail.                      | [View Evidence Bundle](docs/PATENT_EVIDENCE_CANONICAL_IDS.md) |
+| **Canonical Digest Verification**         | Symbol order or shard count changes verification results.      | Canonical symbol IDs and aggregate digest verification across shard layouts.                         | [Read Methodology](docs/PATENT_EVIDENCE_CANONICAL_IDS.md)     |
+| **Compliance / Legal Evidence Packaging** | Performance claims need reviewable, retained proof.            | `bench.jsonl`, `metrics.prom`, manifests, system/compiler info, and reproducible reports.            | [Get Executive Brief](docs/PE_TECH_SUMMARY.md)                |
+| **Enterprise Market-Data Pilot**          | A team needs validation against a representative workload.     | Deterministic replay harness, latency profile, CI gate plan, evidence bundle, and executive readout. | [Request Pilot Review](COMMERCIAL_LICENSE.md)                 |
+
+## Where BQL Fits in the Market
+
+BQL is positioned as an **engine-level deterministic replay and latency-proof
+layer**, not a packet-capture appliance or standalone TCA suite.
+
+| Segment                           | Examples                                                           | Typical Strength                                                  | BQL Positioning                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Network latency / packet evidence | Corvil (Pico), Beeks Analytics, Velocimetrics, LiveAction, cPacket | Wire-level capture, network telemetry, packet-forensics workflows | Complements these systems by proving deterministic engine behavior and release-time latency contracts |
+| Exchange / venue analytics        | ICE Connectivity, CME Smart Stream, Nasdaq tooling                 | Venue-side feed/connectivity analytics                            | Pairs with venue analytics by validating internal replay determinism and CI regression gates          |
+| TCA / execution-quality analytics | big xyt, BMLL, Tradefeedr, ISS LiquidMetrix                        | Execution quality benchmarking and post-trade analytics           | Adjacent; BQL focuses on infrastructure determinism evidence and pre-production proof                 |
+| In-house build                    | Tier-1 banks / HFT internal stacks                                 | Custom fit and internal ownership                                 | Primary competitive alternative; BQL reduces time-to-proof and maintenance overhead                   |
+
+**Bottom line:** BQL wins when teams need reproducible replay evidence,
+CI-enforced tail-latency budgets, and audit-ready artifacts tied directly to
+code changes.
 
 ## Proof Pipeline
 
@@ -138,23 +155,23 @@ Representative artifacts:
 
 ## Performance Delta
 
-| Metric | Before | After | Improvement |
-| --- | ---: | ---: | ---: |
-| Tier C Runtime | ~60–120s | ~0.5–0.9s | **100–200× faster** |
-| Journal Path | 17.4s | 136ms | **128× faster** |
-| Throughput | 2.1 MB/s | 153 MB/s | **73× increase** |
-| Hot-Path Flushes | 100 | 0 | **Eliminated** |
-| Digest Consistency | — | Verified | **100%** |
+| Metric             |   Before |     After |         Improvement |
+| ------------------ | -------: | --------: | ------------------: |
+| Tier C Runtime     | ~60–120s | ~0.5–0.9s | **100–200× faster** |
+| Journal Path       |    17.4s |     136ms |     **128× faster** |
+| Throughput         | 2.1 MB/s |  153 MB/s |    **73× increase** |
+| Hot-Path Flushes   |      100 |         0 |      **Eliminated** |
+| Digest Consistency |        — |  Verified |            **100%** |
 
 ### Performance: Current State vs. Future Targets
 
-| Metric Tier                                                | Phase 3 (Before)                                                            | **Phase 4 (Current — Jun 2026)**                    | Future Target (Phase 5+)                               |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------ |
-| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                                 | **1.96M events/sec**<br/>p50: 0.61μs<br/>p95: 1.42μs<br/>p99: 2.38μs | p50: < 0.5μs<br/>p95: < 1.2μs<br/>p99: < 2.0μs         |
-| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                           | **1.23M events/sec**<br/>p50: 0.98μs<br/>p95: 2.11μs<br/>p99: 3.77μs | p50: < 0.8μs<br/>p95: < 1.8μs<br/>p99: < 3.0μs         |
-| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | runtime: 60–120s<br/>journal: 17.4s<br/>sync flushes: 100<br/>2.1 MB/s      | **runtime: 0.5–0.9s**<br/>**journal: 136ms**<br/>**0 flushes**<br/>**153 MB/s** | runtime: < 0.5s<br/>journal: < 100ms<br/>stable p999/p9999 |
-| **Throughput (all tiers)**                                 | 1M events/sec                                                               | **A: 1.96M / B: 1.23M / C: 1.20M**                  | A: 2.5M / B: 1.8M / C: 1.5M+                           |
-| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                       | ✅ **100% across all tiers**                         | ✅ Maintain under compiler/kernel matrix                |
+| Metric Tier                                                | Phase 3 (Before)                                                       | **Phase 4 (Current — Jun 2026)**                                                | Future Target (Phase 5+)                                   |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Tier A: Match-only**<br/>(Core engine speed)             | p50: 1.25μs<br/>p95: 3.29μs<br/>p99: 5.67μs                            | **1.96M events/sec**<br/>p50: 0.61μs<br/>p95: 1.42μs<br/>p99: 2.38μs            | p50: < 0.5μs<br/>p95: < 1.2μs<br/>p99: < 2.0μs             |
+| **Tier B: In-process Wire-to-Wire**<br/>(No network/disk)  | Not yet separated                                                      | **1.23M events/sec**<br/>p50: 0.98μs<br/>p95: 2.11μs<br/>p99: 3.77μs            | p50: < 0.8μs<br/>p95: < 1.8μs<br/>p99: < 3.0μs             |
+| **Tier C: Proof Pipeline**<br/>(Full deterministic replay) | runtime: 60–120s<br/>journal: 17.4s<br/>sync flushes: 100<br/>2.1 MB/s | **runtime: 0.5–0.9s**<br/>**journal: 136ms**<br/>**0 flushes**<br/>**153 MB/s** | runtime: < 0.5s<br/>journal: < 100ms<br/>stable p999/p9999 |
+| **Throughput (all tiers)**                                 | 1M events/sec                                                          | **A: 1.96M / B: 1.23M / C: 1.20M**                                              | A: 2.5M / B: 1.8M / C: 1.5M+                               |
+| **Deterministic Replay**                                   | ✅ Verified (100% digest consistency)                                  | ✅ **100% across all tiers**                                                    | ✅ Maintain under compiler/kernel matrix                   |
 
 > **Phase 4 Highlights** — Journal overhead reduced from 17.4s → 136ms (~128×); synchronous flushes
 > eliminated entirely (100 → 0); Tier C total runtime dropped from 60–120s to 0.5–0.9s (~100–200×);
@@ -193,13 +210,12 @@ path exactly.
 └────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └──────┘
 ```
 
-Each zone is defined in `config/coordination_zones.yaml`. You can also render a visual escalation diagram from this
-config using `scripts/visualize_coordination.py`, which saves an image to `artifacts/coordination_diagram.png`.
-For a text-only fallback diagram, see `docs/how-it-works-ascii.txt`.
+Current gate policy and thresholds are documented in [`docs/gates.md`](docs/gates.md).
+For a text-only controller overview, see `docs/how-it-works-ascii.txt`.
 
 ### Enhanced Configuration
 
-See [`config/coordination_zones.yaml`](config/coordination_zones.yaml) for full coordination configuration featuring:
+See [`docs/gates.md`](docs/gates.md) for current coordination policy details, including:
 
 - **Multi-dimensional latency budgets:** p50/p95/p99/p999/max enforcement per zone
 - **Per-zone recovery criteria:** Independent recovery logic with digest validation
@@ -210,21 +226,14 @@ See [`config/coordination_zones.yaml`](config/coordination_zones.yaml) for full 
 
 **Documentation:**
 
-- [Patent Claims Analysis](docs/PATENT_CLAIMS_COORDINATION.md) - Detailed claim-by-claim analysis
-- [Configuration Enhancements](docs/COORDINATION_ENHANCEMENTS.md) - Technical implementation guide
-- [Performance Roadmap](docs/PERFORMANCE_ROADMAP.md) - Optimization strategy
+- [Gate Policy Reference](docs/gates.md) - Runtime protection and gate behavior
+- [Determinism Absolutism](docs/DETERMINISM_ABSOLUTISM.md) - Determinism principles and constraints
+- [Long-Horizon Stability](docs/LONG_HORIZON_STABILITY.md) - Stability validation guidance
 
 ### CI Test & Visualization
 
-```bash
-# Run coordination test
-python3 scripts/ci_test_coordination.py
-
-# Generate coordination diagram
-python3 scripts/visualize_coordination.py config/coordination_zones.yaml
-```
-
-CI pipeline validates that zone trips, escalation, and recovery work deterministically.
+CI pipeline validates gate behavior and deterministic replay via benchmark and replay checks in
+`docs/gates.md` and the associated test suite.
 
 ## How the Safety Controller Works (Breaker-Style State Machine)
 
@@ -285,7 +294,8 @@ metrics:
 - **Phase 3 (6–12 weeks):** Deterministic scaling, binary journaling
 - **Phase 4 (12–24 weeks):** Advanced tuning, optional kernel-bypass
 
-See [Performance Roadmap](docs/PERFORMANCE_ROADMAP.md) and [Performance Targets](docs/PERFORMANCE_TARGETS.md) for detailed optimization strategy.
+See [ROADMAP.md](ROADMAP.md), [BENCHMARKS.md](BENCHMARKS.md), and [docs/gates.md](docs/gates.md)
+for current optimization and gating strategy.
 
 ---
 
@@ -719,12 +729,12 @@ Current production-ready capabilities:
 
 ### Commercial Path
 
-| Stage | Output |
-| --- | --- |
-| **Review** | Run the public harness and inspect reproducible evidence artifacts. |
-| **Pilot** | Validate a representative workload with deterministic replay and latency gates. |
-| **Enterprise License** | Production-shaped adapters, dashboards, CI/CD templates, and support terms. |
-| **Support** | Deployment assistance, evidence-retention planning, and benchmark governance. |
+| Stage                  | Output                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| **Review**             | Run the public harness and inspect reproducible evidence artifacts.             |
+| **Pilot**              | Validate a representative workload with deterministic replay and latency gates. |
+| **Enterprise License** | Production-shaped adapters, dashboards, CI/CD templates, and support terms.     |
+| **Support**            | Deployment assistance, evidence-retention planning, and benchmark governance.   |
 
 Not ready for a pilot yet? Start with the
 [Executive Proof Brief](docs/PE_TECH_SUMMARY.md).
@@ -739,16 +749,16 @@ dashboards, support, and commercial terms.
 
 **Enterprise BQL 2.0 adds:**
 
-| Feature | Status |
-|---|---|
-| Real ITCH/FIX ingestion adapters | Enterprise BQL 2.0 |
-| Prometheus/Grafana observability dashboards | Prometheus metrics today; Grafana dashboard package in Enterprise BQL 2.0 |
-| CI/CD integration templates for latency gates | CI-ready today; enterprise templates in BQL 2.0 |
-| Enterprise auth/SSO deployment layer | Enterprise BQL 2.0 |
+| Feature                                                        | Status                                                                                        |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Real ITCH/FIX ingestion adapters                               | Enterprise BQL 2.0                                                                            |
+| Prometheus/Grafana observability dashboards                    | Prometheus metrics today; Grafana dashboard package in Enterprise BQL 2.0                     |
+| CI/CD integration templates for latency gates                  | CI-ready today; enterprise templates in BQL 2.0                                               |
+| Enterprise auth/SSO deployment layer                           | Enterprise BQL 2.0                                                                            |
 | Reproducible benchmark reports and artifact retention policies | Available today (public); extended retention + tamper-evident packaging in Enterprise BQL 2.0 |
-| Legal/compliance evidence bundles with hashes and provenance | Available today (public); structured export and chain-of-custody in Enterprise BQL 2.0 |
-| Pilot support and reference deployment program | Request a 30-minute pilot review via `COMMERCIAL_LICENSE.md` or an issue labeled `enterprise` |
-| Commercial license, support terms, and integration guidance | Available — see `COMMERCIAL_LICENSE.md` |
+| Legal/compliance evidence bundles with hashes and provenance   | Available today (public); structured export and chain-of-custody in Enterprise BQL 2.0        |
+| Pilot support and reference deployment program                 | Request a 30-minute pilot review via `COMMERCIAL_LICENSE.md` or an issue labeled `enterprise` |
+| Commercial license, support terms, and integration guidance    | Available — see `COMMERCIAL_LICENSE.md`                                                       |
 
 > For Enterprise BQL 2.0 inquiries, open an issue with the label `enterprise`
 > or see the contact channel in [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
@@ -760,9 +770,12 @@ See [ROADMAP.md](ROADMAP.md) for the full OSS vs. Enterprise phase breakdown.
 ## Release Information
 
 This release includes prebuilt binaries and necessary artifacts for version 2.00
-of Blanc LOB Engine. If you are interested in accessing full source code, please
-reach out directly for further details. Project is fully open and available for
-students and hobbyists to explore and use.
+of Blanc LOB Engine. Project is fully open and available for students and
+hobbyists to explore and use.
+
+An Enterprise BQL 2.0 version is also available for production-focused
+integrations, deployment support, and commercial terms; see
+[`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 
 ## Analytics Report Output
 
@@ -837,26 +850,19 @@ increased buffer to 100k records
 
 ```bash
 # Run benchmarks (30 iterations per tier)
-python3 scripts/run_benchmark.py --tier A --iterations 30 \
-  --output artifacts/benchmarks/tier_a.json
+scripts/bench.sh 30
 
 # Validate against budgets
-python3 scripts/validate_budgets.py \
-  --budgets config/perf_budgets.yaml \
-  --results artifacts/benchmarks \
-  --output artifacts/budget_report.md
+python3 scripts/verify_bench.py --bench artifacts/bench.jsonl --metrics artifacts/metrics.prom
 ```
 
 **CI Integration:** Auto-runs on PR/main push, fails build on regression
 
 **Documentation:**
 
-- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md)
-  — CI gates + budgets ✅
-- [Phase 4 Complete](docs/PHASE4_COMPLETE.md) - Batch I/O optimization
-- [Phase 3 Complete](docs/PHASE3_COMPLETE.md) - Bottleneck identification
-- [Phase 2 Results](docs/PHASE2_RESULTS.md) - Binary journal implementation
-- [Test Results](docs/TEST_RESULTS_SUMMARY.md) - Validation and testing
+- [Benchmarks at a Glance](BENCHMARKS.md) - Current benchmark metrics and trends
+- [Gate Policy Reference](docs/gates.md) - Latency/determinism gate behavior
+- [Roadmap](ROADMAP.md) - Current and upcoming engineering priorities
 
 ### Visitor Badge Integration
 

@@ -1,4 +1,7 @@
-Blanc Quant Systems — L2 Replay Engine
+Blanc Quant Systems — Blanc LOB Engine
 Copyright (c) 2025 Jean Blanc.
-This project is licensed under BUSL-1.1 with an Additional Use Grant.
-See LICENSE for terms, Change Date, and Change License.
+
+This repository is licensed under BUSL-1.1 with an Additional Use Grant.
+See `LICENSE` for complete terms, Change Date, and Change License.
+
+For production/commercial usage terms, see `COMMERCIAL_LICENSE.md`.

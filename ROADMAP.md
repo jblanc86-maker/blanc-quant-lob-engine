@@ -20,14 +20,14 @@ integrations, dashboards, support, and commercial terms on top of the OSS core.
 
 These capabilities are live in the current repository and CI pipeline:
 
-| Capability | Status |
-|---|---|
-| Reproducible benchmark reports (CI-generated, artifact-retained) | ✅ Available today |
-| Evidence bundles with SHA-256 hashes and provenance metadata | ✅ Available today |
-| CI/CD integration templates (GitHub Actions, CMake/Ninja gates) | ✅ CI-ready today |
-| Prometheus textfile metrics (`artifacts/metrics.prom`) | ✅ Available today |
-| Commercial license for production deployment | ✅ Available — see `COMMERCIAL_LICENSE.md` |
-| 365-day CI artifact retention for compliance and patent evidence | ✅ Available today |
+| Capability                                                       | Status                                     |
+| ---------------------------------------------------------------- | ------------------------------------------ |
+| Reproducible benchmark reports (CI-generated, artifact-retained) | ✅ Available today                         |
+| Evidence bundles with SHA-256 hashes and provenance metadata     | ✅ Available today                         |
+| CI/CD integration templates (GitHub Actions, CMake/Ninja gates)  | ✅ CI-ready today                          |
+| Prometheus textfile metrics (`artifacts/metrics.prom`)           | ✅ Available today                         |
+| Commercial license for production deployment                     | ✅ Available — see `COMMERCIAL_LICENSE.md` |
+| 365-day CI artifact retention for compliance and patent evidence | ✅ Available today                         |
 
 ---
 
@@ -68,25 +68,25 @@ Enterprise BQL 2.0 adds the following on top of the public engine:
 - Features: deterministic replay engine (digest), bench harness, telemetry JSONL + Prometheus metrics, pin-by-SHA workflows, safe pin script (dry-run + preview PR), CPU pin support, basic unit tests, golden validation.
 - Success criteria: CI builds + ctest pass; golden FNV verification test; bench JSONL + metrics produced and uploaded by CI for runs.
 
-### Phase 2 — Full-order-book snapshots & granular invariants (IN-PROGRESS)
+### Phase 2 — Full-order-book snapshots & granular invariants (COMPLETE)
 
 - Features: full Book serialization API, book snapshot & per-message state output, golden-book snapshots for regression tests.
 - Goals: deterministic snapshot equality checks across runs, minimal per-message deltas, and test harnesses to re-check books against a golden set.
 - Success criteria: book snapshot CTest passes in CI; acceptance that changes to the Book are guarded by snapshot diffs; snapshot tests for various golden inputs (normal, burst, corrupted).
 
-### Phase 3 — CI-driven regression monitoring & PR-level benchmarks (NEXT)
+### Phase 3 — CI-driven regression monitoring & PR-level benchmarks (COMPLETE)
 
 - Features: per-run bench artifact upload; benchmark delta reports on PRs; an automated daily baseline and comparison; a nightly job to produce aggregated metrics and summarize drift.
 - Goals: reduce nonfunctional regressions and provide PR reviewers with clear p50/p95/p99 deltas.
 - Success criteria: multi-run baselines and PR comments with delta metrics; allowed thresholds and automated alerts.
 
-### Phase 4 — Profiling, hotspots & performance exercises
+### Phase 4 — Profiling, hotspots & performance exercises (CURRENT)
 
 - Features: integrated profiling workflows (perf, eBPF), annotated hotspots on Flamegraphs, scaling & NUMA-aware tests, LTO/arch flags matrix, stress/gating tests.
 - Goals: identify hotspots, reduce p99, and validate scaling to cores using CPU affinity and worker thread pinning.
 - Success criteria: measured improvements (p95/p99) via CI runs; documentation for core tuning; <= 50% p99 variance across runs with CPU pinning and hardware parity.
 
-### Phase 5 — Production readiness & commercial packaging
+### Phase 5 — Production readiness & commercial packaging (NEXT)
 
 - Features: hardened build pipelines (reproducible build artifacts), license/COM-Lic packaging, commercial benchmarking reports, enterprise adapters (FIX/MD API), monitoring integrations.
 - Goals: meet licensing, security, and operational standards for commercial deployments, and provide a migration kit & documentation.
@@ -100,12 +100,24 @@ Enterprise BQL 2.0 adds the following on top of the public engine:
 - Security & licensing: ensure third-party license audit, include `COMMERCIAL_LICENSE.md` & `LICENSE` usage guidance.
 - Benchmarks & runtime: standardize hardware reporting (CPU family, memory) in CI for apples-to-apples comparisons.
 
+### Local validation cadence (required)
+
+- Every code change: run build + CTest locally.
+- Every performance-sensitive change: regenerate benchmark artifacts and run `./run_local_checks.sh`.
+- Before release candidates: run deterministic golden validation and attach artifact evidence.
+
+### Security roadmap checkpoints
+
+- **Now (0-30 days):** keep vulnerability reporting path current, keep release-publish guards strict, and maintain pre-commit safety checks.
+- **Next (30-90 days):** add lightweight threat-model notes by subsystem and automate dependency/SBOM evidence in CI artifacts.
+- **Later (90+ days):** formalize enterprise hardening checklist and periodic replay-abuse security exercises.
+
 ---
 
-## Owners & timelines (proposal)
+## Owners & timelines
 
-- Owner: core engineering (Jean Blanc) — Phase 1/2
-- Proposed sprint plan: 1–2 week sprints; Phase 2 (book snapshots) baked into the current milestone.
+- Owner: core engineering (Jean Blanc)
+- Cadence: 1–2 week sprints with milestone gating via CI benchmarks and deterministic replay checks.
 
 ## Contact
 

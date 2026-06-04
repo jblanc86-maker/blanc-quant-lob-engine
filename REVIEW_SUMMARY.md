@@ -1,93 +1,39 @@
-# Comprehensive Code Review Summary
+# Engineering Review Summary (Current)
 
-## Changes Made
+This file tracks the current review posture and what to run locally before pushing.
 
-### 1. **Fixed detectors.cpp/detectors.hpp Mismatch** ✅
-- **Issue**: Duplicate function definitions causing compilation errors
-- **Variable mismatch**: `.cpp` used `s_gap_ppm_`, `s_corrupt_ppm_`, etc. while `.hpp` used `s_gap_`, `s_corr_`, etc.
-- **Solution**: Removed `src/detectors.cpp` entirely (all implementations are inline in header)
-- **Files modified**: `CMakeLists.txt`, deleted `src/detectors.cpp`
+## Current repository health
 
-### 2. **Added Help Message** ✅
-- **Feature**: `--help` and `-h` flags now display usage information
-- **Content**: Shows all options, defaults, and exit codes
-- **File modified**: `src/replay.cpp`
+- CMake build: passing in local validation.
+- CTest suite: passing in local validation.
+- Editor diagnostics: no blocking errors.
+- Known non-blocking issue: linker warning about duplicate benchmark library in some build configurations.
 
-### 3. **Security Improvements** ✅
-- **File size limit**: Added 1GB max file size check in `read_all()`
-- **Input validation**: Added try-catch blocks for all `std::stod()` calls (4 total)
-- **Error messages**: Clear feedback for invalid numeric arguments
+## Required local run cadence
 
-### 4. **Code Quality** ✅
-- Variable naming: renamed bu to burst_ms for consistency
-- **Error handling**: Proper exception catching with user-friendly messages
-- **Documentation**: Help message provides complete usage guide
+To reduce regressions, run the following locally before pushing changes:
 
-## Review Checklist - NO REDUNDANCIES OR ERRORS FOUND
+- **Build + tests (every code change):** build via CMake/Ninja and run CTest.
+- **Benchmark gate validation (every performance-sensitive change):** run `scripts/bench.sh` or `scripts/run-benchmark.sh` to produce `artifacts/bench.jsonl` and `artifacts/metrics.prom`, then run `./run_local_checks.sh`.
+- **Determinism checks (before release candidates):** re-run golden and digest checks (`scripts/verify_golden.sh`) and compare against expected artifacts.
 
-### ✅ No Code Duplication
-- Removed duplicate detector implementations
-- No redundant includes or functions
+## Security roadmap alignment
 
-### ✅ No Memory Leaks
-- All containers use RAII (std::vector, std::string)
-- No raw pointers or manual memory management
+Security work is tracked as a rolling roadmap alongside feature delivery:
 
-### ✅ No Buffer Overflows
-- Uses safe C++ containers (std::vector, std::string)
-- `snprintf` used with proper size limits
-- No unsafe C functions (strcpy, strcat, sprintf, gets)
+- **Now (0-30 days)**
+  - Keep vulnerability reporting path current in `SECURITY.md`.
+  - Enforce pre-commit hygiene and dependency update review.
+  - Ensure release workflows avoid accidental publish paths.
+- **Next (30-90 days)**
+  - Add lightweight threat-model notes per major subsystem.
+  - Add dependency/SBOM automation in CI evidence artifacts.
+  - Expand negative/fault-injection tests for parser and replay boundaries.
+- **Later (90+ days)**
+  - Security hardening checklist for enterprise packaging.
+  - Periodic red-team-style replay abuse scenarios and documented mitigations.
 
-### ✅ No Unhandled Exceptions
-- All `std::stod()` calls wrapped in try-catch
-- File operations checked for errors
-- File size validated before allocation
+## Open follow-ups
 
-### ✅ No Resource Leaks
-- RAII ensures cleanup (ifstream, ofstream)
-- No unclosed files or handles
-
-### ✅ Consistent Naming
-- All variables use clear, descriptive names
-- No single-letter variables except loop counters
-
-### ✅ No Dead Code
-- No commented-out code
-- No unused variables or functions
-- No TODO/FIXME/HACK comments
-
-### ✅ No Hardcoded Values (with good defaults)
-- All thresholds configurable via BreakerThresholds struct
-- Command-line overrides available
-- Defaults documented in help message
-
-### ✅ Build & Test Status
-- Clean build with no warnings
-- All pre-commit checks passed
-- Help message works correctly
-- Error handling verified
-
-## File Statistics
-- Total source lines: 382
-- Fi- `snprintf` used with proper size limits
-- No unsaf Build time: ~5 seconds
-- Pre-commit: All checks passed
-
-## Security Posture
-- ✅ No eval() or exec() vulnerabilities
-- ✅ No SQL injection vectors
-- ✅ No buffer overflows
-- ✅ File size limits enforced
-- ✅ Input validation on all user data
-- ✅ Docker runs as non-root user
-- ✅ No hardcoded secrets
-
-## Recommendations for Future
-1. Consider adding unit tests
-2. Add benchmark regression tests
-3. Consider adding `--version` flag
-4. Document the file format specification
-
-## Conclusion
-**ALL- No unused vD - NO REDUNDANCIES OR ERRORS FOUND**
-All security issues fixed, code quality- All thresholds configsful.
+- Continue removing stale transitional docs and references where they are no longer part of active scope.
+- Keep `README.md`, `ROADMAP.md`, and `SECURITY.md` synchronized when process changes.

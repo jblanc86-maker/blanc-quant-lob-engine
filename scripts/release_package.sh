@@ -62,6 +62,7 @@ else
   archive_name="blanc_lob_engine_snapshot.zip"
 fi
 archive_path="$OUT_DIR/$archive_name"
+archive_path_abs="$REPO_ROOT/$archive_path"
 
 tmpdir=$(mktemp -d)
 cleanup(){ rm -rf "$tmpdir"; }
@@ -111,7 +112,7 @@ EOF
 
 # Create zip archive
 pushd "$tmpdir" >/dev/null
-zip -r "$archive_path" . >/dev/null
+zip -r "$archive_path_abs" . >/dev/null
 popd >/dev/null
 
 echo "Created archive: $archive_path"
