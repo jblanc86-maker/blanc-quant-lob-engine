@@ -10,26 +10,24 @@ Release date: 2026-06-03
 
 ## Release Information
 
-This release is designed to show the functionality of Blanc LOB Engine while
-protecting the proprietary portions of the platform. It includes the latest
-public BQL 2.00 binaries and the supporting artifacts needed to evaluate the
-engine in a practical environment.
+This release includes the latest BQL 2.00 binaries and supporting artifacts for
+evaluation and reproducibility checks.
 
-The open package is available for learning, experimentation, and general
-exploration. Selected enterprise modules, advanced integrations, and other
-proprietary functions remain private to protect intellectual property while
-still making the platform's core capabilities visible.
+The public repository contains the OSS replay and benchmarking harness source,
+tests, scripts, and evidence artifacts for learning, experimentation, and
+engineering evaluation. Enterprise BQL 2.0 packages production-focused
+integrations, deployment support, and commercial terms.
 
 ## Why this release model
 
-- Demonstrates the engine's capabilities without exposing protected internals.
-- Preserves intellectual property tied to enterprise-only functionality.
-- Gives users a simple way to assess fit before requesting deeper access.
+- Provides a reproducible public proof harness with deterministic evidence.
+- Keeps production deployment integrations and support terms in the enterprise track.
+- Gives teams a low-friction way to evaluate fit before pilot or commercial rollout.
 
 ## Enterprise Access
 
-If you are interested in full enterprise source access, proprietary functions,
-or professional trading use cases, please reach out directly for more details.
+For production-focused integrations, support, and commercial terms, see
+[`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md).
 
 ## Included Artifacts
 

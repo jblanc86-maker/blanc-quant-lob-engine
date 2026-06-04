@@ -210,13 +210,12 @@ path exactly.
 └────────────┘          └──────────────┘          └──────────────┘          └────────────┘          └──────┘
 ```
 
-Each zone is defined in `config/coordination_zones.yaml`. You can also render a visual escalation diagram from this
-config using `scripts/visualize_coordination.py`, which saves an image to `artifacts/coordination_diagram.png`.
-For a text-only fallback diagram, see `docs/how-it-works-ascii.txt`.
+Current gate policy and thresholds are documented in [`docs/gates.md`](docs/gates.md).
+For a text-only controller overview, see `docs/how-it-works-ascii.txt`.
 
 ### Enhanced Configuration
 
-See [`config/coordination_zones.yaml`](config/coordination_zones.yaml) for full coordination configuration featuring:
+See [`docs/gates.md`](docs/gates.md) for current coordination policy details, including:
 
 - **Multi-dimensional latency budgets:** p50/p95/p99/p999/max enforcement per zone
 - **Per-zone recovery criteria:** Independent recovery logic with digest validation
@@ -227,21 +226,14 @@ See [`config/coordination_zones.yaml`](config/coordination_zones.yaml) for full 
 
 **Documentation:**
 
-- [Patent Claims Analysis](docs/PATENT_CLAIMS_COORDINATION.md) - Detailed claim-by-claim analysis
-- [Configuration Enhancements](docs/COORDINATION_ENHANCEMENTS.md) - Technical implementation guide
-- [Performance Roadmap](docs/PERFORMANCE_ROADMAP.md) - Optimization strategy
+- [Gate Policy Reference](docs/gates.md) - Runtime protection and gate behavior
+- [Determinism Absolutism](docs/DETERMINISM_ABSOLUTISM.md) - Determinism principles and constraints
+- [Long-Horizon Stability](docs/LONG_HORIZON_STABILITY.md) - Stability validation guidance
 
 ### CI Test & Visualization
 
-```bash
-# Run coordination test
-python3 scripts/ci_test_coordination.py
-
-# Generate coordination diagram
-python3 scripts/visualize_coordination.py config/coordination_zones.yaml
-```
-
-CI pipeline validates that zone trips, escalation, and recovery work deterministically.
+CI pipeline validates gate behavior and deterministic replay via benchmark and replay checks in
+`docs/gates.md` and the associated test suite.
 
 ## How the Safety Controller Works (Breaker-Style State Machine)
 
@@ -302,7 +294,8 @@ metrics:
 - **Phase 3 (6–12 weeks):** Deterministic scaling, binary journaling
 - **Phase 4 (12–24 weeks):** Advanced tuning, optional kernel-bypass
 
-See [Performance Roadmap](docs/PERFORMANCE_ROADMAP.md) and [Performance Targets](docs/PERFORMANCE_TARGETS.md) for detailed optimization strategy.
+See [ROADMAP.md](ROADMAP.md), [BENCHMARKS.md](BENCHMARKS.md), and [docs/gates.md](docs/gates.md)
+for current optimization and gating strategy.
 
 ---
 
@@ -857,26 +850,19 @@ increased buffer to 100k records
 
 ```bash
 # Run benchmarks (30 iterations per tier)
-python3 scripts/run_benchmark.py --tier A --iterations 30 \
-  --output artifacts/benchmarks/tier_a.json
+scripts/bench.sh 30
 
 # Validate against budgets
-python3 scripts/validate_budgets.py \
-  --budgets config/perf_budgets.yaml \
-  --results artifacts/benchmarks \
-  --output artifacts/budget_report.md
+python3 scripts/verify_bench.py --bench artifacts/bench.jsonl --metrics artifacts/metrics.prom
 ```
 
 **CI Integration:** Auto-runs on PR/main push, fails build on regression
 
 **Documentation:**
 
-- [Phase 5 Performance Contract](docs/PHASE5_PERFORMANCE_CONTRACT.md)
-  — CI gates + budgets ✅
-- [Phase 4 Complete](docs/PHASE4_COMPLETE.md) - Batch I/O optimization
-- [Phase 3 Complete](docs/PHASE3_COMPLETE.md) - Bottleneck identification
-- [Phase 2 Results](docs/PHASE2_RESULTS.md) - Binary journal implementation
-- [Test Results](docs/TEST_RESULTS_SUMMARY.md) - Validation and testing
+- [Benchmarks at a Glance](BENCHMARKS.md) - Current benchmark metrics and trends
+- [Gate Policy Reference](docs/gates.md) - Latency/determinism gate behavior
+- [Roadmap](ROADMAP.md) - Current and upcoming engineering priorities
 
 ### Visitor Badge Integration
 

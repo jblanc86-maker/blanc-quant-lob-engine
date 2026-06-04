@@ -1,37 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 1 ]]; then
-  echo "usage: sg <command> [args...]" >&2
-  exit 1
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+legacy_sg="${script_dir}/../tools/legacy/signalgrid/sg"
+
+if [[ ! -x "$legacy_sg" ]]; then
+  echo "legacy SignalGrid shim is missing or not executable: $legacy_sg" >&2
+  exit 2
 fi
 
-cmd="$1"
-shift || true
-
-case "$cmd" in
-  sitrep)
-    # Placeholder dry-run implementation until the full CLI lands.
-    if [[ "${1:-}" == "--dry-run" ]]; then
-      echo "[sg] SITREP dry-run completed"
-    else
-      echo "[sg] SITREP completed"
-    fi
-    ;;
-  scan)
-    echo "[sg] scan placeholder (sources: ${*:-default})"
-    ;;
-  targets)
-    echo "[sg] targets placeholder"
-    ;;
-  manifest)
-    echo "[sg] manifest placeholder" && cat
-    ;;
-  strike)
-    echo "[sg] strike placeholder (${*:-})"
-    ;;
-  *)
-    echo "unknown sg command: $cmd" >&2
-    exit 2
-    ;;
- esac
+exec "$legacy_sg" "$@"
