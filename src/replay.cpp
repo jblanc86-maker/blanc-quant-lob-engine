@@ -104,7 +104,7 @@ static std::optional<double> parse_double(const std::string &s)
     errno = 0;
     char *end = nullptr;
     double v = std::strtod(s.c_str(), &end);
-    if (end == s.c_str() || *end != '\0' || errno == ERANGE || !std::isfinite(v) || v < 0.0)
+    if (end == s.c_str() || *end != '\0' || errno == ERANGE || !std::isfinite(v))
         return std::nullopt;
     return v;
 }
@@ -139,13 +139,13 @@ static bool parse_args(int argc, char **argv, ReplayOptions &out)
             dst = argv[++i];
             return true;
         };
-        auto consume_double = [&](const char *name, double &dst) -> bool
+        auto consume_double = [&](const char *name, double &dst, bool require_non_negative) -> bool
         {
             std::string v;
             if (!consume_value(v))
                 return false;
             auto parsed = parse_double(v);
-            if (!parsed)
+            if (!parsed || (require_non_negative && *parsed < 0.0))
             {
                 std::cerr << "Invalid value for " << name << ": " << v << "\n";
                 return false;
@@ -175,22 +175,22 @@ static bool parse_args(int argc, char **argv, ReplayOptions &out)
         }
         else if (arg == "--gap-ppm")
         {
-            if (!consume_double("--gap-ppm", out.gap_ppm))
+            if (!consume_double("--gap-ppm", out.gap_ppm, true))
                 return false;
         }
         else if (arg == "--corrupt-ppm")
         {
-            if (!consume_double("--corrupt-ppm", out.corrupt_ppm))
+            if (!consume_double("--corrupt-ppm", out.corrupt_ppm, true))
                 return false;
         }
         else if (arg == "--skew-ppm")
         {
-            if (!consume_double("--skew-ppm", out.skew_ppm))
+            if (!consume_double("--skew-ppm", out.skew_ppm, true))
                 return false;
         }
         else if (arg == "--burst-ms")
         {
-            if (!consume_double("--burst-ms", out.burst_ms))
+            if (!consume_double("--burst-ms", out.burst_ms, true))
                 return false;
         }
         else if (arg == "--cpu-pin")

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-#include <array>
-#include <cstdio>
+#include <cerrno>
+#include <cstring>
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
 
@@ -15,51 +16,65 @@ namespace
     std::string output;
   };
 
-  std::string shell_quote(const std::string &value)
-  {
-    std::string quoted = "'";
-    for (char c : value)
-    {
-      if (c == '\'')
-      {
-        quoted += "'\\''";
-      }
-      else
-      {
-        quoted += c;
-      }
-    }
-    quoted += "'";
-    return quoted;
-  }
-
   CommandResult run_command(const std::vector<std::string> &args)
   {
-    std::string command = shell_quote(REPLAY_BIN_PATH);
-    for (const auto &arg : args)
+    int fd[2];
+    if (pipe(fd) != 0)
     {
-      command += " ";
-      command += shell_quote(arg);
+      return {-1, std::string("pipe failed: ") + std::strerror(errno)};
     }
-    command += " 2>&1";
 
-    std::array<char, 256> buffer{};
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+      close(fd[0]);
+      close(fd[1]);
+      return {-1, std::string("fork failed: ") + std::strerror(errno)};
+    }
+
+    if (pid == 0)
+    {
+      close(fd[0]);
+      (void)dup2(fd[1], STDOUT_FILENO);
+      (void)dup2(fd[1], STDERR_FILENO);
+      close(fd[1]);
+
+      std::vector<char *> argv;
+      argv.reserve(args.size() + 2);
+      argv.push_back(const_cast<char *>(REPLAY_BIN_PATH));
+      for (const auto &arg : args)
+      {
+        argv.push_back(const_cast<char *>(arg.c_str()));
+      }
+      argv.push_back(nullptr);
+      execv(REPLAY_BIN_PATH, argv.data());
+
+      std::cerr << "execv failed: " << std::strerror(errno) << std::endl;
+      _exit(127);
+    }
+
+    close(fd[1]);
     std::string output;
-    FILE *pipe = popen(command.c_str(), "r");
-    if (!pipe)
+    char buffer[256];
+    ssize_t n = 0;
+    while ((n = read(fd[0], buffer, sizeof(buffer))) > 0)
     {
-      return {-1, "popen failed"};
+      output.append(buffer, static_cast<size_t>(n));
     }
+    close(fd[0]);
 
-    while (std::fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr)
+    int rc = 0;
+    if (waitpid(pid, &rc, 0) < 0)
     {
-      output += buffer.data();
+      return {-1, std::string("waitpid failed: ") + std::strerror(errno)};
     }
-
-    int rc = pclose(pipe);
     if (WIFEXITED(rc))
     {
       rc = WEXITSTATUS(rc);
+    }
+    else if (WIFSIGNALED(rc))
+    {
+      rc = 128 + WTERMSIG(rc);
     }
 
     return {rc, output};
