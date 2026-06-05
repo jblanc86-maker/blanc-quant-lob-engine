@@ -43,14 +43,6 @@ if (DEFINED ENV{CI})
   add_compile_options(-Werror)
 endif()
 
-# Add bench subdirectory if enabled
-if (BUILD_BENCHMARKS)
-  add_subdirectory(bench)
-endif()
-
-# Add apps subdirectory
-add_subdirectory(apps)
-
 # Linux-only hardening (Release)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_BUILD_TYPE MATCHES "Rel")
   include(CheckCXXCompilerFlag)
@@ -72,6 +64,14 @@ if (ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address,undefined)
 endif()
+
+# Add bench subdirectory if enabled
+if (BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
+
+# Add apps subdirectory
+add_subdirectory(apps)
 
 # Put binaries in build/bin for consistent paths
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -156,6 +156,16 @@ if (BUILD_TESTING)
   set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_replay_cli.cpp)
+    add_executable(test_replay_cli
+      tests/test_replay_cli.cpp
+    )
+    add_dependencies(test_replay_cli replay)
+    target_compile_definitions(test_replay_cli PRIVATE REPLAY_BIN_PATH="$<TARGET_FILE:replay>")
+    add_test(NAME replay_cli_validation COMMAND test_replay_cli)
+    set_tests_properties(replay_cli_validation PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  endif()
 
   if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)
     add_executable(test_tail_latency
