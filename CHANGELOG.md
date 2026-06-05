@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.0.1 – Release Hardening (2026-06-04)
+
+### Key changes
+
+- Hardened GitHub Release publishing around canonical `v*` tags for both tag pushes and manual runs.
+- Standardized release metadata to read notes from `RELEASE.md` and publish packaged artifacts from `artifacts/release` when present.
+- Clarified public packaging and version-branding notes so BQL Engine remains a clean credibility signal for evaluation and reproducibility.
+
+### Notes
+
+- No engine or public API changes.
+- This milestone focuses on release hygiene, packaging consistency, and documentation clarity.
+
+---
+
 ## v2.0.0 – Phase 5: Async Proof Pipeline Release (2026-06-03)
 
 ### Key changes
