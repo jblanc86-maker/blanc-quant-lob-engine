@@ -42,11 +42,11 @@ namespace
       std::vector<std::vector<char>> argv_storage;
       argv_storage.reserve(args.size() + 1);
       argv_storage.emplace_back(std::strlen(REPLAY_BIN_PATH) + 1);
-      std::memcpy(argv_storage.back().data(), REPLAY_BIN_PATH, argv_storage.back().size());
+      std::strcpy(argv_storage.back().data(), REPLAY_BIN_PATH);
       for (const auto &arg : args)
       {
         argv_storage.emplace_back(arg.size() + 1);
-        std::memcpy(argv_storage.back().data(), arg.c_str(), argv_storage.back().size());
+        std::strcpy(argv_storage.back().data(), arg.c_str());
       }
 
       std::vector<char *> argv;

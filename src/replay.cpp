@@ -139,13 +139,13 @@ static bool parse_args(int argc, char **argv, ReplayOptions &out)
             dst = argv[++i];
             return true;
         };
-        auto consume_double = [&](const char *name, double &dst, bool require_non_negative) -> bool
+        auto consume_double = [&](const char *name, double &dst, bool require_nonnegative) -> bool
         {
             std::string v;
             if (!consume_value(v))
                 return false;
             auto parsed = parse_double(v);
-            if (!parsed || (require_non_negative && *parsed < 0.0))
+            if (!parsed || (require_nonnegative && *parsed < 0.0))
             {
                 std::cerr << "Invalid value for " << name << ": " << v << "\n";
                 return false;
