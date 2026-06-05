@@ -228,7 +228,7 @@ int main(int argc, char **argv)
         if (opt.cpu_pin >= CPU_SETSIZE)
         {
             std::cerr << "Invalid --cpu-pin: " << opt.cpu_pin
-                      << " is outside supported CPU set range [0, "
+                      << " is outside CPU_SET range [0, "
                       << (CPU_SETSIZE - 1) << "]\n";
             return 1;
         }

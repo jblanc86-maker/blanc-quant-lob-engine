@@ -39,12 +39,21 @@ namespace
       (void)dup2(fd[1], STDERR_FILENO);
       close(fd[1]);
 
-      std::vector<char *> argv;
-      argv.reserve(args.size() + 2);
-      argv.push_back(const_cast<char *>(REPLAY_BIN_PATH));
+      std::vector<std::vector<char>> argv_storage;
+      argv_storage.reserve(args.size() + 1);
+      argv_storage.emplace_back(std::strlen(REPLAY_BIN_PATH) + 1);
+      std::memcpy(argv_storage.back().data(), REPLAY_BIN_PATH, argv_storage.back().size());
       for (const auto &arg : args)
       {
-        argv.push_back(const_cast<char *>(arg.c_str()));
+        argv_storage.emplace_back(arg.size() + 1);
+        std::memcpy(argv_storage.back().data(), arg.c_str(), argv_storage.back().size());
+      }
+
+      std::vector<char *> argv;
+      argv.reserve(args.size() + 2);
+      for (auto &value : argv_storage)
+      {
+        argv.push_back(value.data());
       }
       argv.push_back(nullptr);
       execv(REPLAY_BIN_PATH, argv.data());
