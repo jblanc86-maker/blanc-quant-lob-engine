@@ -43,14 +43,6 @@ if (DEFINED ENV{CI})
   add_compile_options(-Werror)
 endif()
 
-# Add bench subdirectory if enabled
-if (BUILD_BENCHMARKS)
-  add_subdirectory(bench)
-endif()
-
-# Add apps subdirectory
-add_subdirectory(apps)
-
 # Linux-only hardening (Release)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_BUILD_TYPE MATCHES "Rel")
   include(CheckCXXCompilerFlag)
@@ -72,6 +64,14 @@ if (ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address,undefined)
 endif()
+
+# Add bench subdirectory if enabled
+if (BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
+
+# Add apps subdirectory
+add_subdirectory(apps)
 
 # Put binaries in build/bin for consistent paths
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -156,6 +156,18 @@ if (BUILD_TESTING)
   set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  add_test(NAME replay_rejects_nan_gap COMMAND $<TARGET_FILE:replay> --gap-ppm nan)
+  set_tests_properties(replay_rejects_nan_gap PROPERTIES
+    WILL_FAIL TRUE
+    PASS_REGULAR_EXPRESSION "Invalid value for --gap-ppm: nan")
+  add_test(NAME replay_rejects_negative_gap COMMAND $<TARGET_FILE:replay> --gap-ppm -1)
+  set_tests_properties(replay_rejects_negative_gap PROPERTIES
+    WILL_FAIL TRUE
+    PASS_REGULAR_EXPRESSION "Invalid value for --gap-ppm: -1")
+  add_test(NAME replay_rejects_invalid_cpu_pin COMMAND $<TARGET_FILE:replay> --cpu-pin 999999)
+  set_tests_properties(replay_rejects_invalid_cpu_pin PROPERTIES
+    WILL_FAIL TRUE
+    PASS_REGULAR_EXPRESSION "Invalid --cpu-pin:")
 
   if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)
     add_executable(test_tail_latency
