@@ -156,18 +156,16 @@ if (BUILD_TESTING)
   set_tests_properties(replay_help PROPERTIES PASS_REGULAR_EXPRESSION "Blanc LOB Engine")
   add_test(NAME replay_default_run COMMAND $<TARGET_FILE:replay>)
   set_tests_properties(replay_default_run PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-  add_test(NAME replay_rejects_nan_gap COMMAND $<TARGET_FILE:replay> --gap-ppm nan)
-  set_tests_properties(replay_rejects_nan_gap PROPERTIES
-    WILL_FAIL TRUE
-    PASS_REGULAR_EXPRESSION "Invalid value for --gap-ppm: nan")
-  add_test(NAME replay_rejects_negative_gap COMMAND $<TARGET_FILE:replay> --gap-ppm -1)
-  set_tests_properties(replay_rejects_negative_gap PROPERTIES
-    WILL_FAIL TRUE
-    PASS_REGULAR_EXPRESSION "Invalid value for --gap-ppm: -1")
-  add_test(NAME replay_rejects_invalid_cpu_pin COMMAND $<TARGET_FILE:replay> --cpu-pin 999999)
-  set_tests_properties(replay_rejects_invalid_cpu_pin PROPERTIES
-    WILL_FAIL TRUE
-    PASS_REGULAR_EXPRESSION "Invalid --cpu-pin:")
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_replay_cli.cpp)
+    add_executable(test_replay_cli
+      tests/test_replay_cli.cpp
+    )
+    add_dependencies(test_replay_cli replay)
+    target_compile_definitions(test_replay_cli PRIVATE REPLAY_BIN_PATH="$<TARGET_FILE:replay>")
+    add_test(NAME replay_cli_validation COMMAND test_replay_cli)
+    set_tests_properties(replay_cli_validation PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  endif()
 
   if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)
     add_executable(test_tail_latency
