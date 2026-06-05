@@ -1,0 +1,7 @@
+add_executable(test_bqs_enterprise_contract
+  test_contract.cpp
+)
+
+target_link_libraries(test_bqs_enterprise_contract PRIVATE bqs_enterprise)
+
+add_test(NAME bqs_enterprise_contract COMMAND test_bqs_enterprise_contract)

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bqs-enterprise
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bqs-enterprise
+  template:
+    metadata:
+      labels:
+        app: bqs-enterprise
+    spec:
+      containers:
+        - name: bqs-enterprise
+          image: your-registry/bqs-enterprise:latest
+          imagePullPolicy: IfNotPresent
+          # Template only — wire args/config when enterprise binary exists.
+          # args: ["--config", "/etc/bqs/config.yaml"]
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]

@@ -28,6 +28,10 @@ endif()
 # Option to build benchmarks
 option(BUILD_BENCHMARKS "Build microbenchmark suite" ON)
 
+# Enterprise add-on (off by default). This is intentionally additive and must
+# not affect OSS builds unless explicitly enabled.
+option(ENABLE_BQS_ENTERPRISE "Build BQS enterprise modules" OFF)
+
 set(CMAKE_CXX_STANDARD 20)
 
 # Good for tooling
@@ -41,6 +45,19 @@ endif()
 # Optional: only make warnings fatal in CI
 if (DEFINED ENV{CI})
   add_compile_options(-Werror)
+endif()
+
+# Add bench subdirectory if enabled
+if (BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
+
+# Add apps subdirectory
+add_subdirectory(apps)
+
+# Optional enterprise modules
+if (ENABLE_BQS_ENTERPRISE)
+  add_subdirectory(bql-enterprise)
 endif()
 
 # Linux-only hardening (Release)
@@ -64,14 +81,6 @@ if (ENABLE_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address,undefined)
 endif()
-
-# Add bench subdirectory if enabled
-if (BUILD_BENCHMARKS)
-  add_subdirectory(bench)
-endif()
-
-# Add apps subdirectory
-add_subdirectory(apps)
 
 # Put binaries in build/bin for consistent paths
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -165,6 +174,14 @@ if (BUILD_TESTING)
     target_compile_definitions(test_replay_cli PRIVATE REPLAY_BIN_PATH="$<TARGET_FILE:replay>")
     add_test(NAME replay_cli_validation COMMAND test_replay_cli)
     set_tests_properties(replay_cli_validation PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  endif()
+
+  if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_cli_numeric_validation.cpp)
+    add_executable(test_cli_numeric_validation
+      tests/test_cli_numeric_validation.cpp
+    )
+    add_test(NAME cli_numeric_validation COMMAND test_cli_numeric_validation)
+    set_tests_properties(cli_numeric_validation PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
   endif()
 
   if (EXISTS ${CMAKE_SOURCE_DIR}/tests/test_tail_latency.cpp)

@@ -2,7 +2,7 @@
 
 ## Blanc Quant LOB Engine 2.0 (BQL Engine)
 
-> **BQL 2.0 enforces deterministic latency contracts: CI rejects any build whose `p99_ms` breaches the configured budget, and the current full proof pipeline runs in 0.5-0.9s at 1.20M events/sec.**
+> **BQL 2.0 enforces deterministic latency contracts: CI rejects any build whose `p99_ms` breaches the configured budget, and the current full proof pipeline runs in 0.5-0.9s at ~1.20M events/sec on the public harness dataset.**
 
 ### 30-Second Proof
 
@@ -57,6 +57,9 @@
 > BQL Engine 2.0 is deterministic C++20 replay, CI latency regression gates,
 > canonical symbol IDs, breaker-style protection logic, and audit-ready
 > evidence bundles for market-system workloads.
+
+> **Public harness note:** the open-source harness ships with **controlled, synthetic ITCH-like fixtures** under `data/golden/`.
+> **Real ITCH/FIX ingest and venue-shaped adapters are enterprise pilot scope.**
 
 ### Primary Paths
 
@@ -164,6 +167,11 @@ Representative artifacts:
 | Digest Consistency |        — |  Verified |            **100%** |
 
 ### Performance: Current State vs. Future Targets
+
+The tables below include two measurement regimes:
+
+- **Tier A**: match-only core loop microbenchmarks (single-process, minimal instrumentation) where sub-microsecond medians are expected.
+- **Tier C**: full proof pipeline (journal + gates + evidence artifacts) where latencies are higher by design and enforced against explicit budgets.
 
 | Metric Tier                                                | Phase 3 (Before)                                                       | **Phase 4 (Current — Jun 2026)**                                                | Future Target (Phase 5+)                                   |
 | ---------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |

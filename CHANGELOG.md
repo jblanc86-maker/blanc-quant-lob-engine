@@ -15,6 +15,16 @@
 
 ---
 
+## Unreleased
+
+### Correctness / Safety
+
+- Hardened `replay` CLI numeric parsing to reject non-finite values (NaN/Inf)
+  and negative rates for fault injection flags.
+- Hardened Linux `--cpu-pin` parsing/validation and corrected affinity failure
+  reporting.
+- Added regression coverage for invalid CLI numeric inputs.
+
 ## v2.0.0 – Phase 5: Async Proof Pipeline Release (2026-06-03)
 
 ### Key changes
@@ -43,11 +53,11 @@
 
 ### Throughput by Tier (Phase 4)
 
-| Tier | Throughput | Determinism |
-|---|---|---|
-| Tier A — Match-only | 1.96M events/sec | 100% ✅ |
-| Tier B — In-process wire-to-wire | 1.23M events/sec | 100% ✅ |
-| Tier C — Full proof pipeline | 1.20M events/sec | 100% ✅ |
+| Tier                             | Throughput       | Determinism |
+| -------------------------------- | ---------------- | ----------- |
+| Tier A — Match-only              | 1.96M events/sec | 100% ✅     |
+| Tier B — In-process wire-to-wire | 1.23M events/sec | 100% ✅     |
+| Tier C — Full proof pipeline     | 1.20M events/sec | 100% ✅     |
 
 Tier C now runs within 39% of Tier A's raw throughput — the overhead of full deterministic journaling,
 digest chaining, and telemetry is effectively near-zero.
