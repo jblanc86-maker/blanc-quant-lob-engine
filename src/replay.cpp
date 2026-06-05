@@ -2,18 +2,20 @@
 #include "breaker.hpp"
 #include "detectors.hpp"
 #include "telemetry.hpp"
+#include <cerrno>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <limits>
 #include <optional>
 #include <unordered_map>
 #ifdef __linux__
 #include <pthread.h>
 #include <sched.h>
-#include <cerrno>
 #include <cstring>
 #endif
 using namespace lob;
@@ -99,18 +101,22 @@ static void print_help()
 
 static std::optional<double> parse_double(const std::string &s)
 {
+    errno = 0;
     char *end = nullptr;
     double v = std::strtod(s.c_str(), &end);
-    if (end == s.c_str() || *end != '\0')
+    if (end == s.c_str() || *end != '\0' || errno == ERANGE || !std::isfinite(v))
         return std::nullopt;
     return v;
 }
 
 static std::optional<int> parse_int(const std::string &s)
 {
+    errno = 0;
     char *end = nullptr;
     long v = std::strtol(s.c_str(), &end, 10);
-    if (end == s.c_str() || *end != '\0')
+    if (end == s.c_str() || *end != '\0' || errno == ERANGE ||
+        v < std::numeric_limits<int>::min() ||
+        v > std::numeric_limits<int>::max())
         return std::nullopt;
     return static_cast<int>(v);
 }
@@ -133,6 +139,34 @@ static bool parse_args(int argc, char **argv, ReplayOptions &out)
             dst = argv[++i];
             return true;
         };
+        auto consume_double = [&](const char *name, double &dst, bool require_nonnegative) -> bool
+        {
+            std::string v;
+            if (!consume_value(v))
+                return false;
+            auto parsed = parse_double(v);
+            if (!parsed || (require_nonnegative && *parsed < 0.0))
+            {
+                std::cerr << "Invalid value for " << name << ": " << v << "\n";
+                return false;
+            }
+            dst = *parsed;
+            return true;
+        };
+        auto consume_int = [&](const char *name, int &dst) -> bool
+        {
+            std::string v;
+            if (!consume_value(v))
+                return false;
+            auto parsed = parse_int(v);
+            if (!parsed)
+            {
+                std::cerr << "Invalid value for " << name << ": " << v << "\n";
+                return false;
+            }
+            dst = *parsed;
+            return true;
+        };
 
         if (arg == "--input")
         {
@@ -141,53 +175,28 @@ static bool parse_args(int argc, char **argv, ReplayOptions &out)
         }
         else if (arg == "--gap-ppm")
         {
-            std::string v;
-            if (!consume_value(v))
+            if (!consume_double("--gap-ppm", out.gap_ppm, true))
                 return false;
-            auto parsed = parse_double(v);
-            if (!parsed)
-                return false;
-            out.gap_ppm = *parsed;
         }
         else if (arg == "--corrupt-ppm")
         {
-            std::string v;
-            if (!consume_value(v))
+            if (!consume_double("--corrupt-ppm", out.corrupt_ppm, true))
                 return false;
-            auto parsed = parse_double(v);
-            if (!parsed)
-                return false;
-            out.corrupt_ppm = *parsed;
         }
         else if (arg == "--skew-ppm")
         {
-            std::string v;
-            if (!consume_value(v))
+            if (!consume_double("--skew-ppm", out.skew_ppm, true))
                 return false;
-            auto parsed = parse_double(v);
-            if (!parsed)
-                return false;
-            out.skew_ppm = *parsed;
         }
         else if (arg == "--burst-ms")
         {
-            std::string v;
-            if (!consume_value(v))
+            if (!consume_double("--burst-ms", out.burst_ms, true))
                 return false;
-            auto parsed = parse_double(v);
-            if (!parsed)
-                return false;
-            out.burst_ms = *parsed;
         }
         else if (arg == "--cpu-pin")
         {
-            std::string v;
-            if (!consume_value(v))
+            if (!consume_int("--cpu-pin", out.cpu_pin))
                 return false;
-            auto parsed = parse_int(v);
-            if (!parsed)
-                return false;
-            out.cpu_pin = *parsed;
         }
         else
         {
@@ -213,6 +222,28 @@ int main(int argc, char **argv)
         return 0;
     }
 
+#ifdef __linux__
+    if (opt.cpu_pin >= 0)
+    {
+        if (opt.cpu_pin >= CPU_SETSIZE)
+        {
+            std::cerr << "Invalid --cpu-pin: " << opt.cpu_pin
+                      << " is outside CPU_SET range [0, "
+                      << (CPU_SETSIZE - 1) << "]\n";
+            return 1;
+        }
+        cpu_set_t allowed;
+        CPU_ZERO(&allowed);
+        if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0 &&
+            !CPU_ISSET(opt.cpu_pin, &allowed))
+        {
+            std::cerr << "Invalid --cpu-pin: " << opt.cpu_pin
+                      << " is unavailable in the current affinity mask\n";
+            return 1;
+        }
+    }
+#endif
+
     std::vector<uint8_t> buf;
     if (!read_all(opt.input, buf))
     {
@@ -232,7 +263,7 @@ int main(int argc, char **argv)
         int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
         if (rc != 0)
         {
-            std::cerr << "Warning: pthread_setaffinity_np failed: " << std::strerror(errno) << "\n";
+            std::cerr << "Warning: pthread_setaffinity_np failed: " << std::strerror(rc) << "\n";
         }
 #else
         (void)opt.cpu_pin; // no-op on non-Linux platforms
