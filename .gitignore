@@ -52,3 +52,19 @@ __pycache__/
 
 # Local secret-scan artifact
 /current-scan.json
+
+# --- Secrets & credentials (2026-08-09 security audit, Phase 2) ---
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.p8
+*.p12
+*-key.json
+service-account*.json
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
