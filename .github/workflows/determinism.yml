@@ -4,10 +4,6 @@
 name: Determinism
 permissions:
   contents: read
-  # Minimal permissions for determinism workflow; restrict GITHUB_TOKEN to read-only
-  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-  # Do not remove unless workflow requires write access
-  # Copilot Autofix: actions/missing-workflow-permissions
 on:
   push:
     branches: [ main ]
@@ -26,7 +22,6 @@ on:
       - 'CMakeLists.txt'
       - '.github/workflows/determinism.yml'
   schedule:
-    # Weekly instead of daily
     - cron: '0 6 * * 3'
   workflow_dispatch:
     inputs:
@@ -37,25 +32,19 @@ on:
 
 jobs:
   verify-golden:
+    name: Golden State Deterministic Replay
     permissions:
-      actions: read
       contents: read
-      pull-requests: read
-      checks: read
-      statuses: read
-      issues: read
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    if: >-
-      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
-          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Normalize environment
         run: |
-          # Ensure deterministic environment
           echo "TZ=UTC" >> $GITHUB_ENV
           echo "LANG=C.UTF-8" >> $GITHUB_ENV
           echo "LC_ALL=C.UTF-8" >> $GITHUB_ENV
@@ -78,7 +67,6 @@ jobs:
         run: |
           set -euxo pipefail
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
-          # Run replay twice and capture digest lines
           ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run1.txt"
           sleep 1
           ./build/bin/replay --input data/golden/itch_1m.bin | tee "$ART_DIR/run2.txt"
@@ -95,7 +83,6 @@ jobs:
         run: |
           set -euxo pipefail
           ART_DIR=artifacts/${{ github.run_id }}; mkdir -p "$ART_DIR"
-          # Prefer top-level bench runner if present, else fall back to binary path
           if [ -x scripts/run-benchmarks.sh ]; then
             ./scripts/run-benchmarks.sh | tee "$ART_DIR/blanc_bench.log"
           elif [ -x build/bench/blanc_bench ]; then
@@ -105,11 +92,9 @@ jobs:
           else
             echo "Benchmark runner not found; skipping" | tee "$ART_DIR/blanc_bench.log"
           fi
-          # If synthetic generators exist, run minimal synthetic targets (non-failing)
           if [ -x build/bin/gen_synth ]; then
             ./build/bin/gen_synth --mode quick --out "$ART_DIR/synth_quick.bin" || true
           fi
-          # Copy any produced benchmark jsonl / metrics if available
           cp -n artifacts/bench.jsonl "$ART_DIR/bench.jsonl" 2>/dev/null || true
           cp -n artifacts/metrics.prom "$ART_DIR/metrics.prom" 2>/dev/null || true
 
@@ -127,7 +112,6 @@ jobs:
             echo "bench_p95_ms=$p95" >> $GITHUB_OUTPUT
             echo "bench_p99_ms=$p99" >> $GITHUB_OUTPUT
             echo "$line" > artifacts/${{ github.run_id }}/bench-summary.json
-            # Surface metrics in job summary and as notices
             {
               echo "# Bench summary"
               echo "p50_ms: $p50"
