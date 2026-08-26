@@ -115,9 +115,12 @@ jobs:
             sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-image.json || echo "No findings"
 
       # Note: Policy gate removed to avoid failing on findings.
-      # Summaries still print, SARIF is uploaded to the Security tab.
+      # Summaries still print above. SARIF upload below is best-effort:
+      # it requires code scanning (GitHub Advanced Security), which is not
+      # enabled on this private repo, so the step must not fail the job.
 
       - name: Upload SARIF to GitHub Security tab
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@497990dfed22177a82ba1bbab381bc8f6d27058f
         with:
           sarif_file: trivy-image.sarif
