@@ -114,10 +114,16 @@ jobs:
             map({severity: .[0], count: length}) |
             sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-image.json || echo "No findings"
 
-      # Note: Policy gate removed to avoid failing on findings.
-      # Summaries still print, SARIF is uploaded to the Security tab.
-
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@497990dfed22177a82ba1bbab381bc8f6d27058f
         with:
           sarif_file: trivy-image.sarif
+
+      - name: Enforce HIGH/CRITICAL policy
+        run: |
+          set -euo pipefail
+          findings=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-fs.json trivy-image.json | awk '{total += $1} END {print total + 0}')
+          if [[ "$findings" -gt 0 ]]; then
+            echo "::error title=Trivy policy::Found $findings HIGH/CRITICAL vulnerabilities"
+            exit 1
+          fi
