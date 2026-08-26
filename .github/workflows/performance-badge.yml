@@ -3,82 +3,73 @@ name: Update Performance Badge
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'artifacts/**'
       - '.github/workflows/performance-badge.yml'
-  # Also update after CI runs
   workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+    workflows: ['CI']
+    types: [completed]
+
+permissions:
+  contents: read
 
 jobs:
   badge:
+    if: >-
+      ${{ github.event_name != 'workflow_run' ||
+          (github.event.workflow_run.conclusion == 'success' &&
+           github.event.workflow_run.event == 'push' &&
+           github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
-      contents: write
+      contents: read
     steps:
-      - name: Checkout
+      - name: Checkout trusted repository state
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-      - name: Find latest bench summary
+          persist-credentials: false
+
+      - name: Find latest tracked bench summary
         id: find
         run: |
           set -euo pipefail
-          file=""
-          # Look for the newest bench-summary.json
-          mapfile -t files < <(git ls-files | grep -E '^artifacts/.*/bench-summary.json$' || true)
+          file=''
           latest_ts=0
+          mapfile -t files < <(git ls-files | grep -E '^artifacts/.*/bench-summary.json$' || true)
           for f in "${files[@]}"; do
             ts=$(git log -1 --pretty=format:%ct -- "$f" || echo 0)
             if [ "$ts" -gt "$latest_ts" ]; then
-              latest_ts=$ts; file="$f"
+              latest_ts=$ts
+              file="$f"
             fi
           done
-          echo "path=$file" >> $GITHUB_OUTPUT
-      - name: Compute badge JSON
-        id: badge
+          echo "path=$file" >> "$GITHUB_OUTPUT"
+
+      - name: Compute proposed badge JSON
         run: |
           set -euo pipefail
           PATH_IN='${{ steps.find.outputs.path }}'
-          mkdir -p badges
+          mkdir -p badges-proposed
           if [ -n "$PATH_IN" ] && [ -f "$PATH_IN" ]; then
-            line=$(cat "$PATH_IN")
-            p99=$(jq -r '.p99_ms' <<<"$line")
-            p95=$(jq -r '.p95_ms' <<<"$line")
-            p50=$(jq -r '.p50_ms' <<<"$line")
-            # Color thresholds for p99 (ms)
-            # green: <= 500ms, yellow: <= 800ms, red: > 800ms
-            color="blue"
+            p99=$(jq -r '.p99_ms' "$PATH_IN")
+            p95=$(jq -r '.p95_ms' "$PATH_IN")
+            p50=$(jq -r '.p50_ms' "$PATH_IN")
             p99_int=$(printf '%.0f' "$p99")
-            if [ "$p99_int" -le 500 ]; then
-              color="green"
-            elif [ "$p99_int" -le 800 ]; then
-              color="yellow"
-            else
-              color="red"
-            fi
-            jq -n --arg p99 "$p99" --arg color "$color" \
-              '{schemaVersion:1,label:"p99 ms",message:$p99,color:$color,namedLogo:"github"}' > badges/performance.json
-            jq -n --arg p50 "$p50" --arg p95 "$p95" --arg p99 "$p99" --arg color "$color" \
-              '{schemaVersion:1,label:"p50/p95/p99",message:($p50+"/"+$p95+"/"+$p99+" ms"),color:$color}' > badges/performance_extra.json
+            color='red'
+            if [ "$p99_int" -le 500 ]; then color='green'; elif [ "$p99_int" -le 800 ]; then color='yellow'; fi
+            jq -n --arg p99 "$p99" --arg color "$color" '{schemaVersion:1,label:"p99 ms",message:$p99,color:$color,namedLogo:"github"}' > badges-proposed/performance.json
+            jq -n --arg p50 "$p50" --arg p95 "$p95" --arg p99 "$p99" --arg color "$color" '{schemaVersion:1,label:"p50/p95/p99",message:($p50+"/"+$p95+"/"+$p99+" ms"),color:$color}' > badges-proposed/performance_extra.json
           else
-            jq -n '{schemaVersion:1,label:"p99 ms",message:"n/a",color:"lightgrey"}' > badges/performance.json
+            jq -n '{schemaVersion:1,label:"p99 ms",message:"n/a",color:"lightgrey"}' > badges-proposed/performance.json
           fi
-      - name: Commit badge JSON
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add badges/*.json
-          if git diff --cached --quiet; then
-            echo "No badge updates"
-          else
-            git commit -m "perf: update performance badge JSON"
-            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-            git push
-          fi
+
+      - name: Upload proposed badges
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: performance-badges-proposed-${{ github.run_id }}
+          path: badges-proposed/
+          if-no-files-found: error
+          retention-days: 14
