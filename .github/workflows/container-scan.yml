@@ -25,9 +25,9 @@ permissions:
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
-      security-events: write
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -70,11 +70,17 @@ jobs:
           output: 'trivy-image.json'
           severity: 'CRITICAL,HIGH'
 
-      - name: Upload SARIF to GitHub Security tab
+      - name: Upload Trivy evidence
         if: always()
-        uses: github/codeql-action/upload-sarif@497990dfed22177a82ba1bbab381bc8f6d27058f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          sarif_file: trivy-image.sarif
+          name: trivy-evidence-${{ github.run_id }}
+          path: |
+            trivy-fs.json
+            trivy-image.json
+            trivy-image.sarif
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Enforce HIGH/CRITICAL vulnerability policy
         run: |
@@ -87,3 +93,4 @@ jobs:
             echo 'HIGH/CRITICAL vulnerability policy failed.' >&2
             exit 1
           fi
+          echo 'Container vulnerability policy passed.'
