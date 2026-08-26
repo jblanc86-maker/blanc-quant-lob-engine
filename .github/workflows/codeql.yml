@@ -3,20 +3,8 @@ name: "CodeQL Local Gate"
 on:
   push:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'scripts/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/**'
   pull_request:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'scripts/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/**'
   schedule:
     - cron: '24 3 * * 2'
   workflow_dispatch:
