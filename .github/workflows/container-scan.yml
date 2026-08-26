@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   trivy:
+    name: Container HIGH/CRITICAL Gate
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
