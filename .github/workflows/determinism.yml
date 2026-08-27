@@ -9,22 +9,13 @@ permissions:
   # Do not remove unless workflow requires write access
   # Copilot Autofix: actions/missing-workflow-permissions
 on:
+  # No path filters: verify-golden is the required status check for merging to
+  # main, so it must run and report on every PR/push (a path-filtered required
+  # check never reports on unrelated PRs and deadlocks the merge queue).
   push:
     branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'data/golden/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/determinism.yml'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'include/**'
-      - 'data/golden/**'
-      - 'CMakeLists.txt'
-      - '.github/workflows/determinism.yml'
   schedule:
     # Weekly instead of daily
     - cron: '0 6 * * 3'

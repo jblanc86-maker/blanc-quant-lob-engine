@@ -52,6 +52,12 @@ jobs:
         uses: github/codeql-action/autobuild@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e # v4
+        with:
+          # Run the analysis but do not upload SARIF: uploading requires code
+          # scanning (GitHub Advanced Security), which is not enabled on this
+          # private repo. Analysis still runs and fails on genuine query/build
+          # errors; only the unavailable Security-tab upload is skipped.
+          upload: false
     env:
       CODEQL_ACTION_DEBUG: true
       CODEQL_EXTRACTOR_CPP_TRAP_CACHING: false
