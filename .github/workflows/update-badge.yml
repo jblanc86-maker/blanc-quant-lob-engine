@@ -9,6 +9,7 @@ jobs:
   update-badge:
     permissions:
       contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,15 +24,21 @@ jobs:
         run: |
           echo '{"performance": "updated"}' > badges/performance.json
 
-      - name: Push changes
+      - name: Open PR with badge update
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          set -euo pipefail
           git add badges/performance.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "perf: update performance badge JSON"
-            git push origin main
+            exit 0
           fi
+          BRANCH="auto/perf-badge-${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git commit -m "perf: update performance badge JSON"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "perf: update performance badge JSON" \
+            --body "Automated performance badge refresh. Opened as a PR because main requires signed commits and status checks (direct push is blocked)." \
+            || echo "PR already exists for $BRANCH"
