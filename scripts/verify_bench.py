@@ -174,7 +174,7 @@ def parse_bench(path: Path) -> BenchResult:
         except (TypeError, ValueError) as exc:
             raise SystemExit(f"✖ bench '{key}' not an int: {exc}")
 
-    digest = payload.get("digest_fnv") or payload.get("actual")
+    digest = _normalize_digest(payload.get("digest_fnv") or payload.get("actual"))
     return BenchResult(
         p99_ms=_require_float("p99_ms"),
         p999_ms=float(payload.get("p999_ms") or 0.0),
@@ -185,6 +185,21 @@ def parse_bench(path: Path) -> BenchResult:
         digest=digest,
         determinism=payload.get("determinism"),
     )
+
+
+def _normalize_digest(value: Optional[str]) -> Optional[str]:
+    """Canonical digest form: lowercase hex without a 0x prefix.
+
+    The replay binary prints ``digest_fnv=0x...`` while metrics.prom and
+    bench.jsonl carry the bare hex; baselines were written by hand with the
+    prefix. Compare on one form so the digest gate cannot fail on notation.
+    """
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text.startswith("0x"):
+        text = text[2:]
+    return text or None
 
 
 def parse_prom_metrics(path: Path) -> Dict[str, float]:
@@ -360,7 +375,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     force_digest = os.getenv("REQUIRE_DIGEST")
     require_digest = profile_cfg["require_digest"] or args.require_digest or (force_digest == "1")
     digest_ok = True
-    expected_digest = baseline.get("digest_fnv")
+    expected_digest = _normalize_digest(baseline.get("digest_fnv"))
     if expected_digest:
         decision_lines.append(f"digest_ref: {expected_digest}")
     if require_digest and expected_digest:
@@ -372,8 +387,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     status = "PASS"
     if bench.p99_ms > allowed_ms + 1e-9:
         status = "FAIL"
-    if require_digest and expected_digest and not digest_ok:
-        status = "FAIL"
+        decision_lines.append(
+            f"p99_gate: FAIL ({bench.p99_ms:.4f} ms > {allowed_ms:.4f} ms)"
+        )
+    else:
+        decision_lines.append(
+            f"p99_gate: PASS ({bench.p99_ms:.4f} ms ≤ {allowed_ms:.4f} ms)"
+        )
+    if require_digest and expected_digest:
+        if digest_ok:
+            decision_lines.append("digest_gate: PASS")
+        else:
+            status = "FAIL"
+            decision_lines.append(
+                f"digest_gate: FAIL (measured {bench.digest} != expected {expected_digest})"
+            )
 
     # Tail-latency truthfulness: require minimum sample counts.
     if bench.sample_count < 1000:
