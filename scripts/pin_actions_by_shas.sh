@@ -55,7 +55,7 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
       if [[ $ref =~ ^[0-9a-f]{40}$ ]]; then
         continue
       fi
-  repo_url="https://github.com/${repo}.git"
+      repo_url="https://github.com/${repo}.git"
       echo "Resolving $repo@$ref"
       sha=""
       if sha_line=$(git ls-remote --exit-code "$repo_url" "refs/tags/$ref^{}" 2>/dev/null || true); then
@@ -99,21 +99,20 @@ for file in "$WORKFLOWS_DIR"/*.{yml,yaml}; do
 done
 
 if [[ $DRY_RUN -eq 1 ]]; then
-  # Print proposals as a JSON array
+  # Always materialize valid JSON when --output-json is requested so artifact upload
+  # succeeds even when every enabled action is already pinned.
   if [[ ${#proposals[@]} -ne 0 ]]; then
     joined=$(printf "%s\n" "${proposals[@]}" | paste -sd "," -)
-    if [[ -n "$OUTPUT_JSON" ]]; then
-      printf "%s\n" "[$joined]" > "$OUTPUT_JSON"
-    fi
-    printf "%s\n" "[$joined]"
+    output="[$joined]"
   else
-    echo "[]"
+    output="[]"
   fi
-  if [[ ${#proposals[@]} -ne 0 ]]; then
-    exit 0
-  else
-    exit 0
+
+  if [[ -n "$OUTPUT_JSON" ]]; then
+    printf "%s\n" "$output" > "$OUTPUT_JSON"
   fi
+  printf "%s\n" "$output"
+  exit 0
 else
   if [[ $changed -eq 1 ]]; then
     echo "One or more files were updated; please review, git add, and commit."
