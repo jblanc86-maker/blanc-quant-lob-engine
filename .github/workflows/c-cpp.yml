@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libboost-all-dev libnlohmann-json3-dev jq
+          sudo apt-get install -y cmake ninja-build libboost-all-dev nlohmann-json3-dev jq
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
