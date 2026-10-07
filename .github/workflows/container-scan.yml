@@ -1,126 +1,97 @@
 name: Container Scan
 
-
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'Dockerfile'
       - '.github/workflows/container-scan.yml'
       - 'src/**'
       - 'include/**'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'Dockerfile'
       - '.github/workflows/container-scan.yml'
       - 'src/**'
       - 'include/**'
   schedule:
-    # Weekly schedule, Wednesdays 04:12 UTC
     - cron: '12 4 * * 3'
   workflow_dispatch:
-    # Allow manual runs when needed
-    inputs:
-      reason:
-        description: 'Why run manually?'
-        required: false
-        default: 'manual trigger'
 
 permissions:
   contents: read
-  # Minimal permissions for container-scan workflow; restrict GITHUB_TOKEN to read-only
-  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-  # Do not remove unless workflow requires write access
-  # Copilot Autofix: actions/missing-workflow-permissions
 
 jobs:
   trivy:
-    # permissions block already present, removed duplicate
+    name: Container HIGH/CRITICAL Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    permissions:
-      actions: read
-      contents: read
-      pull-requests: read
-      checks: read
-      statuses: read
-      issues: read
-      security-events: write
-    if: >-
-      ${{ !contains(github.event.head_commit.message, '[skip-ci]')
-          && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-
+        with:
+          persist-credentials: false
 
       - name: Build image (no push)
-        run: |
-          docker build -t quant-lob-engine:ci .
+        run: docker build -t quant-lob-engine:ci .
 
-      - name: Run Trivy scan (fs)
+      - name: Trivy filesystem JSON
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: 'fs'
-          ignore-unfixed: true
-          exit-code: '0'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Run Trivy scan (fs, JSON)
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
+          ignore-unfixed: false
           exit-code: '0'
           format: 'json'
           output: 'trivy-fs.json'
           severity: 'CRITICAL,HIGH'
 
-      - name: Trivy summary (fs)
-        run: |
-          echo "Filesystem scan summary:"
-          jq -r '[.Results[]?.Vulnerabilities[]?.Severity] | group_by(.) |
-            map({severity: .[0], count: length}) |
-            sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-fs.json || echo "No findings"
-
-      - name: Run Trivy scan (image)
+      - name: Trivy image SARIF
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'quant-lob-engine:ci'
-          ignore-unfixed: true
+          ignore-unfixed: false
           exit-code: '0'
           format: 'sarif'
           output: 'trivy-image.sarif'
           severity: 'CRITICAL,HIGH'
 
-      - name: Run Trivy scan (image, JSON)
+      - name: Trivy image JSON
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'quant-lob-engine:ci'
-          ignore-unfixed: true
+          ignore-unfixed: false
           exit-code: '0'
           format: 'json'
           output: 'trivy-image.json'
           severity: 'CRITICAL,HIGH'
 
-      - name: Trivy summary (image)
-        run: |
-          echo "Image scan summary:"
-          jq -r '[.Results[]?.Vulnerabilities[]?.Severity] | group_by(.) |
-            map({severity: .[0], count: length}) |
-            sort_by(.severity) | .[] | "\(.severity): \(.count)"' trivy-image.json || echo "No findings"
-
-      # Note: Policy gate removed to avoid failing on findings.
-      # Summaries still print above. SARIF upload below is best-effort:
-      # it requires code scanning (GitHub Advanced Security), which is not
-      # enabled on this private repo, so the step must not fail the job.
-
-      - name: Upload SARIF to GitHub Security tab
-        continue-on-error: true
-        uses: github/codeql-action/upload-sarif@497990dfed22177a82ba1bbab381bc8f6d27058f
+      - name: Upload Trivy evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          sarif_file: trivy-image.sarif
+          name: trivy-evidence-${{ github.run_id }}
+          path: |
+            trivy-fs.json
+            trivy-image.json
+            trivy-image.sarif
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce HIGH/CRITICAL vulnerability policy
+        run: |
+          set -euo pipefail
+          fs_count=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-fs.json)
+          image_count=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-image.json)
+          echo "Filesystem HIGH/CRITICAL findings: $fs_count"
+          echo "Image HIGH/CRITICAL findings: $image_count"
+          if (( fs_count > 0 || image_count > 0 )); then
+            echo 'HIGH/CRITICAL vulnerability policy failed.' >&2
+            exit 1
+          fi
+          echo 'Container vulnerability policy passed.'
