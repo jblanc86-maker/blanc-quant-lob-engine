@@ -1,77 +1,35 @@
 name: Pin Actions by SHA (Scheduled)
 
-
 on:
   schedule:
-    - cron: '0 6 * * 1' # weekly on Monday at 06:00 UTC
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - 'README.md'
-      - 'docs/**'
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'README.md'
-      - 'docs/**'
+    - cron: '0 6 * * 1' # weekly Monday 06:00 UTC
+  workflow_dispatch:
 
 permissions:
   contents: read
-  # Minimal permissions for pin-actions-schedule workflow; restrict GITHUB_TOKEN to read-only
-  # See https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-  # Do not remove unless workflow requires write access
-  # Copilot Autofix: actions/missing-workflow-permissions
 
 jobs:
-  pin:
+  pin-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
-      actions: read
-      contents: write
-      pull-requests: write
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-    if: "!contains(github.event.head_commit.message, '[skip-ci]') && (github.event_name != 'pull_request' || !contains(join(github.event.pull_request.labels.*.name), 'docs-only'))"
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
-      - name: Set up tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq git
-
-      - name: Ensure pin script is executable
-        run: |
-          chmod +x scripts/pin_actions_by_shas.sh
-
-      - name: Run pin script
-        id: pin
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Generate scheduled pin proposal
         run: |
           set -euo pipefail
-          ./scripts/pin_actions_by_shas.sh || true
-          git config --global user.email "actions@github.com"
-          git config --global user.name "github-actions"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-          if [[ -n $(git status --porcelain) ]]; then
-            git add .github/workflows
-            git commit -m "chore(ci): pin GitHub Actions by commit SHA (automated)"
-            BRANCH_NAME="pin-actions-by-sha-$(date +%Y%m%d%H%M%S)"
-            git push origin HEAD:refs/heads/$BRANCH_NAME
-            echo "PR_BRANCH=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          else
-            echo "PR_BRANCH=" >> $GITHUB_OUTPUT
-          fi
+          chmod +x scripts/pin_actions_by_shas.sh
+          ./scripts/pin_actions_by_shas.sh --dry-run --output-json pin_proposed.json
 
-      - name: Create PR
-        if: steps.pin.outputs.PR_BRANCH != ''
-        uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5
+      - name: Upload pin proposal
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          token: ${{ github.token }}
-          title: "chore(ci): pin GitHub Actions by commit SHA"
-          body: "Automated pinning of GitHub Actions to SHA to improve reproducibility."
-          base: main
-          branch: ${{ steps.pin.outputs.PR_BRANCH }}
+          name: scheduled-pin-proposals-${{ github.run_id }}
+          path: pin_proposed.json
+          if-no-files-found: error
+          retention-days: 14

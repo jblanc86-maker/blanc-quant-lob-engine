@@ -26,8 +26,8 @@
 [![Verify Bench](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/verify-bench.yml)
 [![CI](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/ci.yml)
 [![Docs Lint](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/docs-lint.yml)
-[![CodeQL](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
-[![Container Scan (Trivy v0.67.2)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
+[![CodeQL Local Gate](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/codeql.yml)
+[![Container Scan](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/container-scan.yml)
 [![Detect Secrets](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/secrets-scan.yml)
 [![Smoke SITREP](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/smoke-sitrep.yml)
 [![Snapshot Nightly](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml/badge.svg)](https://github.com/jblanc86-maker/blanc-quant-lob-engine/actions/workflows/snapshot-nightly.yml)
@@ -614,7 +614,7 @@ Ubuntu:
 ```sh
 sudo apt-get update
 sudo apt-get install -y cmake ninja-build libboost-all-dev \
-  libnlohmann-json3-dev jq
+  nlohmann-json3-dev jq
 ```
 
 macOS:
@@ -648,7 +648,7 @@ workflow runs this and uploads bundle automatically.
 - `.github/workflows/verify-bench.yml` exposes a manual/cron gate run.
 - `.github/workflows/determinism.yml` surfaces p50/p95/p99 in job summary and emits notices for easy viewing.
 - `.github/workflows/ci.yml` mirrors bench summary surfacing in job summary.
-- `.github/workflows/container-scan.yml` pins Trivy to v0.67.2, runs fs & image scans non-blocking, and uploads SARIF to Security tab.
+- `.github/workflows/container-scan.yml` runs filesystem and image scans, retains JSON/SARIF evidence as Actions artifacts, and fails closed on HIGH/CRITICAL findings.
 - `docs/technology_transition.md` + `docs/deliverable_marking_checklist.md`
   cover gov delivery and rights-marking guidance.
 
